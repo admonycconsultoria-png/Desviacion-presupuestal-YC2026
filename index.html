@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Avance Presupuestal - Bienestar Laboral</title>
+</head>
+<body>
+
+<h2 class="sr-only">Informe de avance presupuestal de bienestar laboral al 28 de mayo de 2026, YC Consultoría</h2>
+
+<style>
+  .rpt { font-family: var(--font-sans); padding: 0 0 2rem; }
+  .cover { border-left: 3px solid #0C447C; padding: 1.25rem 1.5rem; background: var(--color-background-secondary); border-radius: 0 var(--border-radius-lg) var(--border-radius-lg) 0; margin-bottom: 2rem; }
+  .cover-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 4px; }
+  .cover-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 2px; }
+  .cover-sub { font-size: 14px; color: var(--color-text-secondary); margin: 0; }
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
+  .metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; }
+  .metric-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px; }
+  .metric-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 0; }
+  .metric.good .metric-val { color: #0F6E56; }
+  .metric.warn .metric-val { color: #BA7517; }
+  .metric.danger .metric-val { color: #A32D2D; }
+  .section-head { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 0.5px solid var(--color-border-tertiary); padding-bottom: 8px; margin: 2rem 0 1rem; }
+  .chart-wrap { position: relative; width: 100%; margin-bottom: 1.5rem; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px; font-size: 12px; color: var(--color-text-secondary); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-sq { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .table-wrap { overflow-x: auto; margin-bottom: 1.5rem; }
+  table { width: 100%; font-size: 13px; border-collapse: collapse; }
+  th { font-weight: 500; color: var(--color-text-secondary); text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 12px; }
+  td { padding: 9px 10px; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: var(--border-radius-md); font-size: 11px; font-weight: 500; }
+  .badge-ok { background: #E1F5EE; color: #0F6E56; }
+  .badge-over { background: #FAEEDA; color: #854F0B; }
+  .badge-under { background: #FCEBEB; color: #A32D2D; }
+  .badge-pend { background: #F1EFE8; color: #5F5E5A; }
+  .obs-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 14px 16px; font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+  .obs-box strong { color: var(--color-text-primary); font-weight: 500; }
+  .prog-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .prog-label { font-size: 12px; color: var(--color-text-secondary); min-width: 80px; }
+  .prog-bar-bg { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+  .prog-bar-fill { height: 100%; border-radius: 99px; }
+  .prog-pct { font-size: 12px; font-weight: 500; color: var(--color-text-primary); min-width: 36px; text-align: right; }
+  .footer { font-size: 11px; color: var(--color-text-tertiary); border-top: 0.5px solid var(--color-border-tertiary); padding-top: 12px; margin-top: 2rem; }
+</style>
+
+<div class="rpt">
+
+  <div class="cover">
+    <p class="cover-label">YC Consultoría · Gestión Humana · 2026</p>
+    <p class="cover-title">Informe de Avance Presupuestal — Bienestar Laboral</p>
+    <p class="cover-sub">Corte al 28 de mayo de 2026 &nbsp;·&nbsp; Responsable: Yeison Alexis Cardona</p>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <p class="metric-label">Presupuesto anual</p>
+      <p class="metric-val">$7.29M</p>
+      <p class="metric-sub">Total proyectado 2026</p>
+    </div>
+    <div class="metric warn">
+      <p class="metric-label">Ejecutado acumulado</p>
+      <p class="metric-val">$2.16M</p>
+      <p class="metric-sub">De $4.01M proyect. a mayo</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Avance del año</p>
+      <p class="metric-val">56.3%</p>
+      <p class="metric-sub">9 de 16 actividades</p>
+    </div>
+    <div class="metric danger">
+      <p class="metric-label">Ocupación presup.</p>
+      <p class="metric-val">29.7%</p>
+      <p class="metric-sub">Ejecución vs ppto anual</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">Desviación global</p>
+      <p class="metric-val">−$70K</p>
+      <p class="metric-sub">Sobre lo ejecutado acum.</p>
+    </div>
+  </div>
+
+  <p class="section-head">Ejecución mensual — presupuestado vs. ejecutado (COP)</p>
+  <div class="legend">
+    <span><span class="legend-sq" style="background:#185FA5;"></span>Presupuestado</span>
+    <span><span class="legend-sq" style="background:#0F6E56;"></span>Ejecutado</span>
+  </div>
+  <div class="chart-wrap" style="height:260px;"><canvas id="c1" role="img" aria-label="Gráfica de barras comparando valor presupuestado vs ejecutado por mes"></canvas></div>
+
+  <p class="section-head">Desviación mensual (%)</p>
+  <div class="chart-wrap" style="height:220px;"><canvas id="c2" role="img" aria-label="Gráfica de desviación porcentual por mes"></canvas></div>
+
+  <p class="section-head">Avance por mes — ocupación del presupuesto anual</p>
+  <div id="prog-bars"></div>
+
+  <p class="section-head">Detalle de actividades ejecutadas</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Actividad</th>
+          <th>Part.</th>
+          <th>Presupuestado</th>
+          <th>Ejecutado</th>
+          <th>Desviación</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+
+  <p class="section-head">Actividades pendientes (junio – octubre)</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th>Actividad</th>
+          <th>Part.</th>
+          <th>Presupuestado</th>
+          <th>Observación</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-pend"></tbody>
+    </table>
+  </div>
+
+  <p class="section-head">Observaciones y análisis</p>
+
+  <div class="obs-box"><strong>Avance presupuestal por debajo del proyectado.</strong> Al 28 de mayo se han ejecutado $2.16M de los $4.01M previstos para el período enero–mayo (53.9%). Si bien el año lleva 9 actividades realizadas, la ejecución monetaria equivale solo al 29.7% del presupuesto anual, lo que indica que las actividades de mayor valor (septiembre: $2.08M) aún no se han ejecutado.</div>
+
+  <div class="obs-box"><strong>Mes de mayo presenta la mayor desviación negativa.</strong> Con tres cumpleaños y el Día de la Madre, mayo acumuló un ejecutado de $1.61M frente a $1.82M presupuestado, una desviación de −$218K (−12%). Los cumpleaños de Luismi y Valentina Vanegas estuvieron por debajo del presupuesto, mientras que el Día de la Madre superó lo estimado.</div>
+
+  <div class="obs-box"><strong>Marzo superó el presupuesto.</strong> El mes de marzo registró una ejecución de $927K vs $779K presupuestado, impulsado principalmente por el Día del Contador (+$106K) y la salida trimestral (+$56K). Desviación positiva de +19%.</div>
+
+  <div class="obs-box"><strong>Junio, agosto, septiembre y octubre: sin ejecución.</strong> $5.13M del presupuesto anual aún no se ha ejecutado. La salida del Pórton del Sol en septiembre ($2.08M) representa el 28.5% del presupuesto total del año; se recomienda confirmar con anticipación logística y cupos.</div>
+
+  <div class="obs-box"><strong>Recomendación.</strong> Revisar el presupuesto de cumpleaños ($558K por persona) frente a las ejecuciones reales, que en todos los casos quedaron por debajo. Considera ajustar el valor estándar a $450K–$500K y reasignar el remanente a actividades grupales de mayor impacto.</div>
+
+  <p class="footer">Informe generado con base en el archivo BIENESTAR_LABORAL_ACUMULADO_AL_28_DE_MAYO_DDE_2026 · YC Consultoría 2026 · Responsable: Gestión Humana</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const fmt = v => '$' + (v/1000).toFixed(0) + 'K';
+const fmtCOP = v => '$' + v.toLocaleString('es-CO');
+
+const meses = ['Enero','Marzo','Mayo','Junio','Agosto','Septiembre','Octubre'];
+const presup = [558333, 779000, 1824999, 868233, 608333, 2081000, 670000];
+const ejec   = [558333, 927311, 1606667, 0, 0, 0, 0];
+
+new Chart(document.getElementById('c1'), {
+  type: 'bar',
+  data: {
+    labels: meses,
+    datasets: [
+      { label: 'Presupuestado', data: presup, backgroundColor: '#185FA5', borderRadius: 4, borderSkipped: false },
+      { label: 'Ejecutado', data: ejec, backgroundColor: '#0F6E56', borderRadius: 4, borderSkipped: false }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#888780' } },
+      y: { grid: { color: 'rgba(136,135,128,0.15)' }, ticks: { callback: v => fmt(v), font: { size: 11 }, color: '#888780' } }
+    }
+  }
+});
+
+const desv = [0, 19.04, -11.96, -100, -100, -100, -100];
+const desvColors = desv.map(d => d > 0 ? '#0F6E56' : d === 0 ? '#185FA5' : '#A32D2D');
+new Chart(document.getElementById('c2'), {
+  type: 'bar',
+  data: {
+    labels: meses,
+    datasets: [{ label: 'Desviación %', data: desv, backgroundColor: desvColors, borderRadius: 4, borderSkipped: false }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#888780' } },
+      y: { grid: { color: 'rgba(136,135,128,0.15)' }, ticks: { callback: v => v + '%', font: { size: 11 }, color: '#888780' }, min: -120, max: 40 }
+    }
+  }
+});
+
+const anuales = [558333,779000,1824999,868233,608333,2081000,670000];
+const total = anuales.reduce((a,b)=>a+b,0);
+const progContainer = document.getElementById('prog-bars');
+meses.forEach((m, i) => {
+  const pct = Math.round((anuales[i]/total)*100 * 10)/10;
+  const color = ejec[i] > 0 ? '#0F6E56' : '#B4B2A9';
+  progContainer.innerHTML += `<div class="prog-row">
+    <span class="prog-label">${m}</span>
+    <div class="prog-bar-bg"><div class="prog-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+    <span class="prog-pct">${pct}%</span>
+  </div>`;
+});
+
+const actividades = [
+  {mes:'Enero', act:'Cumpleaños Valentina Cano', part:7, pres:558333, ej:558333},
+  {mes:'Marzo', act:'Día del contador', part:7, pres:350000, ej:455611},
+  {mes:'Marzo', act:'Día de la mujer', part:4, pres:40000, ej:38000},
+  {mes:'Marzo', act:'Día del hombre', part:3, pres:30000, ej:19000},
+  {mes:'Marzo', act:'Salida trimestral (Parque Norte)', part:7, pres:359000, ej:414700},
+  {mes:'Mayo', act:'Cumpleaños Alejo', part:7, pres:558333, ej:512126},
+  {mes:'Mayo', act:'Día de la madre', part:3, pres:150000, ej:270000},
+  {mes:'Mayo', act:'Cumpleaños Luismi', part:7, pres:558333, ej:453913},
+  {mes:'Mayo', act:'Cumpleaños Valentina Vanegas', part:7, pres:558333, ej:370628},
+];
+
+const tbody = document.getElementById('tbl-body');
+actividades.forEach(a => {
+  const diff = a.ej - a.pres;
+  const pct = ((diff/a.pres)*100).toFixed(1);
+  let badge, desvTxt;
+  if (diff === 0) { badge = '<span class="badge badge-ok">Exacto</span>'; desvTxt = '0'; }
+  else if (diff > 0) { badge = '<span class="badge badge-over">Sobre presup.</span>'; desvTxt = '+' + fmtCOP(diff) + ' (+'+pct+'%)'; }
+  else { badge = '<span class="badge badge-under">Bajo presup.</span>'; desvTxt = fmtCOP(diff) + ' ('+pct+'%)'; }
+  tbody.innerHTML += `<tr>
+    <td>${a.mes}</td>
+    <td>${a.act}</td>
+    <td style="text-align:center;">${a.part}</td>
+    <td>${fmtCOP(a.pres)}</td>
+    <td>${fmtCOP(a.ej)}</td>
+    <td style="font-size:12px;">${desvTxt}</td>
+    <td>${badge}</td>
+  </tr>`;
+});
+
+const pendientes = [
+  {mes:'Junio', act:'Día del padre', part:1, pres:50000, obs:'Sin ejecución'},
+  {mes:'Junio', act:'Cumpleaños Valentina Serna', part:7, pres:558333, obs:'Sin ejecución'},
+  {mes:'Junio', act:'Salida trimestral (Comfama)', part:7, pres:259900, obs:'Sin ejecución'},
+  {mes:'Agosto', act:'Día del ingeniero', part:1, pres:50000, obs:'Sin ejecución'},
+  {mes:'Agosto', act:'Cumpleaños Yesica', part:7, pres:558333, obs:'Sin ejecución'},
+  {mes:'Septiembre', act:'Salida Pórton del Sol', part:7, pres:2081000, obs:'Actividad de mayor valor del año — confirmar logística'},
+  {mes:'Octubre', act:'Halloween (premiación)', part:7, pres:670000, obs:'Incluye premiación disfraces y dulces'},
+];
+const tbodyP = document.getElementById('tbl-pend');
+pendientes.forEach(a => {
+  tbodyP.innerHTML += `<tr>
+    <td>${a.mes}</td>
+    <td>${a.act}</td>
+    <td style="text-align:center;">${a.part}</td>
+    <td>${fmtCOP(a.pres)}</td>
+    <td style="color:var(--color-text-secondary);font-size:12px;">${a.obs}</td>
+  </tr>`;
+});
+</script>
+
+</body>
+</html>
