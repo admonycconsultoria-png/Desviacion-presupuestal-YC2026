@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Control Horario — Planta de Producción</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== LOGIN ===================== -->
+  <section id="screen-login" class="screen screen-active">
+    <div class="login-card">
+      <p class="brand">Control Horario · Planta</p>
+      <h1>Iniciar marcación</h1>
+      <form id="form-login" autocomplete="off">
+        <label for="input-cedula">Cédula</label>
+        <input id="input-cedula" name="cedula" type="text" inputmode="numeric" pattern="[0-9]*" required autofocus>
+
+        <label for="input-password">Contraseña</label>
+        <input id="input-password" name="password" type="password" required>
+
+        <p id="login-error" class="error-text" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== HOME (empleado autenticado) ===================== -->
+  <section id="screen-home" class="screen">
+    <header class="home-header">
+      <div>
+        <p class="home-nombre" id="home-nombre">—</p>
+        <p class="home-cargo" id="home-cargo">—</p>
+      </div>
+      <button id="btn-cerrar-sesion" class="btn btn-ghost">Salir</button>
+    </header>
+
+    <div class="home-reloj" id="home-reloj">--:--:--</div>
+
+    <div id="home-marcacion-disponible">
+      <button id="btn-marcar" class="btn btn-marcacion">
+        <span id="btn-marcar-label">Cargando…</span>
+      </button>
+    </div>
+
+    <div id="home-jornada-completa" class="jornada-completa" hidden>
+      <p>✅ Jornada del día completa.</p>
+      <p class="jornada-completa-sub">Nos vemos mañana.</p>
+    </div>
+
+    <button id="btn-excepcion" class="btn btn-secondary btn-block">
+      Cambio de horario / permiso especial
+    </button>
+  </section>
+
+  <!-- ===================== CÁMARA ===================== -->
+  <section id="screen-camara" class="screen">
+    <p class="camara-titulo" id="camara-titulo">Foto de verificación</p>
+    <div class="camara-wrap">
+      <video id="camara-video" autoplay playsinline muted></video>
+      <canvas id="camara-canvas" hidden></canvas>
+      <img id="camara-preview" hidden alt="Foto capturada">
+    </div>
+    <div class="camara-botones">
+      <button id="btn-capturar" class="btn btn-primary btn-block">Tomar foto</button>
+      <button id="btn-repetir" class="btn btn-secondary btn-block" hidden>Repetir foto</button>
+      <button id="btn-usar-foto" class="btn btn-primary btn-block" hidden>Continuar</button>
+    </div>
+    <button id="btn-camara-cancelar" class="btn btn-ghost btn-block">Cancelar</button>
+  </section>
+
+  <!-- ===================== JUSTIFICACIÓN ===================== -->
+  <section id="screen-justificacion" class="screen">
+    <div class="justificacion-card">
+      <p class="justificacion-motivo" id="justificacion-motivo">—</p>
+      <label for="input-justificacion">Explica brevemente el motivo (obligatorio)</label>
+      <textarea id="input-justificacion" rows="4" maxlength="300" required></textarea>
+      <button id="btn-confirmar-justificacion" class="btn btn-primary btn-block" disabled>Confirmar marcación</button>
+      <button id="btn-cancelar-justificacion" class="btn btn-ghost btn-block">Cancelar</button>
+    </div>
+  </section>
+
+  <!-- ===================== CONFIRMACIÓN ===================== -->
+  <section id="screen-confirmacion" class="screen">
+    <div class="confirmacion-card">
+      <div class="confirmacion-check">✓</div>
+      <p class="confirmacion-titulo">Marcación registrada</p>
+      <p class="confirmacion-detalle" id="confirmacion-nombre">—</p>
+      <p class="confirmacion-detalle" id="confirmacion-tipo">—</p>
+      <p class="confirmacion-detalle confirmacion-hora" id="confirmacion-hora">—</p>
+      <button id="btn-confirmacion-ok" class="btn btn-primary btn-block">Listo</button>
+    </div>
+  </section>
+
+  <!-- ===================== EXCEPCIÓN DE HORARIO ===================== -->
+  <section id="screen-excepcion" class="screen">
+    <div class="justificacion-card">
+      <p class="justificacion-motivo">Cambio de horario / permiso especial</p>
+      <p class="excepcion-sub">Declara la hora acordada. Un administrador debe aprobarla; mientras tanto tu marcación se evalúa con tu horario normal.</p>
+
+      <label for="input-excepcion-entrada">Hora de entrada acordada</label>
+      <input id="input-excepcion-entrada" type="time" required>
+
+      <label for="input-excepcion-salida">Hora de salida acordada</label>
+      <input id="input-excepcion-salida" type="time" required>
+
+      <button id="btn-enviar-excepcion" class="btn btn-primary btn-block">Enviar solicitud</button>
+      <button id="btn-cancelar-excepcion" class="btn btn-ghost btn-block">Cancelar</button>
+    </div>
+  </section>
+
+  <!-- ===================== ESTADO DE CARGA / ERROR GLOBAL ===================== -->
+  <div id="overlay-cargando" class="overlay" hidden>
+    <div class="spinner"></div>
+  </div>
+  <div id="overlay-error" class="overlay" hidden>
+    <div class="overlay-error-card">
+      <p id="overlay-error-texto">Ocurrió un error.</p>
+      <button id="btn-overlay-error-ok" class="btn btn-primary btn-block">Entendido</button>
+    </div>
+  </div>
+
+</div>
+
+<script type="module" src="js/kiosko.js"></script>
+</body>
+</html>

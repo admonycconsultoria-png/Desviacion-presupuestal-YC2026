@@ -1,0 +1,9 @@
+{
+  "name": "kiosko-control-horario",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Kiosko de control horario estricto para producción textil (Jardín, Antioquia) — Firebase + Netlify, sin build system para el front-end.",
+  "dependencies": {
+    "firebase-admin": "^12.6.0"
+  }
+}

@@ -1,0 +1,85 @@
+rules_version = '2';
+
+// Modelo de auth (sin backend propio, ver README > "Seguridad del login"):
+//  - Kiosko de planta: se autentica con Firebase Auth ANÓNIMO al cargar la
+//    página (una sola vez). Esto NO identifica al empleado (eso lo hace el
+//    login por cédula+contraseña contra la colección `empleados`), pero
+//    exige que cualquier cliente pase por Firebase Auth antes de tocar
+//    Firestore, cerrando el acceso a bots que solo golpeen la REST API.
+//  - Panel admin: Firebase Auth con email+contraseña (Alejandro y Yeison).
+//    Se distingue de una sesión anónima por el sign_in_provider del token.
+//
+// Esto es una mitigación, no una garantía fuerte: cualquiera con acceso
+// físico al kiosko o a las claves web públicas puede autenticarse anónimo.
+// La colección `empleados` expone hashes (nunca contraseñas en texto plano)
+// y solo por lectura puntual (get), nunca por listado (list).
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isAdmin() {
+  return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'password';
+}
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Login del kiosko: necesita poder leer UN empleado por cédula (id del
+    // doc) para comparar password_hash. Nunca se permite listar/consultar
+    // la colección completa.
+    match /empleados/{empleadoId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Historial versionado: nunca se edita ni se borra un horario existente,
+    // solo se crean nuevas versiones con vigencia. Se refuerza también aquí.
+    match /horarios_empleado/{horarioId} {
+      allow read: if isSignedIn();
+      allow create: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    // El empleado declara la excepción (queda pendiente); solo un admin
+    // puede resolverla (aprobar/rechazar) y solo puede tocar esos campos.
+    match /excepciones_horario/{excepcionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.estado == 'pendiente'
+        && request.resource.data.resuelto_por == null
+        && request.resource.data.resuelto_en == null;
+      allow update: if isAdmin()
+        && resource.data.estado == 'pendiente'
+        && request.resource.data.estado in ['aprobado', 'rechazado']
+        && request.resource.data.empleado_id == resource.data.empleado_id
+        && request.resource.data.fecha == resource.data.fecha;
+      allow delete: if false;
+    }
+
+    // Marcaciones: inmutables una vez creadas (sin update/delete desde el
+    // cliente) para preservar la integridad del registro de asistencia.
+    match /marcaciones/{marcacionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    // Resumen diario clasificado (ordinaria/extra/diurna/nocturna/festivo).
+    // Lo escribe el kiosko al cerrar el día y lo puede recalcular el admin
+    // cuando aprueba/rechaza una excepción retroactiva.
+    match /resumen_diario/{resumenId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete: if false;
+    }
+
+    // Tokens FCM de los administradores para notificaciones push.
+    match /admin_tokens/{uid} {
+      allow read: if isAdmin();
+      allow create, update: if isAdmin() && request.auth.uid == uid;
+      allow delete: if isAdmin() && request.auth.uid == uid;
+    }
+  }
+}

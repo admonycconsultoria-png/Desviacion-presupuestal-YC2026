@@ -1,0 +1,32 @@
+rules_version = '2';
+
+function isSignedIn() {
+  return request.auth != null;
+}
+
+function isAdmin() {
+  return isSignedIn() && request.auth.token.firebase.sign_in_provider == 'password';
+}
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Foto tomada en cada marcación. La sube el kiosko (sesión anónima).
+    // Solo lectura para administradores (privacidad de los empleados).
+    match /fotos_marcacion/{empleadoId}/{fileName} {
+      allow write: if isSignedIn()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if isAdmin();
+    }
+
+    // Foto de referencia del empleado (la carga un admin al crear el
+    // empleado, para comparar visualmente contra las fotos de marcación).
+    match /fotos_referencia/{empleadoId}/{fileName} {
+      allow write: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow read: if isSignedIn();
+    }
+  }
+}

@@ -1,0 +1,70 @@
+:root {
+  --azul: #0C447C; --azul-osc: #08315A; --verde: #0F6E56; --rojo: #A32D2D;
+  --ambar: #BA7517; --gris-bg: #F5F4F0; --gris-texto: #5F5E5A; --texto: #1E1D1B;
+  --borde: #E1DFD6; --radio: 12px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: var(--gris-bg); color: var(--texto); }
+
+.brand { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris-texto); margin: 0; }
+.error-text { color: var(--rojo); font-size: 13px; }
+.msg-text { font-size: 13px; margin-top: 8px; }
+.msg-text.ok { color: var(--verde); }
+.msg-text.error { color: var(--rojo); }
+
+.btn { font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; }
+.btn-block { width: 100%; margin-top: 10px; }
+.btn-primary { background: var(--azul); color: #fff; }
+.btn-secondary { background: #fff; color: var(--azul); border: 1.5px solid var(--azul); }
+.btn-ghost { background: transparent; color: var(--gris-texto); }
+.btn-small { padding: 6px 12px; font-size: 12px; }
+.btn-danger { background: var(--rojo); color: #fff; }
+
+/* ---------- Login ---------- */
+.admin-login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.admin-login-card { background: #fff; border-radius: 16px; padding: 36px; width: 100%; max-width: 380px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+.admin-login-card h1 { font-size: 20px; margin: 4px 0 20px; }
+.admin-login-card label { display: block; font-size: 13px; color: var(--gris-texto); margin: 12px 0 4px; }
+.admin-login-card input { width: 100%; font-size: 15px; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--borde); }
+
+/* ---------- Layout admin ---------- */
+.admin-header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 14px 24px; border-bottom: 1px solid var(--borde); }
+.admin-header-right { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--gris-texto); }
+.admin-tabs { display: flex; gap: 4px; background: #fff; padding: 0 20px; border-bottom: 1px solid var(--borde); overflow-x: auto; }
+.tab-btn { background: transparent; border: none; padding: 14px 16px; font-size: 14px; font-weight: 600; color: var(--gris-texto); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tab-btn.tab-active { color: var(--azul); border-bottom-color: var(--azul); }
+.badge { background: var(--rojo); color: #fff; font-size: 11px; padding: 1px 7px; border-radius: 99px; margin-left: 4px; }
+.admin-main { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+.tab-panel { display: none; }
+.tab-panel.tab-panel-active { display: block; }
+.tab-panel h2 { font-size: 18px; margin: 0 0 16px; }
+.vacio-text { color: var(--gris-texto); font-size: 14px; }
+
+/* ---------- Formularios ---------- */
+.form-card { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 20px; margin-bottom: 24px; max-width: 480px; }
+.form-card h3 { font-size: 15px; margin: 0 0 12px; }
+.form-card label { display: block; font-size: 13px; color: var(--gris-texto); margin: 12px 0 4px; }
+.form-card input, .form-card select { width: 100%; font-size: 14px; padding: 9px 11px; border-radius: 7px; border: 1.5px solid var(--borde); }
+.dias-check { display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.dias-check label { display: flex; align-items: center; gap: 4px; margin: 0; }
+.filtro-label { display: block; font-size: 13px; color: var(--gris-texto); margin: 4px 0 6px; }
+#horario-filtro-empleado { margin-bottom: 16px; padding: 8px; border-radius: 7px; border: 1.5px solid var(--borde); }
+#export-rango-libre { display: contents; }
+
+/* ---------- Listas / tarjetas ---------- */
+.lista { display: flex; flex-direction: column; gap: 10px; }
+.card-item { background: #fff; border: 1px solid var(--borde); border-radius: var(--radio); padding: 14px 16px; }
+.card-item-titulo { font-weight: 700; font-size: 14px; margin: 0 0 4px; }
+.card-item-sub { font-size: 13px; color: var(--gris-texto); margin: 0 0 2px; }
+.card-item-acciones { margin-top: 10px; display: flex; gap: 8px; }
+.estado-chip { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 99px; }
+.estado-aprobado { background: #E1F5EE; color: var(--verde); }
+.estado-rechazado { background: #FCEBEB; color: var(--rojo); }
+.estado-pendiente { background: #FAEEDA; color: var(--ambar); }
+
+/* ---------- Overlay ---------- */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.spinner { width: 44px; height: 44px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.3); border-top-color: #fff; animation: girar 0.8s linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+
+table.tabla-export { width: 100%; border-collapse: collapse; font-size: 13px; }

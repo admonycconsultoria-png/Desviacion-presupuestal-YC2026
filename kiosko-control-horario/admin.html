@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Control Horario</title>
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<!-- ===================== LOGIN ADMIN ===================== -->
+<section id="admin-login" class="admin-login-screen">
+  <div class="admin-login-card">
+    <p class="brand">Control Horario · Planta</p>
+    <h1>Panel administrador</h1>
+    <form id="form-admin-login" autocomplete="off">
+      <label for="admin-email">Correo</label>
+      <input id="admin-email" type="email" required>
+      <label for="admin-password">Contraseña</label>
+      <input id="admin-password" type="password" required>
+      <p id="admin-login-error" class="error-text" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== APP ADMIN ===================== -->
+<div id="admin-app" hidden>
+  <header class="admin-header">
+    <p class="brand">Control Horario · Panel administrador</p>
+    <div class="admin-header-right">
+      <span id="admin-user-email"></span>
+      <button id="btn-activar-notificaciones" class="btn btn-small btn-secondary">Activar notificaciones</button>
+      <button id="btn-admin-logout" class="btn btn-small btn-ghost">Salir</button>
+    </div>
+  </header>
+
+  <nav class="admin-tabs">
+    <button class="tab-btn tab-active" data-tab="tab-pendientes">
+      Pendientes <span id="badge-pendientes" class="badge" hidden>0</span>
+    </button>
+    <button class="tab-btn" data-tab="tab-historial">Historial</button>
+    <button class="tab-btn" data-tab="tab-empleados">Empleados</button>
+    <button class="tab-btn" data-tab="tab-horarios">Horarios</button>
+    <button class="tab-btn" data-tab="tab-export">Exportar a Excel</button>
+  </nav>
+
+  <main class="admin-main">
+
+    <!-- ---------- PENDIENTES ---------- -->
+    <section id="tab-pendientes" class="tab-panel tab-panel-active">
+      <h2>Excepciones de horario pendientes de aprobación</h2>
+      <div id="lista-pendientes" class="lista"></div>
+      <p id="pendientes-vacio" class="vacio-text">No hay solicitudes pendientes.</p>
+    </section>
+
+    <!-- ---------- HISTORIAL ---------- -->
+    <section id="tab-historial" class="tab-panel">
+      <h2>Historial de excepciones resueltas</h2>
+      <div id="lista-historial" class="lista"></div>
+    </section>
+
+    <!-- ---------- EMPLEADOS ---------- -->
+    <section id="tab-empleados" class="tab-panel">
+      <h2>Empleados</h2>
+      <form id="form-nuevo-empleado" class="form-card">
+        <h3>Nuevo empleado</h3>
+        <label>Cédula (será su usuario de login)</label>
+        <input id="emp-cedula" required inputmode="numeric">
+        <label>Nombre completo</label>
+        <input id="emp-nombre" required>
+        <label>Cargo</label>
+        <input id="emp-cargo" required>
+        <label>Contraseña inicial</label>
+        <input id="emp-password" type="text" required>
+        <button type="submit" class="btn btn-primary">Crear empleado</button>
+        <p id="emp-crear-msg" class="msg-text" hidden></p>
+      </form>
+      <div id="lista-empleados" class="lista"></div>
+    </section>
+
+    <!-- ---------- HORARIOS ---------- -->
+    <section id="tab-horarios" class="tab-panel">
+      <h2>Horarios por empleado</h2>
+      <form id="form-nuevo-horario" class="form-card">
+        <h3>Nueva versión de horario</h3>
+        <label>Empleado</label>
+        <select id="horario-empleado" required></select>
+
+        <label>Días laborales</label>
+        <div class="dias-check">
+          <label><input type="checkbox" value="lun" checked> Lun</label>
+          <label><input type="checkbox" value="mar" checked> Mar</label>
+          <label><input type="checkbox" value="mie" checked> Mié</label>
+          <label><input type="checkbox" value="jue" checked> Jue</label>
+          <label><input type="checkbox" value="vie" checked> Vie</label>
+          <label><input type="checkbox" value="sab" checked> Sáb</label>
+        </div>
+
+        <label>Hora entrada</label>
+        <input id="horario-entrada" type="time" required value="07:00">
+        <label>Hora salida</label>
+        <input id="horario-salida" type="time" required value="17:00">
+        <label>Duración almuerzo (minutos)</label>
+        <input id="horario-almuerzo" type="number" min="0" required value="60">
+        <label><input type="checkbox" id="horario-ajuste" checked> Correr jornada por tardanza acumulada</label>
+
+        <label>Vigente desde</label>
+        <input id="horario-desde" type="date" required>
+        <label>Vigente hasta (opcional, dejar vacío si sigue vigente)</label>
+        <input id="horario-hasta" type="date">
+
+        <button type="submit" class="btn btn-primary">Guardar nueva versión</button>
+        <p id="horario-crear-msg" class="msg-text" hidden></p>
+      </form>
+
+      <label class="filtro-label">Ver historial de:</label>
+      <select id="horario-filtro-empleado"></select>
+      <div id="lista-horarios" class="lista"></div>
+    </section>
+
+    <!-- ---------- EXPORTAR ---------- -->
+    <section id="tab-export" class="tab-panel">
+      <h2>Exportar consolidado a Excel</h2>
+      <div class="form-card">
+        <label>Rango</label>
+        <select id="export-rango">
+          <option value="dia">Día</option>
+          <option value="semana">Semana (lun–dom)</option>
+          <option value="quincena">Quincena</option>
+          <option value="libre" selected>Rango libre</option>
+        </select>
+
+        <div id="export-rango-libre">
+          <label>Desde</label>
+          <input id="export-desde" type="date">
+          <label>Hasta</label>
+          <input id="export-hasta" type="date">
+        </div>
+
+        <label>Empleado</label>
+        <select id="export-empleado">
+          <option value="">Todos</option>
+        </select>
+
+        <button id="btn-exportar" class="btn btn-primary">Generar Excel</button>
+        <p id="export-msg" class="msg-text" hidden></p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="admin-overlay-cargando" class="overlay" hidden><div class="spinner"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>
