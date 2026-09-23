@@ -1,8 +1,18 @@
 # =====================================================================
 # Doctrina y criterios de obligatoriedad. Cada criterio cita su fuente y
 # queda `verificado: false` hasta contrastarlo con la resolución vigente
-# (Res. 000227 de 2025, modificada por 000233 de 2025 y 000012 de 2026).
+# (Res. 000227 de 2025, modificada por la 000233 de 2025).
 # =====================================================================
+# Umbrales de obligados (texto de la Res. 000227 de 2025, art. 1.3.1.1). Ingresos brutos del año a
+# reportar O del año anterior, cada uno en UVT de su propio año; incluyen ingresos ordinarios,
+# extraordinarios y ganancias ocasionales, salvo la venta de casa o apartamento de habitación (par. 1).
+obligados:
+  pn_ingresos_uvt: 11800          # num. 4: personas naturales (y RST sin considerar el tipo de ingreso)
+  pn_capital_no_laborales_uvt: 2400   # num. 4: además, rentas de capital + no laborales del año a reportar
+  pj_ingresos_uvt: 2400           # num. 5: personas jurídicas y demás entidades
+  fuente: "Res. 000227 de 2025, art. 1.3.1.1 num. 4, 5 y 6, par. 1, 2 y 3"
+  verificado: true
+
 criterios:
   - id: rst_pn_retenedor
     aplica_si: { tipo_persona: natural, regimen: simple, practica_retencion: true }
@@ -13,5 +23,5 @@ criterios:
       si sus ingresos brutos del año superan el tope de ingresos (11.800 UVT según el concepto).
     tope_uvt: 11800
     fuente: "Concepto DIAN 003863 (int. 449) de 31-mar-2025, sobre el parágrafo 3 del art. 1 de la Res. 000162 de 2023"
-    advertencia: "Interpreta la Res. 000162 de 2023. Verificar que la Res. 000227 de 2025 conserve la misma redacción."
-    verificado: false
+    advertencia: "El par. 3 del art. 1.3.1.1 de la Res. 000227 de 2025 compila sin cambios el par. 3 del art. 1 de la Res. 000162 de 2023, que es el que interpreta el concepto."
+    verificado: true

@@ -413,7 +413,10 @@
       E.resultado = null; guardar(); renderLateral(); dvInfo();
     });
     dvInfo();
-    $$("[data-dg]", v).forEach((i) => i.oninput = i.onchange = () => { emp.diagnostico[i.dataset.dg] = i.value; guardar(); evaluarDiagnostico(emp); });
+    $$("[data-dg]", v).forEach((i) => i.oninput = i.onchange = () => {
+      emp.diagnostico[i.dataset.dg] = i.value; guardar();
+      if (["tipo_persona", "regimen"].includes(i.dataset.dg)) render(); else evaluarDiagnostico(emp);   // cambia qué campos se piden
+    });
     evaluarDiagnostico(emp);
     const pintarBancos = () => {
       $("#tb-bancos").innerHTML = (emp.cuentas_bancarias || []).map((c, i) => `<tr><td><input data-i="${i}" data-c="cuenta" value="${esc(c.cuenta)}"></td>
@@ -1054,30 +1057,81 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
   function panelDiagnostico(emp) {
     const d = emp.diagnostico || (emp.diagnostico = {});
     const sel = (k, ops) => `<select data-dg="${k}"><option value=""></option>${ops.map(([v, t]) => `<option value="${v}" ${d[k] === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+    const num = (k, t, ay) => `<label>${t}<input data-dg="${k}" type="number" min="0" value="${esc(d[k] || "")}" placeholder="${ay || ""}"></label>`;
+    const a = Number(emp.anio) || 0;
     return `<div class="panel"><h2>Diagnóstico de obligatoriedad</h2>
-      <p class="ayuda">Responda y el aplicativo muestra los criterios de doctrina registrados que aplican, con su fuente. No reemplaza la lectura del artículo 1 de la Res. 000227 de 2025.</p>
+      <p class="ayuda">Aplica el art. 1.3.1.1 de la Res. 000227 de 2025 (numerales 4, 5 y 6 y parágrafos 1 a 3) y la doctrina registrada. Ingresos brutos: ordinarios, extraordinarios y ganancias ocasionales, sin la venta de casa o apartamento de habitación.</p>
       <div class="grid-form">
-        <label>Tipo de persona${sel("tipo_persona", [["juridica", "Persona jurídica"], ["natural", "Persona natural"]])}</label>
+        <label>Tipo de persona${sel("tipo_persona", [["juridica", "Persona jurídica o entidad"], ["natural", "Persona natural"]])}</label>
         <label>Régimen${sel("regimen", [["ordinario", "Ordinario"], ["simple", "Régimen Simple (RST)"], ["esal", "Régimen tributario especial"], ["no_contribuyente", "No contribuyente"]])}</label>
-        <label>¿Practicó retención o autorretención en el año?${sel("practica_retencion", [["si", "Sí"], ["no", "No"]])}</label>
-        <label>Ingresos brutos del año ($)<input data-dg="ingresos" type="number" value="${esc(d.ingresos || "")}"></label>
-        <label>Valor UVT del año ($)<input data-dg="uvt" type="number" value="${esc(d.uvt || "")}"></label>
+        <label>¿Practicó retención o autorretención (renta, IVA o timbre) en ${a}?${sel("practica_retencion", [["si", "Sí"], ["no", "No"]])}</label>
+        <label>¿Adelanta en ${a} la cancelación del RUT?${sel("cancelacion_rut", [["no", "No"], ["si", "Sí"]])}</label>
+        ${num("ingresos", `Ingresos brutos ${a} ($)`)}
+        ${num("ingresos_ant", `Ingresos brutos ${a - 1} ($)`)}
+        ${d.tipo_persona === "natural" && d.regimen !== "simple" ? num("ingresos_capital", `Rentas de capital y no laborales ${a} ($)`, "intereses, arriendos, honorarios sin vínculo…") : ""}
+        ${num("uvt", `UVT ${a} ($)`, String(uvtDe(a) || ""))}
       </div><div id="dg-res" style="margin-top:12px"></div></div>`;
   }
+  function uvtDe(anio) { return Number((E.normativo.uvt || DEF.parametros.uvt || {})[anio]) || 0; }
+
+  // Art. 1.3.1.1: obligado si cumple CUALQUIERA de los numerales; el par. 2 lo excluye si cancela el RUT
+  function dictamenObligado(emp) {
+    const d = emp.diagnostico || {}, U = (DEF.doctrina || {}).obligados || {}, a = Number(emp.anio) || 0;
+    const uvt = Number(d.uvt) || uvtDe(a), uvtAnt = uvtDe(a - 1);
+    const enUvt = (v, u) => (Number(v) && u ? Number(v) / u : null);
+    const ing = enUvt(d.ingresos, uvt), ingAnt = enUvt(d.ingresos_ant, uvtAnt), cap = enUvt(d.ingresos_capital, uvt);
+    const f = (x) => (x === null ? "sin dato" : `${pesos(x)} UVT`);
+    const pasos = [], faltan = [];
+    if (!d.tipo_persona) return { estado: "pendiente", pasos, faltan: ["tipo de persona"] };
+    if (d.cancelacion_rut === "si") return { estado: "no", pasos: ["Par. 2: quien adelanta en el año la cancelación del RUT no está obligado (en contratos de colaboración, informan las partes)."], faltan };
+    let obligado = false;
+    const supera = (t) => [ing, ingAnt].some((x) => x !== null && x > t);
+    const ingTxt = `ingresos ${a}: ${f(ing)}; ${a - 1}: ${f(ingAnt)}`;
+    if (d.tipo_persona === "juridica") {
+      const t = U.pj_ingresos_uvt;
+      if (supera(t)) { obligado = true; pasos.push(`Num. 5: persona jurídica con ingresos brutos superiores a ${pesos(t)} UVT (${ingTxt}) → OBLIGADA.`); }
+      else if (ing !== null || ingAnt !== null) pasos.push(`Num. 5: no supera ${pesos(t)} UVT (${ingTxt}).`);
+      if (d.practica_retencion === "si") { obligado = true; pasos.push("Num. 6: practicó retención o autorretención en el año → OBLIGADA, sin importar los ingresos."); }
+    } else if (d.regimen === "simple") {
+      const t = U.pn_ingresos_uvt;
+      if (supera(t)) { obligado = true; pasos.push(`Num. 4 inc. 2: persona natural del RST con ingresos brutos superiores a ${pesos(t)} UVT sin considerar el tipo de ingreso (${ingTxt}) → OBLIGADA.`); }
+      else if (ing !== null || ingAnt !== null) pasos.push(`Num. 4 inc. 2: no supera ${pesos(t)} UVT (${ingTxt}).`);
+      if (d.practica_retencion === "si" && !obligado) pasos.push("Num. 6 y par. 3: practicó retención, pero según el Concepto 3863 de 2025 la persona natural del RST no queda obligada solo por ser agente de retención (ver criterio abajo).");
+    } else {
+      const t = U.pn_ingresos_uvt, tc = U.pn_capital_no_laborales_uvt;
+      if (supera(t) && cap !== null && cap > tc) { obligado = true; pasos.push(`Num. 4 inc. 1: ingresos brutos superiores a ${pesos(t)} UVT (${ingTxt}) y rentas de capital y no laborales de ${f(cap)} (> ${pesos(tc)}) → OBLIGADA.`); }
+      else pasos.push(`Num. 4 inc. 1: exige las dos condiciones: ingresos brutos > ${pesos(t)} UVT (${ingTxt}) y rentas de capital y no laborales > ${pesos(tc)} UVT (${f(cap)}).`);
+      if (d.practica_retencion === "si") { obligado = true; pasos.push("Num. 6: practicó retención o autorretención en el año → OBLIGADA."); }
+      if (obligado) pasos.push("Par. 3: la persona natural obligada por el num. 4 inc. 1 o el num. 6 reporta solo la información de sus rentas de capital y no laborales.");
+    }
+    if (!obligado) {
+      if (ing === null) faltan.push(`ingresos brutos ${a}`);
+      if (ingAnt === null) faltan.push(`ingresos brutos ${a - 1} (el umbral se cumple con cualquiera de los dos años)`);
+      if (d.tipo_persona === "natural" && d.regimen !== "simple" && cap === null) faltan.push(`rentas de capital y no laborales ${a}`);
+      if (!d.practica_retencion) faltan.push("si practicó retención");
+      if (!d.regimen) faltan.push("régimen");
+    }
+    const estado = obligado ? "si" : faltan.length ? "pendiente" : "no";
+    return { estado, pasos, faltan };
+  }
+
   function evaluarDiagnostico(emp) {
     const d = emp.diagnostico || {};
+    const el = $("#dg-res"); if (!el) return;
+    const r = dictamenObligado(emp), U = (DEF.doctrina || {}).obligados || {};
+    const cab = { si: ["ERROR", "OBLIGADA a presentar exógena del año gravable " + esc(emp.anio)],
+      no: ["OK", "No obligada por los numerales 4, 5 y 6 del art. 1.3.1.1"],
+      pendiente: ["REVISAR", "Faltan datos para concluir"] }[r.estado];
+    let html = `<div class="aviso" style="background:var(--info-f);color:var(--texto)"><p><span class="chip ${cab[0]}">${cab[1]}</span></p>
+      ${r.pasos.length ? `<ul style="margin:6px 0 6px 18px">${r.pasos.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}
+      ${r.faltan.length ? `<p><b>Falta:</b> ${esc(r.faltan.join(", "))}.</p>` : ""}
+      ${r.estado === "no" ? "<p>Revise los demás numerales antes de descartar: entidades financieras y cooperativas (2), bolsas y comisionistas (3), establecimientos permanentes (7), consorcios, uniones temporales y otros contratos de colaboración (8), entes públicos (9 y 16), obligados a consolidar estados financieros (11), proveedores de activos digitales (21).</p>" : ""}
+      <small><b>Fuente:</b> ${esc(U.fuente || "Res. 000227 de 2025, art. 1.3.1.1")}. UVT: ${esc(emp.anio)} = $${pesos(Number(d.uvt) || uvtDe(Number(emp.anio)))}, ${Number(emp.anio) - 1} = $${pesos(uvtDe(Number(emp.anio) - 1))}.</small></div>`;
     const crit = ((DEF.doctrina || {}).criterios || []).filter((c) => Object.entries(c.aplica_si || {}).every(([k, v]) =>
       k === "practica_retencion" ? (d.practica_retencion === "si") === v : d[k] === v));
-    const el = $("#dg-res"); if (!el) return;
-    if (!crit.length) { el.innerHTML = `<small style="color:var(--texto-2)">Ningún criterio de doctrina registrado aplica a estas respuestas. Confirme la obligatoriedad directamente en el artículo 1 de la Res. 000227 de 2025.</small>`; return; }
-    el.innerHTML = crit.map((c) => {
-      let tope = "";
-      if (c.tope_uvt && Number(d.ingresos) && Number(d.uvt)) {
-        const u = Number(d.ingresos) / Number(d.uvt);
-        tope = `<p><b>${pesos(u)} UVT</b> de ingresos brutos: ${u > c.tope_uvt ? `<span class="chip ERROR">SUPERA ${pesos(c.tope_uvt)} UVT → obligada a reportar</span>` : `<span class="chip OK">No supera ${pesos(c.tope_uvt)} UVT</span>`}</p>`;
-      }
-      return `<div class="aviso" style="background:var(--info-f);color:var(--texto)"><p>${esc(c.conclusion)}</p>${tope}<small><b>Fuente:</b> ${esc(c.fuente)}. ${c.verificado ? "" : `<b style="color:var(--alerta)">${esc(c.advertencia || "Sin verificar.")}</b>`}</small></div>`;
-    }).join("");
+    html += crit.map((c) => `<div class="aviso" style="background:var(--info-f);color:var(--texto);margin-top:8px"><p><b>Doctrina:</b> ${esc(c.conclusion)}</p>
+      <small><b>Fuente:</b> ${esc(c.fuente)}. ${c.verificado ? "" : `<b style="color:var(--alerta)">${esc(c.advertencia || "Sin verificar.")}</b>`}</small></div>`).join("");
+    el.innerHTML = html;
   }
 
   // ------------------------------------------------------------------ acciones globales
