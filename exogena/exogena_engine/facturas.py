@@ -118,13 +118,26 @@ def leer_facturas(rutas: list[str | Path]) -> list[dict]:
         p = Path(r)
         archivos.extend(sorted(p.rglob("*")) if p.is_dir() else [p])
     for p in archivos:
-        if p.suffix.lower() == ".xml":
-            salida.extend(leer_xml(p.read_bytes(), p.name))
-        elif p.suffix.lower() == ".zip":
-            with zipfile.ZipFile(p) as z:
-                for n in z.namelist():
-                    if n.lower().endswith(".xml"):
-                        salida.extend(leer_xml(z.read(n), n))
+        if p.suffix.lower() in (".xml", ".zip"):
+            salida.extend(_leer_contenido(p.read_bytes(), p.name))
+    return salida
+
+
+def _leer_contenido(datos: bytes, nombre: str, nivel: int = 0) -> list[dict]:
+    """Un .xml o un .zip; el ZIP puede traer otros ZIP (p. ej. una carpeta de Google Drive descargada)."""
+    if nombre.lower().endswith(".xml"):
+        return leer_xml(datos, nombre)
+    if not nombre.lower().endswith(".zip") or nivel > 3:
+        return []
+    try:
+        z = zipfile.ZipFile(io.BytesIO(datos))
+    except zipfile.BadZipFile:
+        return []
+    salida = []
+    with z:
+        for n in z.namelist():
+            if n.lower().endswith((".xml", ".zip")):
+                salida.extend(_leer_contenido(z.read(n), n, nivel + 1))
     return salida
 
 

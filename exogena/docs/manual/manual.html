@@ -371,6 +371,31 @@
   </table>
 </section>
 
+<!-- ============================ ANEXO FACTURAS -->
+<section class="paso">
+  <h2>Anexo: descargar todas las facturas del buzón</h2>
+  <p>El aplicativo necesita los ZIP (o XML) de las facturas del año, <b>todos a la vez</b>. Según dónde reciba la empresa las facturas:</p>
+  <h3>Gmail o Google Workspace (script gratuito, sin instalar nada)</h3>
+  <ol>
+    <li>Entre a <b>script.google.com</b> con la cuenta que recibe las facturas → <b>Nuevo proyecto</b>.</li>
+    <li>Pegue el contenido del archivo <b>gmail_facturas.gs</b> (entregado con el aplicativo). Revise el año en la línea <i>CONSULTA</i>.</li>
+    <li>Elija la función <b>guardarFacturas</b> y pulse <b>Ejecutar</b>. Acepte los permisos: el script solo lee los correos y crea archivos en su Drive.</li>
+    <li>Google corta cada ejecución a los 6 minutos. Si el registro dice <i>"Pausa"</i>, vuelva a pulsar Ejecutar: sigue donde iba y no duplica. Repita hasta que diga <i>"Terminado"</i>.</li>
+    <li>En Google Drive, clic derecho sobre la carpeta <i>"Facturas electronicas AG 2025"</i> → <b>Descargar</b>. Drive entrega un ZIP (o varios, si pasan de 2 GB).</li>
+    <li>Cargue esos ZIP en el recuadro <b>Facturas electrónicas</b>: el aplicativo abre los ZIP que vienen dentro de otros ZIP.</li>
+  </ol>
+  <h3>Outlook de escritorio (Windows)</h3>
+  <ol>
+    <li>En Outlook, <b>Alt+F11</b> → Archivo → <b>Importar archivo</b> → <b>outlook_facturas.bas</b>. Revise la carpeta destino y las fechas al inicio del módulo.</li>
+    <li>Ejecute <b>GuardarFacturas</b> (F5) y elija la carpeta del buzón donde llegan las facturas (incluye sus subcarpetas).</li>
+    <li>En la carpeta destino, seleccione todos los archivos (<b>Ctrl+E</b>) y arrástrelos al recuadro de facturas.</li>
+  </ol>
+  <p>Si Outlook bloquea las macros: Archivo → Opciones → Centro de confianza → Configuración de macros (habilítelas solo mientras lo usa).</p>
+  <h3>Otro correo (Outlook web, Hotmail, correo corporativo)</h3>
+  <p>Configure la cuenta en <b>Thunderbird</b> (gratuito) por IMAP, instale el complemento <b>ImportExportTools NG</b>, busque los correos del año con adjuntos, selecciónelos todos y guarde sus adjuntos en una carpeta. Luego cárguelos igual que en Outlook.</p>
+  <div class="caja ojo"><b>Mejor desde la fuente</b>Si el software contable de la empresa recibe las facturas electrónicas (módulo de documentos recibidos) y permite exportar los XML, esa vía evita el correo. Las facturas <b>emitidas</b> por la empresa salen de su propio software de facturación.</div>
+</section>
+
 <!-- ============================ PREGUNTAS -->
 <section class="paso">
   <h2>Preguntas frecuentes</h2>

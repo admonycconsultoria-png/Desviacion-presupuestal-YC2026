@@ -203,3 +203,18 @@ def test_direccion_exigida_para_colombia_segun_macros_del_prevalidador(resultado
         assert cfg.formatos[fmt]["direccion_minima"] == 8, fmt
     # el tercero sembrado sin dirección ni ciudad queda como ERROR en el 1001
     assert any(h[0] == "ERROR" and h[1] == "Falta direccion" and h[2] == "79555111" for h in resultado["hallazgos"])
+
+
+def test_facturas_zip_de_zips(tmp_path):
+    """Una carpeta de Google Drive descargada llega como un ZIP que contiene los ZIP de las facturas."""
+    import zipfile
+    from exogena_engine.facturas import leer_facturas
+    subprocess.run([sys.executable, str(RAIZ / "ejemplos" / "generar_ejemplo.py")], check=True, capture_output=True)
+    fe = RAIZ / "ejemplos" / "facturas"
+    drive = tmp_path / "drive.zip"
+    with zipfile.ZipFile(drive, "w") as z:
+        z.write(fe / "FE_DEMO_0002.zip", "Facturas/FE_DEMO_0002.zip")
+        z.write(fe / "FE_DEMO_0001.xml", "Facturas/FE_DEMO_0001.xml")
+    orden = lambda l: sorted(l, key=lambda r: (r["nit"], r["fuente"]))  # noqa: E731
+    assert orden(leer_facturas([drive])) == orden(leer_facturas([fe]))
+    assert {r["nit"] for r in leer_facturas([drive])} == {"79555111", "830045123", "900123456"}

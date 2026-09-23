@@ -415,13 +415,15 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return salida;
   }
   // Archivos .xml o .zip (XML + PDF como llegan al correo). El ZIP se abre con el lector CFB de SheetJS.
-  function leerFacturasArchivo(XLSX, datos, nombre, DOMParserClase) {
+  // El ZIP puede traer otros ZIP (p. ej. una carpeta de Google Drive descargada)
+  function leerFacturasArchivo(XLSX, datos, nombre, DOMParserClase, nivel = 0) {
     const u8 = datos instanceof Uint8Array ? datos : new Uint8Array(datos);
     const aTexto = (b) => new TextDecoder("utf-8").decode(b);
-    if (/\.zip$/i.test(nombre)) {
-      const cfb = XLSX.CFB.read(u8, { type: "array" });
-      return cfb.FileIndex.filter((e) => e.type === 2 && /\.xml$/i.test(e.name) && e.content)
-        .flatMap((e) => leerFacturaXml(aTexto(e.content instanceof Uint8Array ? e.content : new Uint8Array(e.content)), e.name, DOMParserClase));
+    if (/\.zip$/i.test(nombre) && nivel <= 3) {
+      let cfb;
+      try { cfb = XLSX.CFB.read(u8, { type: "array" }); } catch (e) { return []; }
+      return cfb.FileIndex.filter((e) => e.type === 2 && /\.(xml|zip)$/i.test(e.name) && e.content)
+        .flatMap((e) => leerFacturasArchivo(XLSX, e.content instanceof Uint8Array ? e.content : new Uint8Array(e.content), e.name, DOMParserClase, nivel + 1));
     }
     return /\.xml$/i.test(nombre) ? leerFacturaXml(aTexto(u8), nombre, DOMParserClase) : [];
   }
