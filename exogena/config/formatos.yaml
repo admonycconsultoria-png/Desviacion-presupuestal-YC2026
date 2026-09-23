@@ -1,0 +1,222 @@
+# =====================================================================
+# Layouts de formatos en el orden de columnas del prevalidador DIAN.
+# Si la DIAN cambia la versión de un formato, SOLO se edita este archivo.
+#
+# Claves:
+#   version        versión del formato (verificar en el anexo técnico AG 2026)
+#   modo           por_tercero | sin_tercero | insumo_externo
+#   concepto       true si el formato lleva columna de concepto
+#   columnas       lista [campo_interno, "Encabezado prevalidador"]
+#   valores        campos numéricos (se redondean a pesos, sin decimales)
+#   requiere       campos del tercero obligatorios -> validación
+# =====================================================================
+
+_bloques:
+  id_basico: &id_basico
+    - [tipo_documento, "Tipo de documento"]
+    - [numero_identificacion, "Número identificación"]
+  nombres: &nombres
+    - [primer_apellido, "Primer apellido"]
+    - [segundo_apellido, "Segundo apellido"]
+    - [primer_nombre, "Primer nombre"]
+    - [otros_nombres, "Otros nombres"]
+    - [razon_social, "Razón social"]
+  ubicacion: &ubicacion
+    - [direccion, "Dirección"]
+    - [codigo_departamento, "Código dpto."]
+    - [codigo_municipio, "Código mcp"]
+
+"1001":
+  nombre: "Pagos o abonos en cuenta y retenciones practicadas"
+  version: 10
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - *nombres
+    - *ubicacion
+    - [pais, "País de residencia o domicilio"]
+    - [pago_deducible, "Pago o abono en cuenta deducible"]
+    - [pago_no_deducible, "Pago o abono en cuenta NO deducible"]
+    - [iva_deducible, "IVA mayor valor del costo o gasto deducible"]
+    - [iva_no_deducible, "IVA mayor valor del costo o gasto no deducible"]
+    - [ret_renta, "Retención en la fuente practicada renta"]
+    - [ret_asumida, "Retención en la fuente asumida renta"]
+    - [ret_iva_comun, "Retención en la fuente practicada IVA responsables"]
+    - [ret_iva_no_dom, "Retención en la fuente practicada IVA no domiciliados"]
+  requiere: [direccion, codigo_departamento, codigo_municipio, pais]
+
+"1003":
+  nombre: "Retenciones en la fuente que le practicaron"
+  version: 7
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - *ubicacion
+    - [base_retencion, "Valor acumulado del pago o abono sujeto a retención"]
+    - [retencion, "Retención que le practicaron"]
+  requiere: [direccion, codigo_departamento, codigo_municipio]
+
+"1005":
+  nombre: "IVA descontable"
+  version: 7
+  verificado: false
+  modo: por_tercero
+  concepto: false
+  columnas:
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - [iva_descontable, "Impuesto descontable"]
+    - [iva_dev_ventas, "IVA resultante por devoluciones en ventas anuladas, rescindidas o resueltas"]
+  requiere: []
+
+"1006":
+  nombre: "IVA generado"
+  version: 8
+  verificado: false
+  modo: por_tercero
+  concepto: false
+  columnas:
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - [iva_generado, "Impuesto generado"]
+    - [iva_dev_compras, "IVA recuperado en devoluciones en compras anuladas, rescindidas o resueltas"]
+    - [impoconsumo, "Impuesto al consumo"]
+  requiere: []
+
+"1007":
+  nombre: "Ingresos recibidos"
+  version: 9
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - *nombres
+    - [pais, "País de residencia o domicilio"]
+    - [ingreso_bruto, "Ingresos brutos recibidos"]
+    - [devoluciones, "Devoluciones, rebajas y descuentos"]
+  requiere: [pais]
+
+"1008":
+  nombre: "Saldos de cuentas por cobrar al 31 de diciembre"
+  version: 7
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - *ubicacion
+    - [pais, "País de residencia o domicilio"]
+    - [saldo_cxc, "Saldo cuentas por cobrar al 31-12"]
+  requiere: [direccion, codigo_departamento, codigo_municipio, pais]
+
+"1009":
+  nombre: "Saldos de cuentas por pagar al 31 de diciembre"
+  version: 7
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - *ubicacion
+    - [pais, "País de residencia o domicilio"]
+    - [saldo_cxp, "Saldo cuentas por pagar al 31-12"]
+  requiere: [direccion, codigo_departamento, codigo_municipio, pais]
+
+"1010":
+  nombre: "Información de socios, accionistas, comuneros y/o cooperados"
+  version: 8
+  verificado: false
+  modo: insumo_externo          # libro de accionistas -> ejemplos/accionistas.csv
+  concepto: false
+  columnas:
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - *ubicacion
+    - [pais, "País de residencia o domicilio"]
+    - [valor_patrimonial, "Valor patrimonial de acciones o aportes al 31-12"]
+    - [porcentaje_entero, "Porcentaje de participación"]
+    - [porcentaje_decimal, "Porcentaje de participación (posición decimal)"]
+  requiere: [direccion, codigo_departamento, codigo_municipio, pais]
+
+"1011":
+  nombre: "Información de las declaraciones tributarias"
+  version: 6
+  verificado: false
+  modo: sin_tercero             # totales por concepto (renglón), sin tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - [valor, "Saldos al 31 de diciembre"]
+  requiere: []
+
+"1012":
+  nombre: "Declaraciones tributarias, acciones, inversiones en bonos, cuentas de ahorro y corrientes"
+  version: 7
+  verificado: false
+  modo: por_tercero
+  concepto: true
+  columnas:
+    - [concepto, "Concepto"]
+    - *id_basico
+    - [dv, "DV"]
+    - *nombres
+    - [pais, "País de residencia o domicilio"]
+    - [valor_31dic, "Valor al 31-12"]
+  requiere: [pais]
+
+"2276":
+  nombre: "Información de rentas de trabajo y pensiones"
+  version: 4
+  verificado: false
+  modo: insumo_externo          # consolidado anual de nómina electrónica -> ejemplos/nomina.csv
+  concepto: false
+  columnas:
+    - [entidad_informante, "Entidad informante"]
+    - *id_basico
+    - [primer_apellido, "Primer apellido"]
+    - [segundo_apellido, "Segundo apellido"]
+    - [primer_nombre, "Primer nombre"]
+    - [otros_nombres, "Otros nombres"]
+    - *ubicacion
+    - [pais, "País"]
+    - [pagos_salarios, "Pagos por salarios"]
+    - [pagos_emolumentos, "Pagos por emolumentos eclesiásticos"]
+    - [pagos_honorarios, "Pagos por honorarios (Art. 383 ET)"]
+    - [pagos_servicios, "Pagos por servicios"]
+    - [pagos_comisiones, "Pagos por comisiones"]
+    - [pagos_prestaciones, "Pagos por prestaciones sociales"]
+    - [pagos_viaticos, "Pagos por viáticos"]
+    - [pagos_gastos_repr, "Pagos por gastos de representación"]
+    - [pagos_cooperativo, "Compensaciones por trabajo asociado cooperativo"]
+    - [otros_pagos, "Otros pagos"]
+    - [cesantias_pagadas, "Cesantías e intereses de cesantías efectivamente pagadas"]
+    - [cesantias_fondo, "Cesantías consignadas al fondo de cesantías"]
+    - [pensiones, "Pensiones de jubilación, vejez o invalidez"]
+    - [total_ingresos, "Total ingresos brutos por rentas de trabajo y pensión"]
+    - [aporte_salud, "Aportes obligatorios por salud a cargo del trabajador"]
+    - [aporte_pension, "Aportes obligatorios a fondos de pensiones y solidaridad pensional"]
+    - [aporte_vol_rais, "Aportes voluntarios al régimen de ahorro individual"]
+    - [aporte_vol_pension, "Aportes voluntarios a fondos de pensiones voluntarias"]
+    - [aporte_afc, "Aportes a cuentas AFC"]
+    - [aporte_avc, "Aportes a cuentas AVC"]
+    - [retencion, "Valor de las retenciones en la fuente por rentas de trabajo y pensiones"]
+  requiere: [direccion, codigo_departamento, codigo_municipio, pais]

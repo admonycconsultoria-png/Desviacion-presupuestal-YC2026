@@ -1,0 +1,72 @@
+# =====================================================================
+# Adaptadores de fuentes. Cada software exporta con encabezados distintos;
+# aquí se mapean a los nombres canónicos del motor. Si un export trae un
+# encabezado que no está, se agrega el alias en la lista y listo.
+#
+# Reportes a exportar (año completo ENERO-DICIEMBRE, SIN comprobante de cierre):
+#   balance  -> Balance de prueba POR TERCERO, nivel auxiliar/transaccional
+#   terceros -> Listado/maestro de terceros (contactos) con dirección y ciudad
+#
+# signo_saldo:
+#   debito_positivo  -> saldos acreedores vienen negativos (Siigo, Alegra)
+#   natural          -> saldos positivos según naturaleza de la cuenta
+# =====================================================================
+
+alias_balance: &alias_balance
+  cuenta: ["codigo cuenta contable", "codigo cuenta", "cuenta", "codigo", "cuenta contable", "codigo contable"]
+  nombre_cuenta: ["nombre cuenta contable", "nombre cuenta", "nombre de la cuenta", "descripcion cuenta", "descripcion"]
+  nit: ["identificacion", "nit", "identificacion tercero", "nit tercero", "documento", "numero de identificacion", "numero documento"]
+  nombre_tercero: ["nombre tercero", "tercero", "nombre del tercero", "razon social", "nombre"]
+  saldo_inicial: ["saldo inicial", "saldo anterior"]
+  debito: ["movimiento debito", "debito", "debitos", "debe", "total debito"]
+  credito: ["movimiento credito", "credito", "creditos", "haber", "total credito"]
+  saldo_final: ["saldo final", "nuevo saldo", "saldo"]
+  transaccional: ["transaccional", "es transaccional"]
+  nivel: ["nivel"]
+
+alias_terceros: &alias_terceros
+  nit: ["identificacion", "numero de identificacion", "nit", "documento", "numero documento", "numero identificacion"]
+  dv: ["dv", "digito verificacion", "digito de verificacion", "digito"]
+  tipo_documento: ["tipo de identificacion", "tipo identificacion", "tipo documento", "tipo de documento", "tipo id"]
+  tipo_persona: ["tipo de persona", "tipo persona", "tipo de regimen", "persona"]
+  razon_social: ["razon social", "nombre comercial", "nombre completo", "nombre", "nombre tercero"]
+  primer_nombre: ["primer nombre", "nombres"]
+  otros_nombres: ["segundo nombre", "otros nombres"]
+  primer_apellido: ["primer apellido", "apellidos"]
+  segundo_apellido: ["segundo apellido"]
+  direccion: ["direccion", "direccion principal"]
+  ciudad: ["ciudad", "municipio", "ciudad / municipio"]
+  departamento: ["departamento", "departamento / estado", "estado"]
+  pais: ["pais"]
+  codigo_municipio_dane: ["codigo ciudad", "codigo municipio", "codigo dane", "cod ciudad"]
+  email: ["correo", "email", "correo electronico"]
+
+siigo:
+  descripcion: "Siigo Nube — Balance de prueba por tercero + Terceros"
+  signo_saldo: debito_positivo
+  filtro_filas: { columna: transaccional, valores_validos: ["si", "sí", "s", "true", "1"] }
+  balance: *alias_balance
+  terceros: *alias_terceros
+
+alegra:
+  descripcion: "Alegra — Balance de prueba por tercero + Contactos"
+  signo_saldo: debito_positivo
+  # Alegra incluye filas de totales por cuenta mayor: se conservan solo las
+  # cuentas que no tienen subcuentas en el mismo archivo (hojas).
+  filtro_filas: { modo: solo_hojas }
+  balance: *alias_balance
+  terceros: *alias_terceros
+
+dataico:
+  descripcion: "Dataico — Balance por tercero + Terceros (validar con un export real)"
+  signo_saldo: debito_positivo
+  filtro_filas: { modo: solo_hojas }
+  balance: *alias_balance
+  terceros: *alias_terceros
+
+generico:
+  descripcion: "Cualquier software: CSV/XLSX con encabezados canónicos"
+  signo_saldo: debito_positivo
+  filtro_filas: { modo: solo_hojas }
+  balance: *alias_balance
+  terceros: *alias_terceros

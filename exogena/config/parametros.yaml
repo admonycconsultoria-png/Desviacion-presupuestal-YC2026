@@ -1,0 +1,70 @@
+# =====================================================================
+# Parámetros generales — Información exógena AG 2026 (se presenta en 2027)
+# ---------------------------------------------------------------------
+# Todo valor con `verificado: false` se debe contrastar contra la
+# resolución DIAN vigente para el AG 2026 y su anexo técnico antes de
+# generar archivos definitivos. El motor imprime una advertencia por
+# cada parámetro sin verificar que haya sido usado.
+# =====================================================================
+
+anio_gravable: 2026
+
+empresa:
+  nit: "900123456"        # NIT del informante SIN dígito de verificación
+  razon_social: "EMPRESA DEMO SAS"
+  # La DIAN pide la ubicación del informante en la fila de cuantías menores
+  direccion: "CL 1 1 1"
+  codigo_departamento: "05"
+  codigo_municipio: "001"
+
+# NIT genérico para cuantías menores y tipo de documento asociado.
+cuantias_menores:
+  nit: "222222222"
+  tipo_documento: "43"
+  razon_social: "CUANTIAS MENORES"
+  verificado: false
+
+# Terceros que nunca se reportan como contraparte en ciertos formatos
+# (pagos de impuestos a la DIAN, traslados internos con NIT propio, etc.)
+nits_excluidos:
+  global:
+    - "{empresa}"          # el propio informante (asientos internos/cierre)
+  "1001": ["800197268"]    # pagos de impuestos a DIAN no son pagos a terceros
+  "1005": ["800197268"]
+  "1006": ["800197268"]
+  "1009": []
+
+# Topes por formato. Montos por debajo del tope (por tercero y concepto)
+# se agrupan en el NIT de cuantías menores. `null` = no aplica agrupación.
+topes:
+  "1001": { valor: 100000,  columna: "pago_deducible+pago_no_deducible", verificado: false }
+  "1003": { valor: null,    verificado: false }
+  "1005": { valor: 500000,  columna: "iva_descontable",  verificado: false }
+  "1006": { valor: 500000,  columna: "iva_generado",     verificado: false }
+  "1007": { valor: null,    verificado: false }
+  "1008": { valor: 1000000, columna: "saldo_cxc",        verificado: false }
+  "1009": { valor: 1000000, columna: "saldo_cxp",        verificado: false }
+  "1012": { valor: null,    verificado: false }
+
+# Si un tercero tiene retención practicada, no se agrupa en cuantías menores
+no_agrupar_si_retencion: true
+
+# Concepto destino de la retención de IVA cuando el tercero no tiene pagos en 1001
+concepto_prorrata_defecto:
+  "1001": "5016"
+
+# Tolerancias de validación
+validacion:
+  # diferencia máxima (en pesos) aceptada al cuadrar formato vs. balance
+  tolerancia_cuadre: 1000
+  # % de débitos en cuentas de ingreso (41/42) sobre créditos que dispara alerta
+  alerta_debitos_ingresos_pct: 2.0
+  # ¿Los nombres de personas naturales vienen "NOMBRES APELLIDOS" o "APELLIDOS NOMBRES"?
+  orden_nombre_completo: "apellidos_nombres"   # o "nombres_apellidos"
+
+# Filtro de asientos de cierre: si la fuente trae el movimiento del
+# comprobante de cierre dentro del débito/crédito anual, poner el tipo
+# de comprobante aquí para que el motor lo excluya (solo aplica a
+# fuentes con detalle de movimiento). Con balance por tercero, el motor
+# usa por defecto solo la columna correcta (créditos en ingresos, etc.).
+comprobantes_cierre: ["CIERRE", "CC", "99"]

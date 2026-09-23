@@ -1,0 +1,39 @@
+formato,concepto,descripcion,verificado
+1001,5001,Salarios prestaciones sociales y demás pagos laborales,NO
+1001,5002,Honorarios,NO
+1001,5003,Comisiones,NO
+1001,5004,Servicios,NO
+1001,5005,Arrendamientos,NO
+1001,5006,Intereses y rendimientos financieros,NO
+1001,5007,Compra de activos movibles (inventarios),NO
+1001,5008,Compra de activos fijos,NO
+1001,5010,Aportes parafiscales SENA ICBF cajas de compensación,NO
+1001,5011,Aportes a seguridad social en salud y riesgos laborales,NO
+1001,5012,Aportes obligatorios a fondos de pensiones,NO
+1001,5016,Demás costos y deducciones,NO
+1003,1301,Retención por salarios y demás pagos laborales,NO
+1003,1302,Retención por ventas,NO
+1003,1303,Retención por servicios,NO
+1003,1304,Retención por honorarios,NO
+1003,1305,Retención por comisiones,NO
+1003,1306,Retención por intereses y rendimientos financieros,NO
+1003,1307,Retención por arrendamientos,NO
+1003,1308,Retención por otros conceptos,NO
+1003,1309,Retención en la fuente por IVA,NO
+1007,4001,Ingresos brutos de actividades ordinarias,NO
+1007,4002,Otros ingresos brutos,NO
+1007,4003,Ingresos por intereses y rendimientos financieros,NO
+1008,1315,Clientes,NO
+1008,1316,Accionistas socios comuneros cooperados,NO
+1008,1317,Anticipos y avances,NO
+1008,1318,Otras cuentas por cobrar,NO
+1009,2201,Proveedores,NO
+1009,2202,Cuentas por pagar a socios y accionistas,NO
+1009,2203,Costos y gastos por pagar,NO
+1009,2204,Obligaciones laborales,NO
+1009,2205,Anticipos y avances recibidos,NO
+1009,2206,Obligaciones financieras,NO
+1009,2207,Otros pasivos,NO
+1012,1110,Depósitos en cuentas corrientes y de ahorro,NO
+1012,1115,Inversiones en acciones y aportes,NO
+1012,1120,Inversiones en bonos CDT y otros títulos,NO

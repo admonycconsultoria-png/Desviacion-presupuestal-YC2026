@@ -1,0 +1,123 @@
+formato,prefijo,concepto,columna,base,notas
+# ---------------------------------------------------------------------------------
+# Regla: por formato gana el PREFIJO MÁS LARGO. concepto=EXCLUIR anula una rama.
+# base: neto_deb (débito-crédito) | neto_cred (crédito-débito) | debito | credito
+#       saldo_deb (saldo final deudor) | saldo_cred (saldo final acreedor)
+# Exportar el balance SIN comprobante de cierre (ver README).
+# ---------------------------------------------------------------------------------
+# ============================ 1001 PAGOS ============================
+1001,5105,5001,pago_deducible,neto_deb,Gastos de personal admón -> verificar si va a 2276 y no a 1001
+1001,510568,5011,pago_deducible,neto_deb,ARL
+1001,510569,5011,pago_deducible,neto_deb,EPS
+1001,510570,5012,pago_deducible,neto_deb,Fondos de pensiones
+1001,510572,5010,pago_deducible,neto_deb,Cajas de compensación
+1001,510575,5010,pago_deducible,neto_deb,ICBF
+1001,510578,5010,pago_deducible,neto_deb,SENA
+1001,5110,5002,pago_deducible,neto_deb,Honorarios
+1001,5115,5016,pago_deducible,neto_deb,Impuestos (tasas y contribuciones)
+1001,5120,5005,pago_deducible,neto_deb,Arrendamientos
+1001,5125,5016,pago_deducible,neto_deb,Contribuciones y afiliaciones
+1001,5130,5016,pago_deducible,neto_deb,Seguros
+1001,5135,5004,pago_deducible,neto_deb,Servicios
+1001,5140,5016,pago_deducible,neto_deb,Gastos legales
+1001,5145,5004,pago_deducible,neto_deb,Mantenimiento y reparaciones
+1001,5150,5004,pago_deducible,neto_deb,Adecuación e instalación
+1001,5155,5016,pago_deducible,neto_deb,Gastos de viaje
+1001,5160,EXCLUIR,,,Depreciaciones (no es pago)
+1001,5165,EXCLUIR,,,Amortizaciones (no es pago)
+1001,5195,5016,pago_deducible,neto_deb,Diversos
+1001,5199,EXCLUIR,,,Provisiones / deterioro
+1001,5205,5001,pago_deducible,neto_deb,Gastos de personal ventas
+1001,520568,5011,pago_deducible,neto_deb,ARL
+1001,520569,5011,pago_deducible,neto_deb,EPS
+1001,520570,5012,pago_deducible,neto_deb,Pensiones
+1001,520572,5010,pago_deducible,neto_deb,Cajas
+1001,520575,5010,pago_deducible,neto_deb,ICBF
+1001,520578,5010,pago_deducible,neto_deb,SENA
+1001,5210,5002,pago_deducible,neto_deb,Honorarios ventas
+1001,5215,5016,pago_deducible,neto_deb,Impuestos ventas
+1001,5220,5005,pago_deducible,neto_deb,Arrendamientos ventas
+1001,5225,5016,pago_deducible,neto_deb,Contribuciones
+1001,5230,5016,pago_deducible,neto_deb,Seguros
+1001,5235,5004,pago_deducible,neto_deb,Servicios ventas
+1001,5240,5016,pago_deducible,neto_deb,Gastos legales
+1001,5245,5004,pago_deducible,neto_deb,Mantenimiento
+1001,5250,5004,pago_deducible,neto_deb,Adecuación
+1001,5255,5016,pago_deducible,neto_deb,Viajes
+1001,5260,EXCLUIR,,,Depreciaciones
+1001,5265,EXCLUIR,,,Amortizaciones
+1001,5295,5016,pago_deducible,neto_deb,Diversos ventas
+1001,5299,EXCLUIR,,,Provisiones
+1001,5305,5016,pago_deducible,neto_deb,Financieros (gastos bancarios)
+1001,530515,5003,pago_deducible,neto_deb,Comisiones bancarias
+1001,530520,5006,pago_deducible,neto_deb,Intereses
+1001,5310,EXCLUIR,,,Pérdida en venta y retiro de bienes
+1001,5315,5016,pago_no_deducible,neto_deb,Gastos extraordinarios (revisar deducibilidad)
+1001,5395,5016,pago_no_deducible,neto_deb,Gastos diversos (multas / sanciones -> no deducible)
+1001,54,EXCLUIR,,,Impuesto de renta
+1001,6135,EXCLUIR,,,Costo de ventas (las compras se toman de 14xx para no duplicar)
+1001,6205,5007,pago_deducible,neto_deb,Compras (inventario periódico)
+1001,1405,5007,pago_deducible,debito,Materias primas (inventario permanente)
+1001,1435,5007,pago_deducible,debito,Mercancías no fabricadas
+1001,1455,5007,pago_deducible,debito,Materiales y repuestos
+1001,1504,5008,pago_deducible,debito,Terrenos
+1001,1516,5008,pago_deducible,debito,Construcciones y edificaciones
+1001,1520,5008,pago_deducible,debito,Maquinaria y equipo
+1001,1524,5008,pago_deducible,debito,Equipo de oficina
+1001,1528,5008,pago_deducible,debito,Equipo de cómputo
+1001,1540,5008,pago_deducible,debito,Flota y equipo de transporte
+1001,7,5016,pago_deducible,neto_deb,Costos de producción (afinar por subcuenta)
+1001,236505,5001,ret_renta,credito,Retención salarios
+1001,236515,5002,ret_renta,credito,Retención honorarios
+1001,236520,5003,ret_renta,credito,Retención comisiones
+1001,236525,5004,ret_renta,credito,Retención servicios
+1001,236530,5005,ret_renta,credito,Retención arrendamientos
+1001,236535,5006,ret_renta,credito,Retención rendimientos financieros
+1001,236540,5007,ret_renta,credito,Retención compras
+1001,236570,5016,ret_renta,credito,Otras retenciones
+1001,236575,EXCLUIR,,,Autorretenciones (no se practican a terceros)
+1001,2367,PRORRATA,ret_iva_comun,credito,Retención IVA -> se distribuye entre conceptos del tercero
+# ============================ 1003 RETENCIONES QUE LE PRACTICARON ============================
+1003,135515,1308,retencion,debito,Retención en la fuente (afinar por subcuenta)
+1003,13551505,1302,retencion,debito,Retención por ventas (si existe la subcuenta)
+1003,13551510,1303,retencion,debito,Retención por servicios
+1003,13551515,1304,retencion,debito,Retención por honorarios
+1003,13551520,1306,retencion,debito,Retención rendimientos financieros
+1003,135517,1309,retencion,debito,IVA retenido
+1003,135518,EXCLUIR,,,ICA retenido (no es exógena nacional)
+# ============================ 1005 / 1006 IVA ============================
+1005,2408,,iva_descontable,debito,IVA descontable (mejor usar subcuenta propia)
+1006,2408,,iva_generado,credito,IVA generado (mejor usar subcuenta propia)
+1006,2495,,impoconsumo,credito,Impuesto nacional al consumo (si se lleva aquí)
+# ============================ 1007 INGRESOS ============================
+1007,41,4001,ingreso_bruto,neto_cred,Ingresos operacionales
+1007,4175,4001,devoluciones,neto_deb,Devoluciones en ventas
+1007,42,4002,ingreso_bruto,neto_cred,Ingresos no operacionales
+1007,4210,4003,ingreso_bruto,neto_cred,Financieros
+# ============================ 1008 CxC ============================
+1008,1305,1315,saldo_cxc,saldo_deb,Clientes
+1008,1310,1318,saldo_cxc,saldo_deb,Cuentas corrientes comerciales
+1008,1325,1316,saldo_cxc,saldo_deb,Cuentas por cobrar a socios
+1008,1330,1317,saldo_cxc,saldo_deb,Anticipos y avances
+1008,1355,EXCLUIR,,,Anticipo de impuestos (no es CxC a terceros)
+1008,1365,1318,saldo_cxc,saldo_deb,Cuentas por cobrar a trabajadores
+1008,1380,1318,saldo_cxc,saldo_deb,Deudores varios
+1008,1399,EXCLUIR,,,Deterioro (verificar si el anexo exige reportarlo)
+# ============================ 1009 CxP ============================
+1009,21,2206,saldo_cxp,saldo_cred,Obligaciones financieras
+1009,22,2201,saldo_cxp,saldo_cred,Proveedores
+1009,23,2203,saldo_cxp,saldo_cred,Cuentas por pagar
+1009,2355,2202,saldo_cxp,saldo_cred,Deudas con accionistas o socios
+1009,2360,2202,saldo_cxp,saldo_cred,Dividendos por pagar
+1009,2365,EXCLUIR,,,Retención en la fuente (su contraparte es DIAN)
+1009,2367,EXCLUIR,,,Retención IVA
+1009,2368,EXCLUIR,,,Retención ICA
+1009,24,EXCLUIR,,,Impuestos (verificar si el anexo los pide)
+1009,25,2204,saldo_cxp,saldo_cred,Obligaciones laborales
+1009,28,2207,saldo_cxp,saldo_cred,Otros pasivos
+1009,2805,2205,saldo_cxp,saldo_cred,Anticipos y avances recibidos
+# ============================ 1012 INVERSIONES Y CUENTAS ============================
+1012,1110,1110,valor_31dic,saldo_deb,Bancos
+1012,1120,1110,valor_31dic,saldo_deb,Cuentas de ahorro
+1012,1205,1115,valor_31dic,saldo_deb,Acciones
+1012,1225,1120,valor_31dic,saldo_deb,Certificados (CDT)
