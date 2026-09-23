@@ -117,7 +117,8 @@ formato,prefijo,concepto,columna,base,notas
 1009,28,2207,saldo_cxp,saldo_cred,Otros pasivos
 1009,2805,2205,saldo_cxp,saldo_cred,Anticipos y avances recibidos
 # ============================ 1012 INVERSIONES Y CUENTAS ============================
-1012,1110,1110,valor_31dic,saldo_deb,Bancos
-1012,1120,1110,valor_31dic,saldo_deb,Cuentas de ahorro
+# saldo_deb_cuenta: el tercero del movimiento bancario suele ser la contraparte, no el banco
+1012,1110,1110,valor_31dic,saldo_deb_cuenta,Bancos
+1012,1120,1110,valor_31dic,saldo_deb_cuenta,Cuentas de ahorro
 1012,1205,1115,valor_31dic,saldo_deb,Acciones
-1012,1225,1120,valor_31dic,saldo_deb,Certificados (CDT)
+1012,1225,1120,valor_31dic,saldo_deb_cuenta,Certificados (CDT)

@@ -69,7 +69,7 @@ def inconsistencias(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> None
     # 4. Naturaleza contraria en CxC y CxP
     for pref, esperado, nombre in (("13", 1, "CxC con saldo crédito"), ("22", -1, "Proveedores con saldo débito"),
                                    ("23", -1, "CxP con saldo débito")):
-        g = balance[balance["cuenta"].str.startswith(pref) & ~balance["cuenta"].str.match(r"^236[578]")]
+        g = balance[balance["cuenta"].str.startswith(pref) & ~balance["cuenta"].str.match(r"^(236[578]|1355)")]
         malos = g[g["saldo_final"] * esperado < -1000]
         for r in malos.itertuples():
             hallazgos.append(("ALERTA", nombre, r.nit or r.cuenta,

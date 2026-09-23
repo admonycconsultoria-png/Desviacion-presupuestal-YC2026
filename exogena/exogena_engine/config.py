@@ -12,7 +12,8 @@ from .utils import clave
 RAIZ = Path(__file__).resolve().parent.parent
 CONFIG_DIR = RAIZ / "config"
 
-BASES_VALIDAS = {"neto_deb", "neto_cred", "debito", "credito", "saldo_deb", "saldo_cred"}
+BASES_VALIDAS = {"neto_deb", "neto_cred", "debito", "credito", "saldo_deb", "saldo_cred",
+                 "saldo_deb_cuenta"}  # saldo de toda la cuenta, asignado a un tercero fijo (bancos)
 
 
 @dataclass

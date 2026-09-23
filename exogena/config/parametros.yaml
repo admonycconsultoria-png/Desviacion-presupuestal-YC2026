@@ -46,6 +46,11 @@ topes:
   "1009": { valor: 1000000, columna: "saldo_cxp",        verificado: false }
   "1012": { valor: null,    verificado: false }
 
+# Cuenta auxiliar bancaria -> NIT de la entidad (1012). Si se deja vacío el motor intenta
+# inferirla entre los terceros de la cuenta y deja una ALERTA para confirmar.
+cuentas_bancarias: {}
+#   "11100501": "860034313"   # cuenta auxiliar -> NIT del banco
+
 # Si un tercero tiene retención practicada, no se agrupa en cuantías menores
 no_agrupar_si_retencion: true
 

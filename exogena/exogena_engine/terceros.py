@@ -10,6 +10,7 @@ from .dv import calcular_dv
 from .utils import clave, solo_digitos, texto_dian
 
 PARTICULAS = {"DE", "DEL", "LA", "LAS", "LOS", "SAN", "SANTA", "VAN", "VON", "Y"}
+DIRECCIONES_VACIAS = {"no aplica", "na", "n a", "sin direccion", "ninguna", "0", "x", "."}
 NITS_GENERICOS = {"222222222", "999999999", "111111111", "0", "1", "123456789"}
 SUFIJOS_JURIDICA = ("SAS", "S A S", "LTDA", "S A", "SA", "E U", "EU", "S EN C", "SCA", "ESP", "E S P",
                     "CORP", "BIC")
@@ -224,6 +225,8 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
         if not pais:
             hallazgos.append(("ERROR", "País no identificado", nit, f"'{get('pais')}' no está en config/paises.csv"))
         direccion = texto_dian(get("direccion"))
+        if clave(direccion) in DIRECCIONES_VACIAS:
+            direccion = ""
         if not direccion and m is not None:
             hallazgos.append(("ALERTA", "Sin dirección", nit, "Requerida en 1001/1003/1008/1009/1010"))
 

@@ -1,9 +1,12 @@
 """Motor: balance por tercero + reglas -> partidas -> filas de cada formato."""
 from __future__ import annotations
 
+import re
+
 import pandas as pd
 
 from .config import Config
+from .utils import texto_dian
 
 RETENCIONES = ("ret_renta", "ret_asumida", "ret_iva_comun", "ret_iva_no_dom", "retencion")
 
@@ -27,7 +30,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     for fila in balance.itertuples(index=False):
         for fmt in formatos:
             regla = cfg.regla_para(fmt, fila.cuenta)
-            if regla is None or regla.concepto == "EXCLUIR":
+            if regla is None or regla.concepto == "EXCLUIR" or regla.base.endswith("_cuenta"):
                 continue
             valor = valor_base(fila, regla.base)
             if abs(valor) < 0.5:
@@ -45,6 +48,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
                 "columna": regla.columna, "base": regla.base, "prefijo_regla": regla.prefijo,
                 "valor": valor, "descartado": motivo,
             })
+    salida.extend(_partidas_por_cuenta(balance, formatos, cfg, hallazgos))
     partidas = pd.DataFrame(salida, columns=["formato", "cuenta", "nombre_cuenta", "nit", "concepto",
                                              "columna", "base", "prefijo_regla", "valor", "descartado"])
     sin_t = partidas[partidas["descartado"] == "sin_tercero"]
@@ -53,6 +57,53 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
                           f"Formato {fmt}: ${g['valor'].sum():,.0f} en la cuenta {cuenta} sin NIT; "
                           f"no se puede reportar hasta asignarle tercero"))
     return partidas
+
+
+PATRON_ENTIDAD = re.compile(r"\b(BANCO|BANCOLOMBIA|DAVIVIENDA|BBVA|COLPATRIA|SCOTIABANK|ITAU|AV VILLAS|"
+                            r"CAJA SOCIAL|OCCIDENTE|POPULAR|AGRARIO|BANCAMIA|FALABELLA|PICHINCHA|SERFINANZA|"
+                            r"NEQUI|DAVIPLATA|LULO|NU COLOMBIA|MOVII|CONFIAR|COTRAFA|JFK|COOPERATIVA|"
+                            r"FIDUCIARIA|FONDO)\b")
+SECUNDARIAS = re.compile(r"\b(FIDUCIARIA|FONDO|COMISIONISTA|VALORES)\b")
+
+
+def _partidas_por_cuenta(balance: pd.DataFrame, formatos: list[str], cfg: Config, hallazgos: list) -> list:
+    """Cuentas bancarias e inversiones: en muchos software el tercero de cada movimiento es la
+    contraparte (cliente/proveedor), no el banco. El saldo se toma por cuenta y se asigna a la entidad
+    configurada en parametros.cuentas_bancarias o, si no está, a la entidad financiera que aparezca
+    como tercero en la cuenta."""
+    fijos = {str(k): str(v) for k, v in (cfg.parametros.get("cuentas_bancarias") or {}).items()}
+    salida = []
+    for cuenta, g in balance.groupby("cuenta"):
+        for fmt in formatos:
+            regla = cfg.regla_para(fmt, cuenta)
+            if regla is None or regla.concepto == "EXCLUIR" or not regla.base.endswith("_cuenta"):
+                continue
+            valor = g["saldo_final"].sum()
+            if abs(valor) < 0.5:
+                continue
+            nit = fijos.get(cuenta, "")
+            if not nit:
+                nombres = g.loc[g["nit"] != "", ["nit", "nombre_tercero"]].drop_duplicates("nit")
+                cand = nombres[nombres["nombre_tercero"].map(lambda n: bool(PATRON_ENTIDAD.search(texto_dian(n))))]
+                if len(cand) > 1:
+                    prim = cand[~cand["nombre_tercero"].map(lambda n: bool(SECUNDARIAS.search(texto_dian(n))))]
+                    cand = prim if not prim.empty else cand
+                if len(cand) == 1:
+                    nit = cand.iloc[0]["nit"]
+                    hallazgos.append(("ALERTA", "Entidad financiera inferida", cuenta,
+                                      f"Formato {fmt}: saldo de la cuenta {cuenta} (${valor:,.0f}) asignado a "
+                                      f"'{cand.iloc[0]['nombre_tercero']}' ({nit}). Confirmar y fijarlo en "
+                                      f"parametros.cuentas_bancarias"))
+                else:
+                    hallazgos.append(("ERROR", "Entidad financiera sin definir", cuenta,
+                                      f"Formato {fmt}: no se pudo determinar la entidad de la cuenta {cuenta}; "
+                                      f"configurar parametros.cuentas_bancarias"))
+            salida.append({
+                "formato": fmt, "cuenta": cuenta, "nombre_cuenta": g["nombre_cuenta"].iloc[0], "nit": nit,
+                "concepto": regla.concepto, "columna": regla.columna, "base": regla.base,
+                "prefijo_regla": regla.prefijo, "valor": valor, "descartado": "" if nit else "sin_tercero",
+            })
+    return salida
 
 
 def _prorratear(p: pd.DataFrame, cfg: Config) -> pd.DataFrame:
@@ -114,6 +165,7 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
         tabla[c] = tabla[c].clip(lower=0)
     tabla = tabla[(tabla[valores].abs() > 0.5).any(axis=1)]
 
+    tabla = _retenciones_huerfanas(fmt, tabla, valores, hallazgos)
     tabla = _cuantias_menores(fmt, tabla, valores, cfg)
 
     # Datos del tercero
@@ -171,6 +223,34 @@ def _base_1003(tabla: pd.DataFrame, balance: pd.DataFrame, hallazgos: list) -> p
         hallazgos.append(("INFO", "Base 1003 estimada", nit,
                           f"Base estimada con ingresos del tercero (${base:,.0f}); validar contra certificados"))
     return tabla
+
+
+def _retenciones_huerfanas(fmt: str, tabla: pd.DataFrame, valores: list[str], hallazgos: list) -> pd.DataFrame:
+    """Retención causada en un concepto donde el tercero no tiene pago (p. ej. retención por compras
+    de un bien que se llevó al gasto): se traslada al concepto con mayor pago del mismo tercero."""
+    pagos = [c for c in ("pago_deducible", "pago_no_deducible") if c in valores]
+    rets = [c for c in valores if c in RETENCIONES]
+    if not pagos or not rets:
+        return tabla
+    tabla = tabla.reset_index(drop=True)
+    total_pago = tabla[pagos].sum(axis=1)
+    huerfanas = tabla[(total_pago < 0.5) & (tabla[rets].sum(axis=1) > 0.5)]
+    quitar = []
+    for i, r in huerfanas.iterrows():
+        mismos = tabla[(tabla["nit"] == r["nit"]) & (total_pago > 0.5)]
+        if mismos.empty:
+            hallazgos.append(("ALERTA", "Retención sin pago", r["nit"],
+                              f"Formato {fmt} concepto {r['concepto']}: hay retención pero ningún pago o abono "
+                              f"al tercero; revisar la causación"))
+            continue
+        destino = total_pago[mismos.index].idxmax()
+        for c in rets:
+            tabla.at[destino, c] += r[c]
+        quitar.append(i)
+        hallazgos.append(("INFO", "Retención reasignada", r["nit"],
+                          f"Formato {fmt}: retención del concepto {r['concepto']} trasladada al concepto "
+                          f"{tabla.at[destino, 'concepto']}, donde está el pago"))
+    return tabla.drop(index=quitar)
 
 
 def _cuantias_menores(fmt: str, tabla: pd.DataFrame, valores: list[str], cfg: Config) -> pd.DataFrame:
