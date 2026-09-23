@@ -41,6 +41,15 @@ def solo_digitos(valor) -> str:
     return re.sub(r"\D", "", str(valor))
 
 
+def a_texto(valor) -> str:
+    """Celda -> texto sin artefactos: 900123456.0 -> '900123456', NaN -> ''."""
+    if valor is None or (isinstance(valor, float) and math.isnan(valor)):
+        return ""
+    if isinstance(valor, float) and valor.is_integer():
+        return str(int(valor))
+    return str(valor).strip()
+
+
 def a_numero(valor) -> float:
     """Convierte '1.234.567,89', '1,234,567.89', '(1.000)', '-1000' o números a float."""
     if valor is None:
@@ -61,7 +70,9 @@ def a_numero(valor) -> float:
     elif "," in s:
         partes = s.split(",")
         s = s.replace(",", ".") if len(partes) == 2 and len(partes[1]) != 3 else s.replace(",", "")
-    elif s.count(".") > 1 or (s.count(".") == 1 and len(s.split(".")[1]) == 3 and len(s.split(".")[0].lstrip("-")) <= 3):
+    elif s.count(".") > 1 or (s.count(".") == 1 and len(s.split(".")[1]) == 3
+                              and s.split(".")[0].lstrip("-") not in ("", "0")
+                              and len(s.split(".")[0].lstrip("-")) <= 3):
         s = s.replace(".", "")
     try:
         n = float(s)
@@ -74,7 +85,8 @@ def leer_tabla(ruta: str) -> pd.DataFrame:
     """Lee CSV (detectando separador y codificación) o Excel, todo como texto."""
     ruta_l = str(ruta).lower()
     if ruta_l.endswith((".xlsx", ".xlsm", ".xls")):
-        return pd.read_excel(ruta, dtype=str)
+        # object conserva los números como números (leerlos como texto invita a errores de separador)
+        return pd.read_excel(ruta, dtype=object)
     for enc in ("utf-8-sig", "latin-1"):
         try:
             return pd.read_csv(ruta, dtype=str, sep=None, engine="python", encoding=enc)

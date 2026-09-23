@@ -34,6 +34,31 @@ Flujo por empresa:
 4. **Formatos y descargas**: un Excel por formato, con las columnas en el orden del prevalidador, más el
    informe de validación.
 
+### Parametrización sin sorpresas
+
+- **Asistente por formato**: recorre cada formato y pregunta **cuenta por cuenta del balance de esa empresa**:
+  - si se reporta o no;
+  - el tratamiento: débitos, créditos, débitos − créditos, créditos − débitos, saldo final deudor o acreedor, o
+    saldo de la cuenta asignado a un banco;
+  - el concepto y la columna.
+
+  Muestra en vivo el valor que resultaría y cuántos terceros quedarían negativos. También muestra la estructura
+  del formato en el orden del prevalidador y de qué cuentas sale cada columna. El dictamen no llega a "Listo"
+  mientras quede una cuenta sin revisar. Si la regla de una cuenta cambia después de revisada, vuelve a quedar
+  pendiente.
+- **Corregir terceros**: tipo 13 en empresas pasa a 31, DV errado, NIT con el DV pegado, municipio (DIVIPOLA
+  completa con buscador), dirección, país y nombres. Las correcciones se guardan por empresa, se aplican cada vez
+  que se genera y se descargan en Excel para corregirlas también en el software.
+- **Diagnóstico de obligatoriedad**: criterios de doctrina con su fuente (`config/doctrina.yaml`), por ejemplo el
+  Concepto DIAN 3863 de 2025 para personas naturales del Régimen Simple.
+- **NotebookLM**: el aplicativo no se conecta a NotebookLM (no hay API disponible), así que se trabaja con él de
+  dos formas:
+  - la **pregunta por formato** para copiar y pegar;
+  - el **paquete NotebookLM** (.md), una ficha de parametrización de la empresa para cargar como fuente junto con
+    las resoluciones y los anexos técnicos.
+
+  Ninguno de los dos incluye datos de terceros.
+
 La configuración está en dos niveles:
 
 | Nivel | Qué contiene | Dónde se edita |
@@ -107,7 +132,8 @@ exogena/
 │   ├── conceptos.csv        catálogo de conceptos con marca verificado SI/NO
 │   ├── fuentes.yaml         alias de encabezados de Alegra / Siigo / Dataico
 │   ├── tipos_documento.csv  CC, NIT, CE, PPT… -> códigos DIAN
-│   ├── divipola.csv         departamentos y municipios (ampliar con la DIVIPOLA completa del DANE)
+│   ├── divipola.csv         DIVIPOLA completa: 1.121 municipios (paquete npm `divipola`, MIT)
+│   ├── doctrina.yaml        criterios de obligatoriedad con su fuente
 │   └── paises.csv           códigos de país DIAN
 ├── exogena_engine/
 │   ├── fuentes.py           lectura y normalización: encabezados, totales, signos, formatos numéricos
@@ -172,8 +198,11 @@ formato,prefijo,concepto,columna,base,notas
    dan neto cero. El motor lo detecta y lo marca como ERROR.
 5. **Salarios en 1001 frente a 2276.** La regla `5105 -> 5001` queda activa, pero hay que confirmar en el
    anexo si los pagos laborales ya reportados en 2276 también van en 1001.
-6. **La DIVIPOLA incluida es parcial** (capitales y municipios frecuentes). Antes de producción hay que
-   reemplazar `config/divipola.csv` por la tabla completa del DANE, que tiene las mismas columnas.
+6. **Tabla de países DIAN incompleta.** Solo trae Colombia (169) y Estados Unidos (249). La DIAN usa su propia
+   tabla, que no es la ISO, así que hay que completarla con el anexo técnico desde *Parámetros normativos* o
+   `config/paises.csv`.
+7. **Norma base.** Rige la Res. 000227 de 2025, modificada por la 000233 de 2025 y la 000012 de 2026. Los
+   conceptos, topes y versiones siguen marcados sin verificar hasta contrastarlos con esos textos.
 
 ## Hoja de ruta
 

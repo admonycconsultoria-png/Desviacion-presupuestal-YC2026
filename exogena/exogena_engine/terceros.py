@@ -75,16 +75,15 @@ def partir_nombre(nombre: str, orden: str) -> tuple[dict, bool]:
     return {"primer_apellido": ap1, "segundo_apellido": ap2, "primer_nombre": n1, "otros_nombres": n2}, ambiguo
 
 
-def _ubicar(ciudad: str, dpto: str, cod_dane: str, cfg: Config) -> tuple[str, str]:
+def _ubicar(ciudad: str, dpto: str, cod_dane: str, cfg: Config) -> tuple[str, str, bool]:
     cod = solo_digitos(cod_dane)
-    if len(cod) == 5:
-        return cod[:2], cod[2:]
     if len(cod) == 4:          # Excel se come el cero de Antioquia/Atlántico: 5001 -> 05001
         cod = "0" + cod
-        return cod[:2], cod[2:]
+    if len(cod) == 5:
+        return cod[:2], cod[2:], False
     k = clave(ciudad)
     if not k:
-        return "", ""
+        return "", "", False
     dv = cfg.divipola
     cand = dv[(dv["k_mpio"] == k) | dv["k_mpio"].map(lambda m: k.startswith(m + " "))]
     if len(cand) > 1 and dpto:
@@ -93,8 +92,9 @@ def _ubicar(ciudad: str, dpto: str, cod_dane: str, cfg: Config) -> tuple[str, st
         cand = f if not f.empty else cand
     if len(cand) >= 1:
         fila = cand.iloc[0]
-        return fila["codigo_departamento"], fila["codigo_municipio"]
-    return "", ""
+        homonimo = cand[["codigo_departamento", "codigo_municipio"]].drop_duplicates().shape[0] > 1
+        return fila["codigo_departamento"], fila["codigo_municipio"], homonimo
+    return "", "", False
 
 
 def _pais(valor: str, tiene_mpio: bool, cfg: Config) -> str:
@@ -107,6 +107,18 @@ def _pais(valor: str, tiene_mpio: bool, cfg: Config) -> str:
         if v == p["nombre"] or v in p["alias"].split("|"):
             return p["codigo"]
     return ""
+
+
+def _parche(corr: dict) -> dict:
+    """Corrección manual de un tercero -> campos del maestro canónico."""
+    p = {k: str(v) for k, v in corr.items()
+         if k in ("tipo_documento", "dv", "razon_social", "primer_apellido", "segundo_apellido",
+                  "primer_nombre", "otros_nombres", "direccion", "pais") and str(v).strip()}
+    if corr.get("persona"):
+        p["tipo_persona"] = "persona " + str(corr["persona"])
+    if corr.get("codigo_departamento") and corr.get("codigo_municipio"):
+        p["codigo_municipio_dane"] = str(corr["codigo_departamento"]).zfill(2) + str(corr["codigo_municipio"]).zfill(3)
+    return p
 
 
 def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
@@ -124,8 +136,15 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
         hallazgos.append(("ALERTA", "Duplicado en maestro", nit,
                           f"NIT repetido {len(g)} veces en el maestro de terceros; se usa el primero"))
     maestro = maestro.drop_duplicates("nit").set_index("nit")
+    # NIT corregido (p. ej. DV pegado): el NIT nuevo hereda la ficha del maestro del NIT viejo
+    for viejo, c in (cfg.parametros.get("correcciones_terceros") or {}).items():
+        nuevo = str((c or {}).get("nit_correcto") or "")
+        if nuevo and nuevo not in maestro.index and str(viejo) in maestro.index:
+            maestro.loc[nuevo] = maestro.loc[str(viejo)]
 
     nits = sorted(set(balance.loc[balance["nit"] != "", "nit"]))
+    correcciones = {str(k): v for k, v in (cfg.parametros.get("correcciones_terceros") or {}).items()
+                    if isinstance(v, dict)}
     cm = cfg.parametros["cuantias_menores"]
     emp = cfg.parametros["empresa"]
     filas = []
@@ -141,8 +160,11 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
                           "codigo_departamento": emp.get("codigo_departamento", ""),
                           "codigo_municipio": emp.get("codigo_municipio", ""), "pais": "169"})
             continue
-        m = maestro.loc[nit] if nit in maestro.index else None
-        get = (lambda c: str(m[c]).strip()) if m is not None else (lambda c: "")
+        m = maestro.loc[nit].to_dict() if nit in maestro.index else None
+        corr = correcciones.get(nit) or {}
+        if corr:
+            m = {**(m or {c: "" for c in maestro.columns}), **_parche(corr)}
+        get = (lambda c: str(m.get(c, "")).strip()) if m is not None else (lambda c: "")
         if m is None:
             hallazgos.append(("ALERTA", "Tercero sin maestro", nit,
                               "Aparece en el balance pero no en el maestro de terceros: sin dirección ni ubicación"))
@@ -170,7 +192,7 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
             tipo = "31" if juridica else "13"
             hallazgos.append(("INFO", "Tipo de documento inferido", nit,
                               f"Sin tipo en maestro; se asignó {tipo}"))
-        if juridica and tipo != "31":
+        if juridica and tipo not in ("31", "42", "43", "44"):
             hallazgos.append(("ERROR", "Tipo documento incoherente", nit,
                               f"'{razon}' parece persona jurídica pero tiene tipo {tipo}"))
 
@@ -203,6 +225,10 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
         else:
             separados = {k: texto_dian(get(k)) for k in ("primer_apellido", "segundo_apellido",
                                                          "primer_nombre", "otros_nombres")}
+            if separados["primer_apellido"] and not separados["primer_nombre"] and razon \
+                    and not texto_dian(get("razon_social")).endswith(separados["primer_apellido"]):
+                # Alegra: la columna "Nombre" trae el primer nombre de las personas naturales
+                separados["primer_nombre"] = razon
             if separados["primer_apellido"] and separados["primer_nombre"]:
                 nom = separados
             else:
@@ -217,7 +243,11 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
                                   "Persona natural sin primer apellido o primer nombre"))
 
         # ---- Ubicación
-        dpto, mpio = _ubicar(get("ciudad"), get("departamento"), get("codigo_municipio_dane"), cfg)
+        dpto, mpio, homonimo = _ubicar(get("ciudad"), get("departamento"), get("codigo_municipio_dane"), cfg)
+        if homonimo:
+            hallazgos.append(("ALERTA", "Municipio homónimo", nit,
+                              f"'{get('ciudad')}' existe en varios departamentos y el maestro no trae uno que lo "
+                              f"distinga; se asignó {dpto}-{mpio}. Confirmar"))
         pais = _pais(get("pais"), bool(mpio), cfg)
         if pais == "169" and not mpio:
             hallazgos.append(("ALERTA", "Municipio no identificado", nit,

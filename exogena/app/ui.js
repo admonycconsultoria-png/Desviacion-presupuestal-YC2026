@@ -39,7 +39,7 @@
   function empresaNueva(nombre, nit) {
     return { id: uid(), razon_social: nombre || "Nueva empresa", nit: nit || "", anio: new Date().getFullYear() - 1,
       direccion: "", codigo_departamento: "", codigo_municipio: "", fuente: "siigo", orden_nombre: "apellidos_nombres",
-      cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas) };
+      cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas), correcciones: {}, revisiones: {}, diagnostico: {} };
   }
   const E = {
     empresas: leerLS(LS_EMPRESAS, []),
@@ -47,7 +47,9 @@
     activa: leerLS(LS_ACTIVA, null),
     vista: "procesar", subvista: "hallazgos",
     archivos: {}, resultado: null, filtroNivel: "", filtroTexto: "", filtroFmt: "", filtroRegla: "", verFormato: null,
+    fmtAsis: "1001", cacheBal: null,
   };
+  E.empresas.forEach((x) => { x.correcciones = x.correcciones || {}; x.revisiones = x.revisiones || {}; x.diagnostico = x.diagnostico || {}; });
   const empresa = () => E.empresas.find((x) => x.id === E.activa) || null;
   let tGuardar;
   function guardar() { clearTimeout(tGuardar); tGuardar = setTimeout(() => { guardarLS(LS_EMPRESAS, E.empresas); guardarLS(LS_NORMATIVO, E.normativo); guardarLS(LS_ACTIVA, E.activa); }, 250); }
@@ -65,7 +67,9 @@
     p.topes = copia(n.topes); p.cuantias_menores = copia(n.cuantias_menores); p.no_agrupar_si_retencion = n.no_agrupar_si_retencion;
     Object.entries(n.formatos).forEach(([k, f]) => { if (cfg.formatos[k]) { cfg.formatos[k].version = f.version; cfg.formatos[k].verificado = f.verificado; } });
     cfg.conceptos = copia(n.conceptos);
+    if (n.paises) cfg.paises = copia(n.paises);
     cfg.reglas = copia(emp.reglas);
+    p.correcciones_terceros = copia(emp.correcciones || {});
     return cfg;
   }
 
@@ -100,13 +104,16 @@
       return;
     }
     m.innerHTML = `<div class="tabs">
-      ${[["procesar", "Procesar exógena"], ["datos", "Datos de la empresa"], ["reglas", `Parametrización de cuentas (${emp.reglas.length})`]]
+      ${[["procesar", "Procesar exógena"], ["asistente", "Asistente por formato"], ["datos", "Datos y diagnóstico"],
+         ["reglas", `Reglas de cuentas (${emp.reglas.length})`], ["correcciones", `Correcciones de terceros (${Object.keys(emp.correcciones || {}).length})`]]
         .map(([k, t]) => `<button class="tab ${E.vista === k ? "activa" : ""}" data-v="${k}">${t}</button>`).join("")}
       </div><div id="vista"></div>`;
     $$(".tab", m).forEach((b) => b.onclick = () => { E.vista = b.dataset.v; render(); });
     const v = $("#vista");
     if (E.vista === "datos") renderDatos(v, emp);
     else if (E.vista === "reglas") renderReglas(v, emp);
+    else if (E.vista === "asistente") renderAsistente(v, emp);
+    else if (E.vista === "correcciones") renderCorrecciones(v, emp);
     else renderProcesar(v, emp);
   }
 
@@ -181,11 +188,13 @@
     const r = E.resultado;
     const n = (lv) => r.hallazgos.filter((h) => h[0] === lv).length;
     const sinRegla = cuentasSinRegla(r);
-    const listo = n("ERROR") === 0 && r.sinVerificar.length === 0;
+    const pend = pendientesRevision(emp, r.balance);
+    const nPend = Object.values(pend).reduce((a, b) => a + b, 0);
+    const listo = n("ERROR") === 0 && r.sinVerificar.length === 0 && nPend === 0;
     const revisar = r.cuadres.filter((c) => c.estado !== "OK").length;
     el.innerHTML = `
       <div class="dictamen ${listo ? "si" : "no"}">${listo ? "✓ Listo para prevalidador" :
-        `No listo para prevalidador: ${n("ERROR")} errores por corregir${r.sinVerificar.length ? ` y ${r.sinVerificar.length} parámetros normativos sin verificar` : ""}`}</div>
+        `No listo para prevalidador: ${[n("ERROR") ? `${n("ERROR")} errores por corregir` : "", nPend ? `${nPend} cuentas sin revisar en el asistente` : "", r.sinVerificar.length ? `${r.sinVerificar.length} parámetros normativos sin verificar` : ""].filter(Boolean).join(" · ")}`}</div>
       <div class="kpis">
         <div class="kpi"><span>Formatos generados</span><b>${Object.keys(r.generados).length}</b></div>
         <div class="kpi"><span>Terceros depurados</span><b>${r.terceros.size}</b></div>
@@ -193,13 +202,13 @@
         <div class="kpi a"><span>Alertas</span><b>${n("ALERTA")}</b></div>
         <div class="kpi ${revisar ? "e" : "o"}"><span>Cuadres con diferencia</span><b>${revisar}</b></div>
       </div>
-      <div class="tabs">${[["hallazgos", `Hallazgos (${r.hallazgos.length})`], ["formatos", "Formatos y descargas"], ["cuadres", "Cuadres"],
+      <div class="tabs">${[["hallazgos", `Hallazgos (${r.hallazgos.length})`], ["corregir", `Corregir terceros (${tercerosACorregir(r).length})`], ["formatos", "Formatos y descargas"], ["cuadres", "Cuadres"],
         ["sinregla", `Cuentas sin parametrizar (${sinRegla.length})`], ["verificar", `Parámetros sin verificar (${r.sinVerificar.length})`]]
         .map(([k, t]) => `<button class="tab ${E.subvista === k ? "activa" : ""}" data-s="${k}">${t}</button>`).join("")}</div>
       <div id="sub"></div>`;
     $$(".tab[data-s]", el).forEach((b) => b.onclick = () => { E.subvista = b.dataset.s; renderResultado(el, emp); });
     const s = $("#sub", el);
-    ({ hallazgos: subHallazgos, formatos: subFormatos, cuadres: subCuadres, sinregla: subSinRegla, verificar: subVerificar })[E.subvista](s, r, emp);
+    ({ hallazgos: subHallazgos, corregir: subCorregir, formatos: subFormatos, cuadres: subCuadres, sinregla: subSinRegla, verificar: subVerificar })[E.subvista](s, r, emp);
   }
 
   function subHallazgos(s, r) {
@@ -348,6 +357,7 @@
           <option value="nombres_apellidos" ${emp.orden_nombre === "nombres_apellidos" ? "selected" : ""}>NOMBRES APELLIDOS</option></select></label>
         <label>NIT adicionales a excluir (separados por coma)<input data-k="nits_excluidos" value="${esc((emp.nits_excluidos || []).join(", "))}"></label>
       </div><p class="ayuda" id="dv-info" style="margin-top:12px"></p></div>
+      ${panelDiagnostico(emp)}
       <div class="panel"><h2>Cuentas bancarias → entidad (formato 1012)</h2>
       <p class="ayuda">En la mayoría de software el tercero del movimiento bancario es el cliente o proveedor, no el banco. Indique a qué entidad corresponde cada cuenta auxiliar de bancos, ahorros o CDT.</p>
       <div class="tabla-wrap"><table><thead><tr><th>Cuenta auxiliar</th><th>NIT de la entidad</th><th></th></tr></thead><tbody id="tb-bancos"></tbody></table></div>
@@ -364,6 +374,8 @@
       E.resultado = null; guardar(); renderLateral(); dvInfo();
     });
     dvInfo();
+    $$("[data-dg]", v).forEach((i) => i.oninput = i.onchange = () => { emp.diagnostico[i.dataset.dg] = i.value; guardar(); evaluarDiagnostico(emp); });
+    evaluarDiagnostico(emp);
     const pintarBancos = () => {
       $("#tb-bancos").innerHTML = (emp.cuentas_bancarias || []).map((c, i) => `<tr><td><input data-i="${i}" data-c="cuenta" value="${esc(c.cuenta)}"></td>
         <td><input data-i="${i}" data-c="nit" value="${esc(c.nit)}"></td><td><button class="mini peligro" data-del="${i}">Quitar</button></td></tr>`).join("") ||
@@ -490,6 +502,9 @@
       <div class="tabla-wrap" style="margin-top:12px"><table><thead><tr><th>Formato</th><th>Tope ($)</th><th>Columna(s) que se comparan</th><th>Verificado</th></tr></thead><tbody>
       ${Object.entries(n.topes).map(([k, t]) => `<tr><td>${k}</td><td><input type="number" data-tv="${k}" value="${t.valor === null ? "" : t.valor}" placeholder="sin agrupación"></td>
         <td><input data-tc="${k}" value="${esc(t.columna || "")}"></td><td><input type="checkbox" data-tchk="${k}" ${t.verificado ? "checked" : ""}></td></tr>`).join("")}</tbody></table></div></div>
+      <div class="panel"><h2>Tabla de países</h2><p class="ayuda">Códigos de país DIAN (tabla propia de la DIAN, no ISO: Colombia = 169). Complete la tabla con el anexo técnico; un tercero del exterior con país no identificado genera ERROR.</p>
+      <div class="barra"><button id="p-add">+ País</button></div>
+      <div class="tabla-wrap" style="max-height:300px"><table><thead><tr><th>Código</th><th>Nombre</th><th>Otros nombres (separados por |)</th><th></th></tr></thead><tbody id="tb-p"></tbody></table></div></div>
       <div class="panel"><h2>Catálogo de conceptos</h2>
       <div class="barra"><button id="c-add">+ Concepto</button><button id="c-todos">Marcar todos como verificados</button></div>
       <div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Concepto</th><th>Descripción</th><th>Verificado</th><th></th></tr></thead><tbody id="tb-c"></tbody></table></div></div>`;
@@ -513,9 +528,384 @@
       $$("#tb-c [data-del]").forEach((b) => b.onclick = () => { n.conceptos.splice(Number(b.dataset.del), 1); cambio(); pintarC(); });
     };
     pintarC();
+    n.paises = n.paises || copia(DEF.paises);
+    const pintarP = () => {
+      $("#tb-p").innerHTML = n.paises.map((p, i) => `<tr><td><input data-i="${i}" data-k="codigo" value="${esc(p.codigo)}" style="width:70px"></td><td><input data-i="${i}" data-k="nombre" value="${esc(p.nombre)}"></td>
+        <td><input data-i="${i}" data-k="alias" value="${esc(p.alias)}"></td><td><button class="mini peligro" data-del="${i}">✕</button></td></tr>`).join("");
+      $$("#tb-p [data-k]").forEach((i) => i.oninput = () => { const v = i.value.trim(); n.paises[i.dataset.i][i.dataset.k] = i.dataset.k === "codigo" ? v.replace(/\D/g, "") : v.toUpperCase(); cambio(); });
+      $$("#tb-p [data-del]").forEach((b) => b.onclick = () => { n.paises.splice(Number(b.dataset.del), 1); cambio(); pintarP(); });
+    };
+    pintarP();
+    $("#p-add").onclick = () => { n.paises.push({ codigo: "", nombre: "", alias: "" }); cambio(); pintarP(); };
     $("#c-add").onclick = () => { n.conceptos.push({ formato: "1001", concepto: "", descripcion: "", verificado: "NO" }); cambio(); pintarC(); };
     $("#c-todos").onclick = () => { if (confirm("¿Confirma que contrastó TODOS los conceptos con el anexo técnico vigente?")) { n.conceptos.forEach((c) => { c.verificado = "SI"; }); cambio(); pintarC(); } };
     $("#n-reset").onclick = () => { if (confirm("¿Restaurar todos los parámetros normativos a los valores de fábrica?")) { E.normativo = normativoDefecto(); guardar(); render(); } };
+  }
+
+  // ================================================================== ASISTENTE POR FORMATO
+  const TRATAMIENTOS = [
+    ["EXCLUIR", "No se reporta en este formato"],
+    ["neto_deb", "Débitos − créditos"], ["neto_cred", "Créditos − débitos"],
+    ["debito", "Solo débitos"], ["credito", "Solo créditos"],
+    ["saldo_deb", "Saldo final deudor (por tercero)"], ["saldo_cred", "Saldo final acreedor (por tercero)"],
+    ["saldo_deb_cuenta", "Saldo final de la cuenta a una entidad (bancos)"],
+  ];
+  const nat = (x) => (Math.abs(x) < 0.5 ? "0" : `${pesos(Math.abs(x))} ${x > 0 ? "D" : "C"}`);
+  function formatosAsistente() { return formatosConReglas().filter((f) => (DEF.formatos[f].universo || []).length); }
+
+  function balanceNormalizado(emp) {
+    if (E.resultado && E.resultado.balance) return E.resultado.balance;
+    const a = E.archivos.balance;
+    if (!a) return null;
+    const k = a.nombre + "|" + a.filas.length + "|" + emp.fuente + "|" + JSON.stringify(emp.correcciones || {});
+    if (E.cacheBal && E.cacheBal.k === k) return E.cacheBal.bal;
+    const cfg = construirCfg(emp);
+    Exogena.prepararConfig(cfg);
+    const bal = Exogena.cargarBalance(a.filas, emp.fuente, cfg, []);
+    E.cacheBal = { k, bal };
+    return bal;
+  }
+  function candidatos(fmt, bal) {
+    const uni = DEF.formatos[fmt].universo || [];
+    const m = new Map();
+    for (const r of bal) {
+      if (!uni.some((u) => r.cuenta.startsWith(u))) continue;
+      if (!r.debito && !r.credito && Math.abs(r.saldo_final) < 0.5) continue;
+      const x = m.get(r.cuenta) || { cuenta: r.cuenta, nombre: r.nombre_cuenta, filas: [], nits: new Set(), si: 0, d: 0, c: 0, sf: 0, sinT: 0 };
+      x.filas.push(r); if (r.nit) x.nits.add(r.nit); else x.sinT += r.debito + r.credito;
+      x.si += r.saldo_inicial; x.d += r.debito; x.c += r.credito; x.sf += r.saldo_final;
+      if (!x.nombre && r.nombre_cuenta) x.nombre = r.nombre_cuenta;
+      m.set(r.cuenta, x);
+    }
+    return [...m.values()].sort((a, b) => a.cuenta.localeCompare(b.cuenta));
+  }
+  function reglaEfectiva(emp, fmt, cuenta) { return Exogena.reglaPara({ reglas: emp.reglas }, fmt, cuenta); }
+  function firma(regla) { return regla ? [regla.concepto, regla.columna, regla.base, regla.prefijo].join("|") : "SIN_REGLA"; }
+  function revisada(emp, fmt, cuenta) {
+    const rv = (emp.revisiones[fmt] || {})[cuenta];
+    return !!rv && rv === firma(reglaEfectiva(emp, fmt, cuenta));
+  }
+  function pendientesRevision(emp, bal) {
+    const out = {};
+    if (!bal) return out;
+    for (const f of formatosAsistente()) {
+      const n = candidatos(f, bal).filter((c) => !revisada(emp, f, c.cuenta)).length;
+      if (n) out[f] = n;
+    }
+    return out;
+  }
+  function valorSegun(c, base) {
+    if (!base || base === "EXCLUIR") return { total: 0, neg: 0 };
+    if (base === "saldo_deb_cuenta") return { total: c.sf, neg: c.sf < 0 ? 1 : 0 };
+    const f = { neto_deb: (r) => r.debito - r.credito, neto_cred: (r) => r.credito - r.debito, debito: (r) => r.debito,
+      credito: (r) => r.credito, saldo_deb: (r) => r.saldo_final, saldo_cred: (r) => -r.saldo_final }[base];
+    const porNit = new Map();
+    c.filas.forEach((r) => porNit.set(r.nit, (porNit.get(r.nit) || 0) + f(r)));
+    let total = 0, neg = 0;
+    porNit.forEach((v) => { total += v; if (v < -0.5) neg++; });
+    return { total, neg };
+  }
+
+  function renderAsistente(v, emp) {
+    let bal;
+    try { bal = balanceNormalizado(emp); } catch (e) { v.innerHTML = `<div class="aviso">No se pudo leer el balance: ${esc(e.message)}</div>`; return; }
+    if (!bal) {
+      v.innerHTML = `<div class="panel"><h2>Asistente de parametrización por formato</h2>
+        <p>El asistente recorre cada formato y le pregunta, <b>cuenta por cuenta del balance de esta empresa</b>, si se reporta, en qué concepto y columna, y si se toma el débito, el crédito, el neto o el saldo final. Muestra en vivo el valor que resultaría.</p>
+        <p>Primero cargue el balance de prueba por tercero en <b>Procesar exógena</b>.</p><button class="prim" id="ir-proc">Ir a Procesar exógena</button></div>`;
+      $("#ir-proc").onclick = () => { E.vista = "procesar"; render(); };
+      return;
+    }
+    const fmts = formatosAsistente();
+    if (!fmts.includes(E.fmtAsis)) E.fmtAsis = fmts[0];
+    const fmt = E.fmtAsis, spec = DEF.formatos[fmt], vers = E.normativo.formatos[fmt];
+    const cands = candidatos(fmt, bal);
+    const chips = fmts.map((f) => {
+      const cs = candidatos(f, bal), ok = cs.filter((c) => revisada(emp, f, c.cuenta)).length;
+      return `<button class="tab ${f === fmt ? "activa" : ""}" data-f="${f}">${f} <span class="chip ${ok === cs.length ? "OK" : "REVISAR"}">${ok}/${cs.length}</span></button>`;
+    }).join("");
+    const vals = camposValor(fmt);
+    const conc = E.normativo.conceptos.filter((c) => c.formato === fmt);
+    v.innerHTML = `<div class="tabs">${chips}</div>
+      <div class="panel"><h2>${fmt} · ${esc(spec.nombre)} <small style="color:var(--texto-2);font-weight:400">versión ${esc(vers.version)} ${vers.verificado ? "✓ verificada" : "· sin verificar"}</small></h2>
+        <p class="ayuda">${esc(spec.que_reporta || "")}. Cuentas del balance que se preguntan: ${(spec.universo || []).map((u) => `<b>${u}</b>`).join(", ")}.</p>
+        <details><summary style="cursor:pointer;font-weight:600">Estructura del formato en el orden del prevalidador (${spec.columnas.length} columnas)</summary>
+        <div class="tabla-wrap" style="margin-top:8px"><table><thead><tr><th>#</th><th>Columna</th><th>De dónde sale</th></tr></thead><tbody>
+        ${spec.columnas.map(([c, h], i) => {
+          let origen;
+          if (c === "concepto") origen = "Concepto de la regla de cada cuenta";
+          else if (CAMPOS_TERCERO.has(c)) origen = "Dato del tercero (maestro depurado + correcciones)";
+          else {
+            const cs = cands.filter((x) => { const r = reglaEfectiva(emp, fmt, x.cuenta); return r && r.concepto !== "EXCLUIR" && (r.columna === c || (r.concepto === "PRORRATA" && r.columna === c)); });
+            origen = cs.length ? `Σ ${cs.length} cuentas: ${cs.slice(0, 8).map((x) => x.cuenta).join(", ")}${cs.length > 8 ? "…" : ""}` : (c === "base_retencion" ? "Estimada con los ingresos del tercero (validar con certificados)" : "<span style='color:var(--alerta)'>Ninguna cuenta asignada</span>");
+          }
+          return `<tr><td>${i + 1}</td><td>${esc(h)}</td><td>${origen}</td></tr>`;
+        }).join("")}</tbody></table></div></details></div>
+      <div class="panel"><h2>Cuentas del balance para el ${fmt}</h2>
+        <p class="ayuda">Saldos con D (débito) o C (crédito). Al cambiar el tratamiento se guarda una regla para esa cuenta exacta y queda marcada como revisada. Una cuenta con tratamiento heredado de un prefijo debe confirmarse explícitamente.</p>
+        <div class="barra"><button id="as-todas">Confirmar todas las pendientes con su tratamiento actual</button>
+          <button id="as-nb">Pregunta para NotebookLM</button><button id="as-paq">Descargar paquete NotebookLM</button><span class="esp"></span>
+          <small style="color:var(--texto-2)">${cands.filter((c) => !revisada(emp, fmt, c.cuenta)).length} pendientes de ${cands.length}</small></div>
+        <div id="as-preg"></div>
+        <div class="tabla-wrap" style="max-height:640px"><table><thead><tr><th>✓</th><th>Cuenta</th><th>Terceros</th><th>Saldo inicial</th><th>Débitos</th><th>Créditos</th><th>Saldo final</th><th>Tratamiento</th><th>Concepto</th><th>Columna</th><th>Valor resultante</th></tr></thead>
+        <tbody>${cands.map((c) => {
+          const r = reglaEfectiva(emp, fmt, c.cuenta), ok = revisada(emp, fmt, c.cuenta);
+          const base = !r ? "" : r.concepto === "EXCLUIR" ? "EXCLUIR" : r.base;
+          const vr = valorSegun(c, base);
+          const hered = r && r.prefijo !== c.cuenta ? `<br><small style="color:var(--texto-2)">heredada de ${esc(r.prefijo)}</small>` : !r ? `<br><small style="color:var(--error)">sin regla: no llega al formato</small>` : "";
+          const concOpts = spec.concepto ? `<option value=""></option>${conc.map((x) => `<option value="${esc(x.concepto)}" ${r && r.concepto === x.concepto ? "selected" : ""}>${esc(x.concepto)} ${esc(x.descripcion.slice(0, 34))}</option>`).join("")}${fmt === "1001" ? `<option value="PRORRATA" ${r && r.concepto === "PRORRATA" ? "selected" : ""}>PRORRATA (reparte entre conceptos del tercero)</option>` : ""}` : `<option value="">(sin concepto)</option>`;
+          return `<tr data-c="${c.cuenta}" class="${ok ? "" : "ALERTA"}">
+            <td><input type="checkbox" class="as-ok" ${ok ? "checked" : ""} title="Revisada"></td>
+            <td><b>${c.cuenta}</b><br><small>${esc(c.nombre)}</small>${hered}</td>
+            <td class="num">${c.nits.size}${c.sinT ? `<br><small style="color:var(--error)">+ sin tercero</small>` : ""}</td>
+            <td class="num">${nat(c.si)}</td><td class="num">${pesos(c.d)}</td><td class="num">${pesos(c.c)}</td><td class="num">${nat(c.sf)}</td>
+            <td><select class="as-base">${!r ? `<option value="">— elegir —</option>` : ""}${TRATAMIENTOS.map(([k, t]) => `<option value="${k}" ${k === base ? "selected" : ""}>${t}</option>`).join("")}</select></td>
+            <td><select class="as-conc" ${base === "EXCLUIR" ? "disabled" : ""}>${concOpts}</select></td>
+            <td><select class="as-col" ${base === "EXCLUIR" ? "disabled" : ""}><option value=""></option>${vals.map((x) => `<option ${r && r.columna === x ? "selected" : ""}>${x}</option>`).join("")}</select></td>
+            <td class="num">${base === "EXCLUIR" ? "—" : `<b>${pesos(vr.total)}</b>${vr.neg ? `<br><small style="color:var(--error)">${vr.neg} terceros negativos</small>` : ""}`}</td></tr>`;
+        }).join("") || `<tr><td colspan="11" class="vacio">El balance no tiene cuentas con movimiento o saldo en ${(spec.universo || []).join(", ")}.</td></tr>`}</tbody></table></div></div>`;
+    $$(".tab[data-f]", v).forEach((b) => b.onclick = () => { E.fmtAsis = b.dataset.f; renderAsistente(v, emp); });
+    const marcar = (cuenta, si) => {
+      emp.revisiones[fmt] = emp.revisiones[fmt] || {};
+      if (si) emp.revisiones[fmt][cuenta] = firma(reglaEfectiva(emp, fmt, cuenta)); else delete emp.revisiones[fmt][cuenta];
+    };
+    $$("tbody tr[data-c]", v).forEach((tr) => {
+      const cuenta = tr.dataset.c;
+      $(".as-ok", tr).onchange = (e) => {
+        if (e.target.checked && !reglaEfectiva(emp, fmt, cuenta)) { e.target.checked = false; toast("Primero elija el tratamiento (aunque sea 'No se reporta')."); return; }
+        marcar(cuenta, e.target.checked); guardar(); renderAsistente(v, emp);
+      };
+      const cambio = () => {
+        const base = $(".as-base", tr).value; if (!base) return;
+        const actual = reglaEfectiva(emp, fmt, cuenta);
+        let concepto = $(".as-conc", tr).value, columna = $(".as-col", tr).value;
+        if (base === "EXCLUIR") { concepto = "EXCLUIR"; columna = ""; }
+        else {
+          if (!columna) columna = (actual && actual.columna && actual.concepto !== "EXCLUIR") ? actual.columna : vals[0];
+          if (spec.concepto && !concepto) concepto = (actual && actual.concepto !== "EXCLUIR") ? actual.concepto : ((conc[conc.length - 1] || {}).concepto || "");
+        }
+        const i = emp.reglas.findIndex((x) => x.formato === fmt && x.prefijo === cuenta);
+        const nueva = { formato: fmt, prefijo: cuenta, concepto, columna, base: base === "EXCLUIR" ? "" : base, notas: (i >= 0 ? emp.reglas[i].notas : "") || ("Asistente: " + (tr.querySelector("small") || {}).textContent) };
+        if (i >= 0) emp.reglas[i] = nueva; else emp.reglas.push(nueva);
+        marcar(cuenta, true); E.resultado = null; guardar(); renderAsistente(v, emp);
+      };
+      $(".as-base", tr).onchange = cambio; $(".as-conc", tr).onchange = cambio; $(".as-col", tr).onchange = cambio;
+    });
+    $("#as-todas").onclick = () => {
+      const pend = cands.filter((c) => !revisada(emp, fmt, c.cuenta));
+      const sin = pend.filter((c) => !reglaEfectiva(emp, fmt, c.cuenta));
+      if (!pend.length) return toast("No hay cuentas pendientes en este formato.");
+      if (!confirm(`¿Confirma el tratamiento actual de ${pend.length - sin.length} cuentas del ${fmt}?${sin.length ? `\n${sin.length} cuentas sin regla quedan pendientes: decida una por una.` : ""}`)) return;
+      pend.filter((c) => reglaEfectiva(emp, fmt, c.cuenta)).forEach((c) => marcar(c.cuenta, true)); guardar(); renderAsistente(v, emp);
+    };
+    $("#as-nb").onclick = () => {
+      const txt = preguntaNotebook(emp, fmt, cands);
+      $("#as-preg").innerHTML = `<div class="panel" style="background:var(--azul-suave)"><h2>Pregunta para NotebookLM · ${fmt}</h2>
+        <p class="ayuda">Péguela en un cuaderno de NotebookLM que tenga cargadas la Res. 000227 de 2025, sus modificaciones (000233 de 2025 y 000012 de 2026) y el anexo técnico del formato. No incluye datos de terceros.</p>
+        <textarea style="width:100%;height:220px;font:12px monospace" readonly>${esc(txt)}</textarea>
+        <div class="barra" style="margin-top:8px"><button class="prim" id="as-copiar">Copiar</button></div></div>`;
+      $("#as-copiar").onclick = () => copiar(txt);
+    };
+    $("#as-paq").onclick = () => descargarPaqueteNotebook(emp, bal);
+  }
+
+  function copiar(txt) {
+    const ok = () => toast("Copiado. Péguelo en NotebookLM.");
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(ok, () => fallback());
+    else fallback();
+    function fallback() { const t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); ok(); } catch (e) { toast("Seleccione el texto y cópielo manualmente."); } t.remove(); }
+  }
+
+  const NORMAS = "Resolución DIAN 000227 del 23 de septiembre de 2025 (resolución única de información exógena), modificada por la Resolución 000233 del 30 de octubre de 2025 y la Resolución 000012 del 29 de abril de 2026, y el anexo técnico vigente del formato";
+  function preguntaNotebook(emp, fmt, cands) {
+    const spec = DEF.formatos[fmt], v = E.normativo.formatos[fmt];
+    const trat = Object.fromEntries(TRATAMIENTOS);
+    const lineas = cands.map((c) => {
+      const r = reglaEfectiva(emp, fmt, c.cuenta);
+      if (!r) return `- ${c.cuenta} ${c.nombre}: SIN DEFINIR (¿se reporta en el ${fmt}? ¿en qué concepto, columna y con qué valor?)`;
+      if (r.concepto === "EXCLUIR") return `- ${c.cuenta} ${c.nombre}: la estoy EXCLUYENDO del ${fmt}`;
+      const col = (spec.columnas.find((x) => x[0] === r.columna) || [])[1] || r.columna;
+      return `- ${c.cuenta} ${c.nombre}: concepto ${r.concepto || "(sin concepto)"}, columna "${col}", tomando ${trat[r.base] || r.base}`;
+    });
+    return `Contexto: información exógena del año gravable ${emp.anio}. Fuentes: ${NORMAS} ${fmt} (${spec.nombre}).
+
+1. ¿Cuál es la versión vigente del formato ${fmt} para el año gravable ${emp.anio}? Yo tengo la versión ${v.version}.
+2. Confirma el orden exacto de las columnas del formato ${fmt}. Mi estructura es:
+${spec.columnas.map(([, h], i) => `   ${i + 1}. ${h}`).join("\n")}
+   Señala columnas que falten, sobren o estén en otro orden.
+3. Lista todos los conceptos válidos del formato ${fmt} (código y descripción).
+4. ¿Cuál es el tope de cuantías menores del formato ${fmt}, cómo se agrupan (NIT y tipo de documento) y qué datos del informante se usan?
+5. Para cada cuenta de mi balance, confirma o corrige si se reporta en el ${fmt}, el concepto, la columna y si se toma el débito, el crédito, el neto o el saldo final:
+${lineas.join("\n")}
+
+Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tomar | soporte) y cita el artículo, numeral, parágrafo o sección del anexo técnico que sustenta cada respuesta. Si las fuentes no lo dicen expresamente, responde "No consta en las fuentes" en lugar de suponer.`;
+  }
+
+  function descargarPaqueteNotebook(emp, bal) {
+    const trat = Object.fromEntries(TRATAMIENTOS);
+    let md = `# Ficha de parametrización de exógena · ${emp.razon_social} · AG ${emp.anio}\n\n`;
+    md += `Generada por Exógena YC el ${new Date().toLocaleString("es-CO")}. Esta ficha NO contiene datos de terceros (ni NIT, ni nombres, ni valores por tercero): solo el plan de cuentas de la empresa y cómo se parametrizó cada cuenta.\n\n`;
+    md += `## Cómo usarla en NotebookLM\n\n1. Cree un cuaderno para el año gravable ${emp.anio}.\n2. Cargue como fuentes: la Resolución 000227 de 2025, la 000233 de 2025, la 000012 de 2026, los anexos técnicos de cada formato (PDF de la DIAN), la doctrina que use (p. ej. Concepto 003863 de 2025) y esta ficha.\n3. Haga las preguntas de la sección final, una por formato. Exija siempre la cita; lo que NotebookLM no pueda citar no se toma como cierto.\n4. Lleve las correcciones al aplicativo (Asistente por formato y Parámetros normativos) y marque como verificado solo lo que tenga cita.\n\n`;
+    md += `## Parámetros normativos que debe confirmar\n\n| Formato | Versión usada | Verificada | Tope cuantías menores | Verificado |\n|---|---|---|---|---|\n`;
+    formatosAsistente().forEach((f) => { const t = E.normativo.topes[f] || {}; md += `| ${f} | ${E.normativo.formatos[f].version} | ${E.normativo.formatos[f].verificado ? "Sí" : "No"} | ${t.valor ? "$" + pesos(t.valor) : "sin agrupación"} | ${t.verificado ? "Sí" : "No"} |\n`; });
+    md += `\nConceptos sin verificar: ${E.normativo.conceptos.filter((c) => String(c.verificado).toUpperCase() !== "SI").map((c) => c.formato + "-" + c.concepto).join(", ") || "ninguno"}.\n\n`;
+    md += `Tabla de países: el aplicativo solo tiene ${(E.normativo.paises || DEF.paises).length} países cargados. Pida a NotebookLM la tabla de códigos de país del anexo técnico.\n\n`;
+    for (const f of formatosAsistente()) {
+      const spec = DEF.formatos[f], cs = candidatos(f, bal);
+      md += `## Formato ${f} · ${spec.nombre}\n\n${spec.que_reporta || ""}.\n\nColumnas en el orden usado: ${spec.columnas.map(([, h], i) => `${i + 1}) ${h}`).join("; ")}.\n\n`;
+      md += `| Cuenta | Nombre | Tratamiento | Concepto | Columna | Origen de la regla | Revisada |\n|---|---|---|---|---|---|---|\n`;
+      cs.forEach((c) => {
+        const r = reglaEfectiva(emp, f, c.cuenta);
+        md += `| ${c.cuenta} | ${c.nombre.replace(/\|/g, "/")} | ${!r ? "SIN DEFINIR" : r.concepto === "EXCLUIR" ? "No se reporta" : trat[r.base] || r.base} | ${r && r.concepto !== "EXCLUIR" ? r.concepto : ""} | ${r && r.concepto !== "EXCLUIR" ? r.columna : ""} | ${r ? (r.prefijo === c.cuenta ? "propia" : "prefijo " + r.prefijo) : ""} | ${revisada(emp, f, c.cuenta) ? "Sí" : "No"} |\n`;
+      });
+      md += `\n### Pregunta para NotebookLM\n\n\`\`\`\n${preguntaNotebook(emp, f, cs)}\n\`\`\`\n\n`;
+    }
+    md += `## Criterios de obligatoriedad registrados\n\n`;
+    ((DEF.doctrina || {}).criterios || []).forEach((c) => { md += `- ${c.conclusion} Fuente: ${c.fuente}. ${c.advertencia || ""}\n`; });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+    a.download = `NotebookLM_parametrizacion_${String(emp.nit).replace(/\D/g, "") || "empresa"}_AG${emp.anio}.md`; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ================================================================== CORRECCIÓN DE TERCEROS
+  const CORREGIBLES = new Set(["Tipo documento incoherente", "DV errado", "NIT con DV pegado", "Municipio no identificado", "Municipio homónimo",
+    "Sin dirección", "Falta direccion", "Falta codigo_departamento", "Falta codigo_municipio", "Falta pais", "País no identificado",
+    "Nombre incompleto", "Nombre partido por heurística", "Longitud de identificación", "Tercero sin maestro"]);
+  function tercerosACorregir(r) {
+    const m = new Map();
+    for (const h of r.hallazgos) {
+      if (!CORREGIBLES.has(h[1]) || !/^\d+$/.test(String(h[2]))) continue;
+      if (!m.has(h[2])) m.set(h[2], new Set());
+      m.get(h[2]).add(h[1]);
+    }
+    return [...m].map(([nit, cats]) => ({ nit, cats: [...cats] })).sort((a, b) => b.cats.length - a.cats.length || a.nit.localeCompare(b.nit));
+  }
+  let dlDivipola = null;
+  function datalists() {
+    if (!dlDivipola) {
+      dlDivipola = `<datalist id="dl-mpio">${DEF.divipola.map((d) => `<option value="${esc(d.municipio)} · ${esc(d.departamento)} · ${d.codigo_departamento}${d.codigo_municipio}">`).join("")}</datalist>`;
+    }
+    const paises = E.normativo.paises || DEF.paises;
+    return dlDivipola + `<datalist id="dl-pais">${paises.map((p) => `<option value="${esc(p.codigo)} · ${esc(p.nombre)}">`).join("")}</datalist>`;
+  }
+  const codMpio = (v) => { const m = String(v || "").match(/(\d{5})\s*$/); return m ? [m[1].slice(0, 2), m[1].slice(2)] : null; };
+  const codPais = (v) => { const m = String(v || "").match(/^\s*(\d{1,3})/); return m ? m[1].padStart(3, "0") : ""; };
+  function sugerencia(t, cats) {
+    const s = {};
+    if (cats.includes("Tipo documento incoherente")) { s.tipo_documento = "31"; s.persona = "juridica"; }
+    if (cats.includes("NIT con DV pegado")) { s.nit_correcto = t.nit.slice(0, 9); s.dv = t.nit.slice(9); }
+    const nit = s.nit_correcto || t.nit;
+    if ((s.tipo_documento || t.tipo_documento) === "31" && /^\d{5,15}$/.test(nit)) { try { s.dv = String(Exogena.calcularDv(nit)); } catch (e) { /* */ } }
+    return s;
+  }
+  function filaCorreccion(emp, t, cats) {
+    const c = { ...(emp.correcciones[t.nit] || {}) };
+    const sug = sugerencia(t, cats);
+    const val = (k) => (c[k] !== undefined ? c[k] : sug[k] !== undefined ? sug[k] : t[k] || "");
+    const persona = val("persona") || t.persona;
+    const mp = c.codigo_departamento ? DEF.divipola.find((d) => d.codigo_departamento === c.codigo_departamento && d.codigo_municipio === c.codigo_municipio)
+      : DEF.divipola.find((d) => d.codigo_departamento === t.codigo_departamento && d.codigo_municipio === t.codigo_municipio);
+    const paises = E.normativo.paises || DEF.paises;
+    const ps = paises.find((p) => p.codigo === (c.pais || t.pais));
+    return `<tr data-nit="${t.nit}" class="${emp.correcciones[t.nit] ? "" : "ERROR"}">
+      <td><b>${t.nit}</b><br>${cats.map((x) => `<span class="chip ALERTA" style="margin:1px">${esc(x)}</span>`).join(" ")}</td>
+      <td><select data-k="tipo_documento">${(DEF.tiposDoc).map((x) => `<option value="${x.codigo}" ${val("tipo_documento") === x.codigo ? "selected" : ""}>${x.codigo} ${esc(x.descripcion.slice(0, 22))}</option>`).join("")}</select>
+        <select data-k="persona"><option value="juridica" ${persona === "juridica" ? "selected" : ""}>Jurídica</option><option value="natural" ${persona === "natural" ? "selected" : ""}>Natural</option></select></td>
+      <td><input data-k="dv" value="${esc(val("dv"))}" style="width:40px">${cats.includes("NIT con DV pegado") ? `<br><small>NIT correcto</small><input data-k="nit_correcto" value="${esc(val("nit_correcto"))}" style="width:110px">` : ""}</td>
+      <td>${persona === "juridica" ? `<input data-k="razon_social" value="${esc(val("razon_social") || [t.primer_nombre, t.otros_nombres, t.primer_apellido, t.segundo_apellido].filter(Boolean).join(" "))}" placeholder="Razón social">`
+        : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">${["primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres"].map((k) => `<label style="font-size:10px;color:var(--texto-2)">${k.replace("_", " ")}<input data-k="${k}" value="${esc(val(k))}" title="${k.replace("_", " ")}"></label>`).join("")}</div>`}</td>
+      <td><input data-k="direccion" value="${esc(val("direccion"))}" placeholder="Dirección"></td>
+      <td><input data-k="mpio" list="dl-mpio" value="${mp ? esc(`${mp.municipio} · ${mp.departamento} · ${mp.codigo_departamento}${mp.codigo_municipio}`) : ""}" placeholder="Escriba el municipio…"></td>
+      <td><input data-k="pais" list="dl-pais" value="${ps ? esc(ps.codigo + " · " + ps.nombre) : esc(c.pais || t.pais || "")}" placeholder="Código país" style="width:110px"></td>
+      <td><button class="mini prim">Guardar</button></td></tr>`;
+  }
+  function leerFilaCorreccion(tr, t) {
+    const g = (k) => { const el = $(`[data-k="${k}"]`, tr); return el ? el.value.trim() : undefined; };
+    const c = { tipo_documento: g("tipo_documento"), persona: g("persona"), dv: g("dv"), direccion: g("direccion") };
+    ["razon_social", "primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres", "nit_correcto"].forEach((k) => { const v = g(k); if (v !== undefined) c[k] = v; });
+    const mp = codMpio(g("mpio")); if (mp) { c.codigo_departamento = mp[0]; c.codigo_municipio = mp[1]; }
+    const ps = codPais(g("pais")); if (ps) c.pais = ps;
+    Object.keys(c).forEach((k) => { if (c[k] === "" || c[k] === undefined) delete c[k]; });
+    return c;
+  }
+  function guardarCorreccion(emp, nit, c) {
+    if (c.nit_correcto && c.nit_correcto !== nit) {
+      const { nit_correcto, ...resto } = c;
+      emp.correcciones[nit] = { nit_correcto };
+      emp.correcciones[nit_correcto] = { ...(emp.correcciones[nit_correcto] || {}), ...resto };
+    } else { delete c.nit_correcto; emp.correcciones[nit] = c; }
+  }
+  function subCorregir(s, r, emp) {
+    const lista = tercerosACorregir(r);
+    if (!lista.length) { s.innerHTML = `<div class="vacio">No hay terceros con errores corregibles.</div>`; return; }
+    s.innerHTML = datalists() + `<p class="ayuda">Corrija aquí los datos que el prevalidador rechazaría. Las correcciones se guardan <b>por empresa</b> y se aplican cada vez que se genera, pero lo correcto es llevarlas también al software contable: en <b>Correcciones de terceros</b> puede descargar el listado.</p>
+      <div class="barra"><button class="prim" id="co-auto">Aplicar sugerencias automáticas (tipo 31 a empresas, DV correcto, NIT con DV pegado)</button>
+      <button id="co-regen">Volver a generar con las correcciones</button></div>
+      <div class="tabla-wrap" style="max-height:640px"><table><thead><tr><th>NIT y problemas</th><th>Tipo doc / persona</th><th>DV</th><th>Nombre o razón social</th><th>Dirección</th><th>Municipio</th><th>País</th><th></th></tr></thead>
+      <tbody>${lista.slice(0, 300).map(({ nit, cats }) => filaCorreccion(emp, r.terceros.get(nit) || { nit, numero_identificacion: nit }, cats)).join("")}</tbody></table></div>
+      ${lista.length > 300 ? `<small>Se muestran 300 de ${lista.length}.</small>` : ""}`;
+    $$("tbody tr[data-nit]", s).forEach((tr) => {
+      const t = r.terceros.get(tr.dataset.nit) || { nit: tr.dataset.nit };
+      $("button", tr).onclick = () => { guardarCorreccion(emp, t.nit, leerFilaCorreccion(tr, t)); guardar(); tr.classList.remove("ERROR"); toast(`Corrección de ${t.nit} guardada.`); };
+      $('[data-k="persona"]', tr).onchange = () => { guardarCorreccion(emp, t.nit, leerFilaCorreccion(tr, t)); guardar(); subCorregir(s, r, emp); };
+    });
+    $("#co-auto").onclick = () => {
+      let n = 0;
+      lista.forEach(({ nit, cats }) => {
+        const t = r.terceros.get(nit); if (!t) return;
+        const sug = sugerencia(t, cats);
+        if (Object.keys(sug).length) { guardarCorreccion(emp, nit, { ...(emp.correcciones[nit] || {}), ...sug }); n++; }
+      });
+      guardar(); toast(`${n} sugerencias aplicadas. Vuelva a generar para ver el efecto.`); subCorregir(s, r, emp);
+    };
+    $("#co-regen").onclick = () => { E.vista = "procesar"; generar(emp); };
+  }
+  function renderCorrecciones(v, emp) {
+    const cs = Object.entries(emp.correcciones || {});
+    const campos = ["nit_correcto", "tipo_documento", "persona", "dv", "razon_social", "primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres", "direccion", "codigo_departamento", "codigo_municipio", "pais"];
+    v.innerHTML = `<div class="panel"><h2>Correcciones de terceros de ${esc(emp.razon_social)}</h2>
+      <p class="ayuda">Se aplican sobre el maestro del software cada vez que se genera. Descargue el listado y corríjalo también en el software, para que el año siguiente no se repita.</p>
+      <div class="barra"><button class="prim" id="cr-dl" ${cs.length ? "" : "disabled"}>Descargar listado para corregir en el software</button></div>
+      <div class="tabla-wrap"><table><thead><tr><th>NIT</th>${campos.map((c) => `<th>${c.replace(/_/g, " ")}</th>`).join("")}<th></th></tr></thead><tbody>
+      ${cs.map(([nit, c]) => `<tr><td>${nit}</td>${campos.map((k) => `<td>${esc(c[k] || "")}</td>`).join("")}<td><button class="mini peligro" data-del="${nit}">Quitar</button></td></tr>`).join("") || `<tr><td colspan="${campos.length + 2}" class="vacio">Sin correcciones. Se registran desde Procesar exógena → Corregir terceros.</td></tr>`}
+      </tbody></table></div></div>`;
+    $$("[data-del]", v).forEach((b) => b.onclick = () => { delete emp.correcciones[b.dataset.del]; guardar(); renderCorrecciones(v, emp); render(); });
+    if (cs.length) $("#cr-dl").onclick = () => {
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, hoja([["nit"].concat(campos)].concat(cs.map(([nit, c]) => [nit].concat(campos.map((k) => String(c[k] || "")))))), "Correcciones");
+      XLSX.writeFile(wb, `Correcciones_terceros_${String(emp.nit).replace(/\D/g, "")}.xlsx`);
+    };
+  }
+
+  // ================================================================== DIAGNÓSTICO DE OBLIGATORIEDAD
+  function panelDiagnostico(emp) {
+    const d = emp.diagnostico || (emp.diagnostico = {});
+    const sel = (k, ops) => `<select data-dg="${k}"><option value=""></option>${ops.map(([v, t]) => `<option value="${v}" ${d[k] === v ? "selected" : ""}>${t}</option>`).join("")}</select>`;
+    return `<div class="panel"><h2>Diagnóstico de obligatoriedad</h2>
+      <p class="ayuda">Responda y el aplicativo muestra los criterios de doctrina registrados que aplican, con su fuente. No reemplaza la lectura del artículo 1 de la Res. 000227 de 2025.</p>
+      <div class="grid-form">
+        <label>Tipo de persona${sel("tipo_persona", [["juridica", "Persona jurídica"], ["natural", "Persona natural"]])}</label>
+        <label>Régimen${sel("regimen", [["ordinario", "Ordinario"], ["simple", "Régimen Simple (RST)"], ["esal", "Régimen tributario especial"], ["no_contribuyente", "No contribuyente"]])}</label>
+        <label>¿Practicó retención o autorretención en el año?${sel("practica_retencion", [["si", "Sí"], ["no", "No"]])}</label>
+        <label>Ingresos brutos del año ($)<input data-dg="ingresos" type="number" value="${esc(d.ingresos || "")}"></label>
+        <label>Valor UVT del año ($)<input data-dg="uvt" type="number" value="${esc(d.uvt || "")}"></label>
+      </div><div id="dg-res" style="margin-top:12px"></div></div>`;
+  }
+  function evaluarDiagnostico(emp) {
+    const d = emp.diagnostico || {};
+    const crit = ((DEF.doctrina || {}).criterios || []).filter((c) => Object.entries(c.aplica_si || {}).every(([k, v]) =>
+      k === "practica_retencion" ? (d.practica_retencion === "si") === v : d[k] === v));
+    const el = $("#dg-res"); if (!el) return;
+    if (!crit.length) { el.innerHTML = `<small style="color:var(--texto-2)">Ningún criterio de doctrina registrado aplica a estas respuestas. Confirme la obligatoriedad directamente en el artículo 1 de la Res. 000227 de 2025.</small>`; return; }
+    el.innerHTML = crit.map((c) => {
+      let tope = "";
+      if (c.tope_uvt && Number(d.ingresos) && Number(d.uvt)) {
+        const u = Number(d.ingresos) / Number(d.uvt);
+        tope = `<p><b>${pesos(u)} UVT</b> de ingresos brutos: ${u > c.tope_uvt ? `<span class="chip ERROR">SUPERA ${pesos(c.tope_uvt)} UVT → obligada a reportar</span>` : `<span class="chip OK">No supera ${pesos(c.tope_uvt)} UVT</span>`}</p>`;
+      }
+      return `<div class="aviso" style="background:var(--info-f);color:var(--texto)"><p>${esc(c.conclusion)}</p>${tope}<small><b>Fuente:</b> ${esc(c.fuente)}. ${c.verificado ? "" : `<b style="color:var(--alerta)">${esc(c.advertencia || "Sin verificar.")}</b>`}</small></div>`;
+    }).join("");
   }
 
   // ------------------------------------------------------------------ acciones globales

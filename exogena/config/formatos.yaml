@@ -30,6 +30,9 @@ _bloques:
   nombre: "Pagos o abonos en cuenta y retenciones practicadas"
   version: 10
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["14", "15", "16", "17", "5", "6", "7", "2365", "2367"]
+  que_reporta: "Pagos o abonos en cuenta (gastos, costos, compras de inventario y activos) y retenciones practicadas a cada tercero"
   modo: por_tercero
   concepto: true
   columnas:
@@ -52,6 +55,9 @@ _bloques:
   nombre: "Retenciones en la fuente que le practicaron"
   version: 7
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["1355"]
+  que_reporta: "Retenciones que le practicaron a la empresa, por agente retenedor"
   modo: por_tercero
   concepto: true
   columnas:
@@ -68,6 +74,9 @@ _bloques:
   nombre: "IVA descontable"
   version: 7
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["2408"]
+  que_reporta: "IVA descontable por proveedor"
   modo: por_tercero
   concepto: false
   columnas:
@@ -82,6 +91,9 @@ _bloques:
   nombre: "IVA generado"
   version: 8
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["2408", "2495"]
+  que_reporta: "IVA generado e impuesto al consumo por cliente"
   modo: por_tercero
   concepto: false
   columnas:
@@ -97,6 +109,9 @@ _bloques:
   nombre: "Ingresos recibidos"
   version: 9
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["4"]
+  que_reporta: "Ingresos brutos y devoluciones por cliente"
   modo: por_tercero
   concepto: true
   columnas:
@@ -112,6 +127,9 @@ _bloques:
   nombre: "Saldos de cuentas por cobrar al 31 de diciembre"
   version: 7
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["13"]
+  que_reporta: "Saldos de cuentas por cobrar al 31 de diciembre por deudor"
   modo: por_tercero
   concepto: true
   columnas:
@@ -128,6 +146,9 @@ _bloques:
   nombre: "Saldos de cuentas por pagar al 31 de diciembre"
   version: 7
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["21", "22", "23", "24", "25", "26", "27", "28"]
+  que_reporta: "Saldos de cuentas por pagar al 31 de diciembre por acreedor"
   modo: por_tercero
   concepto: true
   columnas:
@@ -161,6 +182,9 @@ _bloques:
   nombre: "Información de las declaraciones tributarias"
   version: 6
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: []
+  que_reporta: "Saldos totales por renglón de las declaraciones (sin tercero)"
   modo: sin_tercero             # totales por concepto (renglón), sin tercero
   concepto: true
   columnas:
@@ -172,6 +196,9 @@ _bloques:
   nombre: "Declaraciones tributarias, acciones, inversiones en bonos, cuentas de ahorro y corrientes"
   version: 7
   verificado: false
+  # cuentas que el asistente pregunta una por una para este formato
+  universo: ["11", "12"]
+  que_reporta: "Cuentas bancarias, inversiones y acciones al 31 de diciembre por entidad"
   modo: por_tercero
   concepto: true
   columnas:

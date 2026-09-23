@@ -43,7 +43,8 @@
       s = p.length === 2 && p[1].length !== 3 ? s.replace(",", ".") : s.replace(/,/g, "");
     } else {
       const p = s.split(".");
-      if (p.length > 2 || (p.length === 2 && p[1].length === 3 && p[0].replace("-", "").length <= 3)) s = s.replace(/\./g, "");
+      const ent = p[0].replace("-", "");
+      if (p.length > 2 || (p.length === 2 && p[1].length === 3 && ent !== "" && ent !== "0" && ent.length <= 3)) s = s.replace(/\./g, "");
     }
     const n = parseFloat(s);
     if (isNaN(n)) return 0;
@@ -120,15 +121,30 @@
     let bal = datos.map((d) => {
       const [nit, dv] = separarDv(d.nit);
       return {
-        cuenta: soloDigitos(d.cuenta), nombre_cuenta: vacio(d.nombre_cuenta) ? "" : String(d.nombre_cuenta),
+        _nivel: d.nivel,
+        cuenta: soloDigitos(d.cuenta), nombre_cuenta: vacio(d.nombre_cuenta) ? "" : String(d.nombre_cuenta).trim(),
         nit, dv_fuente: dv, nombre_tercero: vacio(d.nombre_tercero) ? "" : String(d.nombre_tercero).trim(),
         saldo_inicial: aNumero(d.saldo_inicial), debito: aNumero(d.debito), credito: aNumero(d.credito),
         saldo_final: aNumero(d.saldo_final), _trans: d.transaccional,
       };
-    }).filter((r) => r.cuenta !== "");
-
+    });
     const filtro = spec.filtro_filas || {};
-    if (filtro.columna && columnas.includes(filtro.columna)) {
+    if (filtro.excluir_nivel && columnas.includes("nivel")) {
+      const k = clave(filtro.excluir_nivel);
+      bal = bal.filter((r) => !clave(r._nivel).includes(k));
+    }
+    const porJerarquia = filtro.modo === "jerarquia_nivel" && columnas.includes("nivel");
+    if (porJerarquia) bal = jerarquia(bal);
+    // Movimiento con tercero en cuentas sin código contable (Alegra permite crearlas)
+    for (const [nombre, g] of agrupar(bal.filter((r) => r.cuenta === "" && r.nit !== ""), (r) => r.nombre_cuenta)) {
+      hallazgos.push(["ERROR", "Cuenta sin código contable", nombre || "(sin nombre)", `'${nombre}' tiene ${g.length} filas con tercero (débitos ${fmtPesos(suma(g, (r) => r.debito))}, créditos ${fmtPesos(suma(g, (r) => r.credito))}) y no tiene código PUC: asígnele código en el software o esos valores quedan por fuera de la exógena`]);
+    }
+    bal = bal.filter((r) => r.cuenta !== "");
+    const corr = cfg.parametros.correcciones_terceros || {};
+    bal.forEach((r) => { const c = corr[r.nit]; if (c && c.nit_correcto) r.nit = String(c.nit_correcto); });
+
+    if (porJerarquia) { /* ya filtrado */ }
+    else if (filtro.columna && columnas.includes(filtro.columna)) {
       const validos = new Set(filtro.valores_validos.map(clave));
       bal = bal.filter((r) => validos.has(clave(r._trans)));
     } else {
@@ -140,8 +156,33 @@
     if (bal.every((r) => r.saldo_final === 0) && bal.some((r) => r.debito || r.credito)) {
       bal.forEach((r) => { r.saldo_final = r.saldo_inicial + r.debito - r.credito; });
     }
-    bal.forEach((r) => delete r._trans);
+    bal.forEach((r) => { delete r._trans; delete r._nivel; });
     return bal;
+  }
+
+  // Alegra: árbol por la columna Nivel. Filas con tercero = detalle. Una fila sin tercero abre un bloque
+  // (filas más profundas o terceros con su mismo código y nivel) cuyo total ya está en el detalle:
+  // solo se conserva el residuo (total − elementos directos del bloque) como movimiento sin tercero.
+  function jerarquia(bal) {
+    bal = bal.filter((r) => !vacio(r._nivel) && String(r._nivel).trim() !== "");
+    const n = bal.length, prof = bal.map((r) => (String(r._nivel).match(/>/g) || []).length), fin = new Array(n);
+    const C = ["saldo_inicial", "debito", "credito", "saldo_final"];
+    for (let i = n - 1; i >= 0; i--) {
+      if (bal[i].nit !== "") { fin[i] = i + 1; continue; }
+      let j = i + 1;
+      while (j < n && (prof[j] > prof[i] || (prof[j] === prof[i] && bal[j].cuenta === bal[i].cuenta && bal[j].nit !== "")))
+        j = bal[j].nit === "" && prof[j] > prof[i] ? fin[j] : j + 1;
+      fin[i] = j;
+    }
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      if (bal[i].nit !== "") { out.push(bal[i]); continue; }
+      const resto = { ...bal[i] };
+      let j = i + 1;
+      while (j < fin[i]) { C.forEach((c) => { resto[c] -= bal[j][c]; }); j = bal[j].nit === "" ? fin[j] : j + 1; }
+      if (Math.max(Math.abs(resto.debito), Math.abs(resto.credito), Math.abs(resto.saldo_final)) >= 1) out.push(resto);
+    }
+    return out;
   }
 
   function soloHojas(bal, hallazgos) {
@@ -228,16 +269,18 @@
   function ubicar(ciudad, dpto, codDane, cfg) {
     let cod = soloDigitos(codDane);
     if (cod.length === 4) cod = "0" + cod;
-    if (cod.length === 5) return [cod.slice(0, 2), cod.slice(2)];
+    if (cod.length === 5) return [cod.slice(0, 2), cod.slice(2), false];
     const k = clave(ciudad);
-    if (!k) return ["", ""];
+    if (!k) return ["", "", false];
     let cand = cfg.divipola.filter((d) => d.k_mpio === k || k.startsWith(d.k_mpio + " "));
     if (cand.length > 1 && dpto) {
       const kd = clave(dpto);
       const f = cand.filter((d) => d.k_dpto === kd || kd.startsWith(d.k_dpto) || d.k_dpto.startsWith(kd));
       if (f.length) cand = f;
     }
-    return cand.length ? [cand[0].codigo_departamento, cand[0].codigo_municipio] : ["", ""];
+    if (!cand.length) return ["", "", false];
+    const homonimo = new Set(cand.map((d) => d.codigo_departamento + d.codigo_municipio)).size > 1;
+    return [cand[0].codigo_departamento, cand[0].codigo_municipio, homonimo];
   }
   function pais(v, cfg) {
     const t = textoDian(v);
@@ -245,6 +288,15 @@
     if (/^\d+$/.test(t)) return t.padStart(3, "0");
     for (const p of cfg.paises) if (t === p.nombre || p.alias.split("|").includes(t)) return p.codigo;
     return "";
+  }
+
+  function parche(c) {
+    const p = {};
+    ["tipo_documento", "dv", "razon_social", "primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres", "direccion", "pais"]
+      .forEach((k) => { if (c[k] !== undefined && String(c[k]).trim()) p[k] = String(c[k]); });
+    if (c.persona) p.tipo_persona = "persona " + c.persona;
+    if (c.codigo_departamento && c.codigo_municipio) p.codigo_municipio_dane = String(c.codigo_departamento).padStart(2, "0") + String(c.codigo_municipio).padStart(3, "0");
+    return p;
   }
 
   function depurar(balance, maestro, cfg, hallazgos) {
@@ -262,6 +314,12 @@
       mMap.set(nit, g[0]);
     }
     const cm = cfg.parametros.cuantias_menores, emp = cfg.parametros.empresa;
+    const correcciones = cfg.parametros.correcciones_terceros || {};
+    // NIT corregido (p. ej. DV pegado): el NIT nuevo hereda la ficha del maestro del NIT viejo
+    Object.entries(correcciones).forEach(([viejo, c]) => {
+      const nuevo = c && c.nit_correcto ? String(c.nit_correcto) : "";
+      if (nuevo && !mMap.has(nuevo) && mMap.has(String(viejo))) mMap.set(nuevo, { ...mMap.get(String(viejo)), nit: nuevo });
+    });
     const terceros = new Map();
     const nits = [...nombresBal.keys()].sort();
     for (const nit of nits) {
@@ -273,7 +331,9 @@
           codigo_municipio: emp.codigo_municipio || "", pais: "169" });
         continue;
       }
-      const m = mMap.get(nit);
+      let m = mMap.get(nit);
+      const cr = correcciones[nit];
+      if (cr) m = { ...(m || {}), ...parche(cr) };
       const get = (c) => (m ? String(m[c] || "").trim() : "");
       if (!m) hallazgos.push(["ALERTA", "Tercero sin maestro", nit, "Aparece en el balance pero no en el maestro de terceros: sin dirección ni ubicación"]);
       const nb = [...(nombresBal.get(nit) || [])].sort();
@@ -291,7 +351,7 @@
         tipo = juridica ? "31" : "13";
         hallazgos.push(["INFO", "Tipo de documento inferido", nit, `Sin tipo en maestro; se asignó ${tipo}`]);
       }
-      if (juridica && tipo !== "31") hallazgos.push(["ERROR", "Tipo documento incoherente", nit, `'${razon}' parece persona jurídica pero tiene tipo ${tipo}`]);
+      if (juridica && !["31", "42", "43", "44"].includes(tipo)) hallazgos.push(["ERROR", "Tipo documento incoherente", nit, `'${razon}' parece persona jurídica pero tiene tipo ${tipo}`]);
 
       const dvFuente = soloDigitos(get("dv")) || dvBal.get(nit) || "";
       let dvCalc = "";
@@ -311,6 +371,7 @@
       } else {
         const sep = {};
         ["primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres"].forEach((k) => { sep[k] = textoDian(get(k)); });
+        if (sep.primer_apellido && !sep.primer_nombre && razon && !textoDian(get("razon_social")).endsWith(sep.primer_apellido)) sep.primer_nombre = razon;
         if (sep.primer_apellido && sep.primer_nombre) nom = sep;
         else {
           const [n, amb] = partirNombre(razon, orden);
@@ -321,7 +382,8 @@
         if (!nom.primer_apellido || !nom.primer_nombre) hallazgos.push(["ERROR", "Nombre incompleto", nit, "Persona natural sin primer apellido o primer nombre"]);
       }
 
-      const [dp, mp] = ubicar(get("ciudad"), get("departamento"), get("codigo_municipio_dane"), cfg);
+      const [dp, mp, homonimo] = ubicar(get("ciudad"), get("departamento"), get("codigo_municipio_dane"), cfg);
+      if (homonimo) hallazgos.push(["ALERTA", "Municipio homónimo", nit, `'${get("ciudad")}' existe en varios departamentos y el maestro no trae uno que lo distinga; se asignó ${dp}-${mp}. Confirmar`]);
       const ps = pais(get("pais"), cfg);
       if (ps === "169" && !mp) hallazgos.push(["ALERTA", "Municipio no identificado", nit, `Ciudad '${get("ciudad")}' / dpto '${get("departamento")}' no se encontró en DIVIPOLA`]);
       if (!ps) hallazgos.push(["ERROR", "País no identificado", nit, `'${get("pais")}' no está en la tabla de países`]);
@@ -550,7 +612,8 @@
           codigo_departamento: emp.codigo_departamento || "", codigo_municipio: emp.codigo_municipio || "", pais: "169" };
       } else {
         t = terceros.get(r.nit) || { numero_identificacion: r.nit };
-        for (const req of spec.requiere || []) if (!t[req]) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
+        const exterior = !["", "169", undefined].includes(t.pais);
+        for (const req of spec.requiere || []) if (!(exterior && (req === "codigo_departamento" || req === "codigo_municipio")) && !t[req]) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
       }
       const o = {};
       for (const c of campos) {
@@ -755,6 +818,6 @@
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, textoCsv, leerLibro, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, textoCsv, leerLibro, cargarBalance, prepararConfig, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);

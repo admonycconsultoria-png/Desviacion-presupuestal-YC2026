@@ -14,7 +14,7 @@
 
 alias_balance: &alias_balance
   cuenta: ["codigo cuenta contable", "codigo cuenta", "cuenta", "codigo", "cuenta contable", "codigo contable"]
-  nombre_cuenta: ["nombre cuenta contable", "nombre cuenta", "nombre de la cuenta", "descripcion cuenta", "descripcion"]
+  nombre_cuenta: ["nombre cuenta contable", "nombre cuenta", "nombre de la cuenta", "descripcion cuenta", "descripcion", "cuenta contable"]
   nit: ["identificacion", "nit", "identificacion tercero", "nit tercero", "documento", "numero de identificacion", "numero documento"]
   nombre_tercero: ["nombre tercero", "tercero", "nombre del tercero", "razon social", "nombre"]
   saldo_inicial: ["saldo inicial", "saldo anterior"]
@@ -50,10 +50,11 @@ siigo:
 
 alegra:
   descripcion: "Alegra — Balance de prueba por tercero + Contactos"
-  signo_saldo: debito_positivo
-  # Alegra incluye filas de totales por cuenta mayor: se conservan solo las
-  # cuentas que no tienen subcuentas en el mismo archivo (hojas).
-  filtro_filas: { modo: solo_hojas }
+  # Alegra: cada cuenta trae una fila de total (sin tercero, mismo código y nivel) seguida de sus
+  # terceros, filas "Total Auxiliar" y terceros también en niveles intermedios. Se lee por la
+  # jerarquía de la columna Nivel (">" = profundidad), no por prefijos de código.
+  filtro_filas: { modo: jerarquia_nivel, excluir_nivel: "total" }
+  signo_saldo: natural
   balance: *alias_balance
   terceros: *alias_terceros
 

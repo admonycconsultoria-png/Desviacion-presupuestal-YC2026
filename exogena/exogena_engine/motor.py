@@ -52,7 +52,8 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     salida.extend(_partidas_por_cuenta(balance, formatos, cfg, hallazgos))
     partidas = pd.DataFrame(salida, columns=["formato", "cuenta", "nombre_cuenta", "nit", "concepto",
                                              "columna", "base", "prefijo_regla", "valor", "descartado"])
-    sin_t = partidas[partidas["descartado"] == "sin_tercero"]
+    # (las cuentas bancarias sin entidad ya tienen su propio hallazgo)
+    sin_t = partidas[(partidas["descartado"] == "sin_tercero") & ~partidas["base"].str.endswith("_cuenta")]
     for (fmt, cuenta), g in sin_t.groupby(["formato", "cuenta"]):
         hallazgos.append(("ERROR", "Movimiento sin tercero", cuenta,
                           f"Formato {fmt}: ${g['valor'].sum():,.0f} en la cuenta {cuenta} sin NIT; "
@@ -182,7 +183,10 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
                  "codigo_municipio": emp.get("codigo_municipio", ""), "pais": "169"}
         else:
             t = terceros.loc[r["nit"]].to_dict()
+            exterior = t.get("pais") not in ("", "169")
             for req in spec.get("requiere", []):
+                if exterior and req in ("codigo_departamento", "codigo_municipio"):
+                    continue  # el prevalidador solo exige dpto/municipio para Colombia
                 if not t.get(req):
                     hallazgos.append(("ERROR", f"Falta {req}", r["nit"],
                                       f"Formato {fmt}: el tercero no tiene {req} y el prevalidador lo exige"))

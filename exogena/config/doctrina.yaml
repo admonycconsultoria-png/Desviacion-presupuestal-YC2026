@@ -1,0 +1,17 @@
+# =====================================================================
+# Doctrina y criterios de obligatoriedad. Cada criterio cita su fuente y
+# queda `verificado: false` hasta contrastarlo con la resolución vigente
+# (Res. 000227 de 2025, modificada por 000233 de 2025 y 000012 de 2026).
+# =====================================================================
+criterios:
+  - id: rst_pn_retenedor
+    aplica_si: { tipo_persona: natural, regimen: simple, practica_retencion: true }
+    conclusion: >-
+      La persona natural del Régimen Simple que practica retenciones (pagos laborales o IVA del
+      numeral 9 del art. 437-2 ET) NO está obligada a reportar información de rentas de capital
+      y/o no laborales por el solo hecho de ser agente de retención. SÍ está obligada a reportar
+      si sus ingresos brutos del año superan el tope de ingresos (11.800 UVT según el concepto).
+    tope_uvt: 11800
+    fuente: "Concepto DIAN 003863 (int. 449) de 31-mar-2025, sobre el parágrafo 3 del art. 1 de la Res. 000162 de 2023"
+    advertencia: "Interpreta la Res. 000162 de 2023. Verificar que la Res. 000227 de 2025 conserve la misma redacción."
+    verificado: false

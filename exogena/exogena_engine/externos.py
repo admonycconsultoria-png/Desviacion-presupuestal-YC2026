@@ -6,7 +6,7 @@ import pandas as pd
 from .config import Config
 from .motor import _redondear
 from .terceros import depurar
-from .utils import a_numero, clave, leer_tabla, renombrar
+from .utils import a_numero, a_texto, clave, leer_tabla, renombrar
 
 ALIAS_PERSONA = {
     "nit": ["nit", "identificacion", "numero identificacion", "documento", "cedula"],
@@ -26,8 +26,8 @@ def _personas(df: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
     for c in ALIAS_PERSONA:
         if c not in df.columns:
             df[c] = ""
-    df = df.fillna("")
-    df["nit"] = df["nit"].astype(str).str.replace(r"\D", "", regex=True)
+    df = df.apply(lambda s: s.map(a_texto))
+    df["nit"] = df["nit"].str.replace(r"\D", "", regex=True)
     pseudo_balance = pd.DataFrame({"nit": df["nit"], "nombre_tercero": df["razon_social"], "dv_fuente": df["dv"]})
     return depurar(pseudo_balance, df[list(ALIAS_PERSONA)], cfg, hallazgos), df
 

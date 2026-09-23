@@ -26,6 +26,7 @@ def test_separar_dv():
 @pytest.mark.parametrize("texto,valor", [
     ("1.234.567,89", 1234567.89), ("1,234,567.89", 1234567.89), ("(1.000)", -1000.0),
     ("-2500", -2500.0), ("1.000", 1000.0), ("0,5", 0.5), ("", 0.0), (1500, 1500.0),
+    ("0.005", 0.005), ("-0.004", -0.004), ("4.656612873077393e-10", 4.656612873077393e-10),
 ])
 def test_a_numero(texto, valor):
     assert a_numero(texto) == pytest.approx(valor)
@@ -101,3 +102,30 @@ def test_departamento_con_cero_a_la_izquierda(resultado):
 
 def test_no_se_declara_listo_con_parametros_sin_verificar(resultado):
     assert resultado["sin_verificar"]
+
+
+def test_correcciones_de_terceros(tmp_path):
+    """Las correcciones por empresa quitan los errores sin crear otros (el NIT corregido hereda el maestro)."""
+    import shutil
+    import yaml
+    ej = RAIZ / "ejemplos"
+    cfgdir = tmp_path / "config"
+    shutil.copytree(RAIZ / "config", cfgdir)
+    p = yaml.safe_load((cfgdir / "parametros.yaml").read_text(encoding="utf-8"))
+    p["correcciones_terceros"] = {
+        "8605012347": {"nit_correcto": "860501234"},
+        "860501234": {"dv": "7"},
+        "830045123": {"dv": "2"},
+        "79555111": {"direccion": "CL 10 20 30", "codigo_departamento": "05", "codigo_municipio": "001",
+                     "primer_apellido": "RAMIREZ", "primer_nombre": "PEDRO", "otros_nombres": "ANTONIO"},
+    }
+    (cfgdir / "parametros.yaml").write_text(yaml.safe_dump(p, allow_unicode=True), encoding="utf-8")
+    r = ejecutar("siigo", str(ej / "siigo_balance_por_tercero.xlsx"), str(ej / "siigo_terceros.xlsx"),
+                 str(tmp_path / "out"), config_dir=str(cfgdir))
+    cats = {(h[1], str(h[2])) for h in r["hallazgos"] if h[0] == "ERROR"}
+    assert not any(n in ("8605012347", "860501234", "830045123", "79555111") for _, n in cats), cats
+    f = r["generados"]["1009"].set_index("numero_identificacion")
+    assert f.loc["860501234", "codigo_municipio"] == "001" and f.loc["860501234", "dv"] == "7"
+    f1 = r["generados"]["1001"]
+    ped = f1[f1["numero_identificacion"] == "79555111"].iloc[0]
+    assert ped["primer_apellido"] == "RAMIREZ" and ped["codigo_departamento"] == "05"

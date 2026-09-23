@@ -10,12 +10,21 @@ from __future__ import annotations
 
 import json
 import sys
+
+import yaml
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI.parent))
 
 from exogena_engine import config as config_mod  # noqa: E402
+
+
+def _doctrina(d: Path) -> dict:
+    ruta = d / "doctrina.yaml"
+    if not ruta.exists():
+        ruta = config_mod.CONFIG_DIR / "doctrina.yaml"
+    return yaml.safe_load(ruta.read_text(encoding="utf-8")) if ruta.exists() else {"criterios": []}
 
 
 def config_por_defecto(config_dir: Path | str | None = None) -> dict:
@@ -34,6 +43,7 @@ def config_por_defecto(config_dir: Path | str | None = None) -> dict:
         "tiposDoc": cfg.tipos_doc.to_dict("records"),
         "paises": cfg.paises.to_dict("records"),
         "divipola": divipola,
+        "doctrina": _doctrina(Path(config_dir or config_mod.CONFIG_DIR)),
     }
 
 
