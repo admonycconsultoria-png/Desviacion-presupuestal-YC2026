@@ -167,9 +167,9 @@ def facturas_demo():
                f"<cbc:ID>77</cbc:ID><cac:Attachment><cac:ExternalReference><cbc:MimeCode>text/xml</cbc:MimeCode>"
                f"<cbc:Description><![CDATA[{factura}]]></cbc:Description></cac:ExternalReference></cac:Attachment>"
                f"</AttachedDocument>")
-    with zipfile.ZipFile(carpeta / "FE_DEMO_0002.zip", "w") as z:
-        z.writestr("ad0830045123.xml", adjunto)
-        z.writestr("ad0830045123.pdf", b"%PDF-1.4 demo")
+    with zipfile.ZipFile(carpeta / "FE_DEMO_0002.zip", "w") as z:   # fecha fija: archivo reproducible
+        for nombre, datos in (("ad0830045123.xml", adjunto), ("ad0830045123.pdf", b"%PDF-1.4 demo")):
+            z.writestr(zipfile.ZipInfo(nombre, date_time=(2025, 1, 1, 0, 0, 0)), datos)
 
 
 if __name__ == "__main__":
