@@ -410,6 +410,8 @@
     neto_deb: (f) => f.debito - f.credito, neto_cred: (f) => f.credito - f.debito,
     debito: (f) => f.debito, credito: (f) => f.credito,
     saldo_deb: (f) => f.saldo_final, saldo_cred: (f) => -f.saldo_final,
+    // débito − crédito solo del tercero con débitos (proveedor); los créditos de terceros sin débitos son salidas al costo
+    compras_netas: (f) => (f.debito > 0 ? Math.max(f.debito - f.credito, 0) : 0),
   };
 
   function terceroFijo(cfg, v) {
@@ -656,7 +658,12 @@
         if (r.nit === String(cfg.parametros.empresa.nit)) t = { ...t, ...datosInformante(cfg) };
         const exterior = !["", "169", undefined, null].includes(t.pais);
         if (exterior) t = { ...t, direccion: "", codigo_departamento: "", codigo_municipio: "" };
-        for (const req of spec.requiere || []) if (!(exterior && ["direccion", "codigo_departamento", "codigo_municipio"].includes(req)) && !t[req]) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
+        for (const req of spec.requiere || []) {
+          if ((exterior && ["direccion", "codigo_departamento", "codigo_municipio"].includes(req)) || t[req]) continue;
+          // ERROR solo si el prevalidador rechaza la columna vacía; si no, dato que la norma pide y falta
+          if ((spec.obligatorios || [req]).includes(req)) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
+          else hallazgos.push(["ALERTA", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req}. El prevalidador acepta la columna vacía, pero repórtela si la conoce`]);
+        }
       }
       const o = {};
       for (const c of campos) {
@@ -835,6 +842,15 @@
     return { verificado: false, fuente: "", diferencias: [], omitidas: [] };
   }
 
+  // Campos que el prevalidador exige (misma versión o, si no hay, cualquier versión emparejando por encabezado)
+  function camposObligatorios(fmt, spec, prevalidadores) {
+    const lays = (prevalidadores || []).map((p) => (p.formatos || {})[fmt]).filter(Boolean)
+      .sort((a, b) => (Number(a.version) !== Number(spec.version)) - (Number(b.version) !== Number(spec.version)));
+    if (!lays.length) return [];
+    const oblig = new Map(lays[0].columnas.map((c) => [clave(c.encabezado), c.obligatorio]));
+    return spec.columnas.filter(([, e]) => oblig.get(clave(e))).map(([c]) => c);
+  }
+
   const FORMATOS_PREVALIDADOR = ["1001", "1003", "1005", "1006", "1007", "1008", "1009", "1010", "1011", "1012", "2276"];
   // Lee el prevalidador (.xlsm) con SheetJS: versiones (DefinicionFormatos), columnas (hojas F####) y catálogos (Tablas)
   function leerPrevalidador(XLSX, datos, nombre) {
@@ -872,7 +888,10 @@
   function prepararConfig(cfg) {
     const anio = String(cfg.parametros.anio_gravable);
     Object.values(cfg.formatos).forEach((f) => { if (f.version_por_anio && f.version_por_anio[anio]) f.version = f.version_por_anio[anio]; });
-    Object.entries(cfg.formatos).forEach(([k, f]) => { f.verificacion_columnas = estadoColumnas(k, f, cfg.prevalidadores); f.columnas_verificadas = f.verificacion_columnas.verificado; });
+    Object.entries(cfg.formatos).forEach(([k, f]) => {
+      f.verificacion_columnas = estadoColumnas(k, f, cfg.prevalidadores); f.columnas_verificadas = f.verificacion_columnas.verificado;
+      f.obligatorios = camposObligatorios(k, f, cfg.prevalidadores);
+    });
     cfg.divipola.forEach((d) => { d.k_mpio = clave(d.municipio); d.k_dpto = clave(d.departamento); });
     cfg._sinVerificar = new Set();
     return cfg;

@@ -21,7 +21,7 @@ criterios:
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 10"
   - formato: "1001"
     prefijos: ["14", "6205"]
-    texto: "Compras de inventario: concepto 5007 y SIEMPRE en la columna deducible. No reporte el costo de ventas que sale del inventario (6135), ya quedó en la compra."
+    texto: "Compras de inventario: concepto 5007 y SIEMPRE en la columna deducible. Base 'compras netas': débitos menos las notas crédito (devoluciones) del mismo proveedor; los créditos de terceros sin compras son salidas al costo y no se restan. No reporte el costo de ventas (6135), ya quedó en la compra."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 4"
   - formato: "1001"
     prefijos: ["15", "16"]

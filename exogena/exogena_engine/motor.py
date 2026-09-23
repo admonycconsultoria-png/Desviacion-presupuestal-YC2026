@@ -21,6 +21,9 @@ def valor_base(fila, base: str) -> float:
         "credito": fila.credito,
         "saldo_deb": fila.saldo_final,
         "saldo_cred": -fila.saldo_final,
+        # Compras netas de devoluciones: débito − crédito solo del tercero que tiene débitos (el proveedor).
+        # Los créditos de terceros sin débitos son salidas al costo de ventas y no se restan.
+        "compras_netas": max(fila.debito - fila.credito, 0.0) if fila.debito > 0 else 0.0,
     }[base]
 
 
@@ -214,8 +217,14 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
                 if exterior and req in ("direccion", "codigo_departamento", "codigo_municipio"):
                     continue  # el prevalidador solo exige dpto/municipio para Colombia
                 if not t.get(req):
-                    hallazgos.append(("ERROR", f"Falta {req}", r["nit"],
-                                      f"Formato {fmt}: el tercero no tiene {req} y el prevalidador lo exige"))
+                    # ERROR solo si el prevalidador rechaza la columna vacía; si no, dato que la norma pide y falta
+                    if req in spec.get("obligatorios", [req]):
+                        hallazgos.append(("ERROR", f"Falta {req}", r["nit"],
+                                          f"Formato {fmt}: el tercero no tiene {req} y el prevalidador lo exige"))
+                    else:
+                        hallazgos.append(("ALERTA", f"Falta {req}", r["nit"],
+                                          f"Formato {fmt}: el tercero no tiene {req}. El prevalidador acepta la "
+                                          f"columna vacía, pero repórtela si la conoce"))
         filas.append({**{c: t.get(c, "") for c in campos if c in _CAMPOS_TERCERO}, **r})
     out = pd.DataFrame(filas)
     if not spec.get("concepto"):

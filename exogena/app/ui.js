@@ -6,7 +6,8 @@
   const LS_EMPRESAS = "exogenaYC.empresas.v1", LS_NORMATIVO = "exogenaYC.normativo.v1", LS_ACTIVA = "exogenaYC.activa.v1";
   const BASES = [
     ["neto_deb", "Débito − crédito (gastos, costos)"], ["neto_cred", "Crédito − débito (ingresos)"],
-    ["debito", "Solo débitos (compras a inventario/activos, IVA descontable)"], ["credito", "Solo créditos (retenciones, IVA generado)"],
+    ["compras_netas", "Compras netas de devoluciones (inventarios y activos): débito − crédito del proveedor"],
+    ["debito", "Solo débitos (IVA descontable)"], ["credito", "Solo créditos (retenciones, IVA generado)"],
     ["saldo_deb", "Saldo final deudor (CxC)"], ["saldo_cred", "Saldo final acreedor (CxP)"],
     ["saldo_deb_cuenta", "Saldo deudor de toda la cuenta a un tercero fijo (bancos, DIAN)"],
     ["saldo_cred_cuenta", "Saldo acreedor de toda la cuenta a un tercero fijo (DIAN, municipio)"],
@@ -44,7 +45,8 @@
       cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas), reglasVersion: REGLAS_VERSION, correcciones: {}, revisiones: {}, diagnostico: {} };
   }
   // normativo 2 = Res. 227/2025 (mod. 233/2025); 3 = columnas, conceptos y países del prevalidador DIAN
-  const NORMATIVO_VERSION = 3, REGLAS_VERSION = 2;
+  // reglas 3 = inventarios y activos fijos con base "compras_netas" (neta de devoluciones al proveedor)
+  const NORMATIVO_VERSION = 3, REGLAS_VERSION = 3;
   let normGuardado = leerLS(LS_NORMATIVO, null);
   const migrado = normGuardado && (normGuardado.version || 1) < NORMATIVO_VERSION;
   if (!normGuardado || migrado) normGuardado = { ...normativoDefecto(), prevalidadores: (normGuardado && normGuardado.prevalidadores) || [] };
@@ -57,6 +59,13 @@
     fmtAsis: "1001", cacheBal: null,
   };
   E.empresas.forEach((x) => { x.correcciones = x.correcciones || {}; x.revisiones = x.revisiones || {}; x.diagnostico = x.diagnostico || {}; });
+  // Migración puntual 2 -> 3: solo cambia las reglas de 14/15/16 que conservan la base de fábrica "debito"
+  let migradasCompras = 0;
+  E.empresas.forEach((x) => {
+    if ((x.reglasVersion || 1) !== 2) return;
+    x.reglas.forEach((r) => { if (r.formato === "1001" && ["14", "15", "16"].includes(r.prefijo) && r.base === "debito") { r.base = "compras_netas"; migradasCompras++; } });
+    x.reglasVersion = 3;
+  });
   const empresa = () => E.empresas.find((x) => x.id === E.activa) || null;
   let tGuardar;
   function guardar() { clearTimeout(tGuardar); tGuardar = setTimeout(() => { guardarLS(LS_EMPRESAS, E.empresas); guardarLS(LS_NORMATIVO, E.normativo); guardarLS(LS_ACTIVA, E.activa); }, 250); }
@@ -202,10 +211,19 @@
     const btn = $("#btn-generar"); btn.disabled = true; btn.textContent = "Procesando…";
     setTimeout(() => {
       try {
-        const cfg = construirCfg(emp);
-        const r = Exogena.ejecutar({ fuente: emp.fuente, balance: E.archivos.balance.filas, terceros: E.archivos.terceros && E.archivos.terceros.filas,
-          accionistas: E.archivos.accionistas && E.archivos.accionistas.filas, nomina: E.archivos.nomina && E.archivos.nomina.filas }, cfg);
-        r.cfg = cfg; r.fecha = new Date();
+        const correr = () => {
+          const cfg = construirCfg(emp);
+          const x = Exogena.ejecutar({ fuente: emp.fuente, balance: E.archivos.balance.filas, terceros: E.archivos.terceros && E.archivos.terceros.filas,
+            accionistas: E.archivos.accionistas && E.archivos.accionistas.filas, nomina: E.archivos.nomina && E.archivos.nomina.filas }, cfg);
+          x.cfg = cfg; return x;
+        };
+        let r = correr(), auto = [];
+        // Errores con una sola respuesta posible: se corrigen, quedan registrados en Correcciones de terceros y se regenera
+        if (emp.autocorregir !== "no") {
+          auto = autocorrecciones(r, emp);
+          if (auto.length) { auto.forEach((a) => guardarCorreccion(emp, a.nit, { ...(emp.correcciones[a.nit] || {}), ...a.s })); guardar(); r = correr(); }
+        }
+        r.autocorregidos = auto; r.fecha = new Date();
         E.resultado = r; E.subvista = "hallazgos"; E.verFormato = null;
       } catch (e) {
         E.resultado = null;
@@ -227,6 +245,9 @@
     el.innerHTML = `
       <div class="dictamen ${listo ? "si" : "no"}">${listo ? "✓ Listo para prevalidador" :
         `No listo para prevalidador: ${[n("ERROR") ? `${n("ERROR")} errores por corregir` : "", nPend ? `${nPend} cuentas sin revisar en el asistente` : "", r.sinVerificar.length ? `${r.sinVerificar.length} parámetros normativos sin verificar` : ""].filter(Boolean).join(" · ")}`}</div>
+      ${(r.autocorregidos || []).length ? `<div class="aviso" style="background:var(--info-f);color:var(--texto)"><b>Se corrigieron automáticamente ${r.autocorregidos.length} terceros</b>
+        (${esc(r.autocorregidos.slice(0, 6).map((a) => `${a.nit}: ${a.cambios.join(", ")}`).join(" · "))}${r.autocorregidos.length > 6 ? " …" : ""}).
+        Quedaron registrados en <b>Correcciones de terceros</b>: descargue el listado y corríjalos también en el software contable.</div>` : ""}
       <div class="kpis">
         <div class="kpi"><span>Formatos generados</span><b>${Object.keys(r.generados).length}</b></div>
         <div class="kpi"><span>Terceros depurados</span><b>${r.terceros.size}</b></div>
@@ -394,6 +415,9 @@
         <label>Nombres de personas naturales en el software<select data-k="orden_nombre">
           <option value="apellidos_nombres" ${emp.orden_nombre === "apellidos_nombres" ? "selected" : ""}>APELLIDOS NOMBRES</option>
           <option value="nombres_apellidos" ${emp.orden_nombre === "nombres_apellidos" ? "selected" : ""}>NOMBRES APELLIDOS</option></select></label>
+        <label>Autocorregir terceros al generar<select data-k="autocorregir">
+          <option value="si" ${emp.autocorregir !== "no" ? "selected" : ""}>Sí: tipo 31 a sociedades, DV, NIT con DV pegado</option>
+          <option value="no" ${emp.autocorregir === "no" ? "selected" : ""}>No: solo reportar el error</option></select></label>
         <label>NIT adicionales a excluir (separados por coma)<input data-k="nits_excluidos" value="${esc((emp.nits_excluidos || []).join(", "))}"></label>
       </div><p class="ayuda" id="dv-info" style="margin-top:12px"></p></div>
       ${panelDiagnostico(emp)}
@@ -440,7 +464,7 @@
 
   // ---------------- Parametrización de cuentas
   function renderReglas(v, emp) {
-    const vieja = (emp.reglasVersion || 1) < REGLAS_VERSION;
+    const vieja = (emp.reglasVersion || 1) < 2;
     v.innerHTML = `${vieja ? `<div class="aviso">Esta empresa usa una parametrización anterior a la actualización según la Res. 227/2025 (conceptos del 1008/1009, 1011, retenciones y tercero fijo). <button class="prim" id="r-migrar">Actualizar a la parametrización 2026</button> (se reemplazan las reglas; las cuentas del asistente quedarán pendientes de revisar).</div>` : ""}
       <div class="panel"><h2>Parametrización de cuentas de ${esc(emp.razon_social)}</h2>
       <p class="ayuda">Cada regla envía las cuentas que empiezan por el <b>prefijo</b> a un formato, concepto y columna. Dentro de un formato gana la regla con el prefijo <b>más largo</b>: con 5105 → 5001 y 510569 → 5011, la EPS va a 5011 y el resto del gasto de personal a 5001. Concepto <b>EXCLUIR</b> saca una rama completa; <b>PRORRATA</b> reparte entre los conceptos del mismo tercero.</p>
@@ -711,6 +735,7 @@
   const TRATAMIENTOS = [
     ["EXCLUIR", "No se reporta en este formato"],
     ["neto_deb", "Débitos − créditos"], ["neto_cred", "Créditos − débitos"],
+    ["compras_netas", "Compras netas de devoluciones (débito − crédito del proveedor)"],
     ["debito", "Solo débitos"], ["credito", "Solo créditos"],
     ["saldo_deb", "Saldo final deudor (por tercero)"], ["saldo_cred", "Saldo final acreedor (por tercero)"],
     ["saldo_deb_cuenta", "Saldo deudor de la cuenta a un tercero fijo"],
@@ -770,7 +795,8 @@
     if (!base || base === "EXCLUIR") return { total: 0, neg: 0 };
     if (base === "saldo_deb_cuenta") return { total: c.sf, neg: c.sf < 0 ? 1 : 0 };
     const f = { neto_deb: (r) => r.debito - r.credito, neto_cred: (r) => r.credito - r.debito, debito: (r) => r.debito,
-      credito: (r) => r.credito, saldo_deb: (r) => r.saldo_final, saldo_cred: (r) => -r.saldo_final }[base];
+      credito: (r) => r.credito, saldo_deb: (r) => r.saldo_final, saldo_cred: (r) => -r.saldo_final,
+      compras_netas: (r) => (r.debito > 0 ? Math.max(r.debito - r.credito, 0) : 0) }[base];
     const porNit = new Map();
     c.filas.forEach((r) => porNit.set(r.nit, (porNit.get(r.nit) || 0) + f(r)));
     let total = 0, neg = 0;
@@ -974,6 +1000,24 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
     if ((s.tipo_documento || t.tipo_documento) === "31" && /^\d{5,15}$/.test(nit)) { try { s.dv = String(Exogena.calcularDv(nit)); } catch (e) { /* */ } }
     return s;
   }
+  // Solo lo determinista: sociedad (NIT de 9 dígitos que empieza por 8 o 9 y nombre con SAS, LTDA, S.A.…) con tipo 13 -> 31;
+  // DV recalculado; NIT de 10 dígitos cuyo último dígito es el DV de los 9 primeros. Nunca pisa una corrección manual.
+  function autocorrecciones(r, emp) {
+    const salida = [];
+    for (const { nit, cats } of tercerosACorregir(r)) {
+      if (emp.correcciones[nit]) continue;
+      const t = r.terceros.get(nit) || { nit, tipo_documento: "" };
+      const s = {}, cambios = [];
+      if (cats.includes("Tipo documento incoherente") && /^[89]\d{8}$/.test(nit)) { s.tipo_documento = "31"; s.persona = "juridica"; cambios.push(`tipo ${t.tipo_documento || "?"} → 31`); }
+      if (cats.includes("NIT con DV pegado")) { s.nit_correcto = nit.slice(0, 9); cambios.push(`NIT ${nit} → ${s.nit_correcto}-${nit.slice(9)}`); }
+      const nitFinal = s.nit_correcto || nit;
+      if ((s.tipo_documento || t.tipo_documento) === "31" && (cats.includes("DV errado") || s.tipo_documento || s.nit_correcto)) {
+        try { s.dv = String(Exogena.calcularDv(nitFinal)); if (cats.includes("DV errado")) cambios.push(`DV → ${s.dv}`); } catch (e) { /* */ }
+      }
+      if (cambios.length) salida.push({ nit, s, cambios });
+    }
+    return salida;
+  }
   function filaCorreccion(emp, t, cats) {
     const c = { ...(emp.correcciones[t.nit] || {}) };
     const sug = sugerencia(t, cats);
@@ -1169,6 +1213,7 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
   Object.keys(nd.formatos).forEach((k) => { if (!E.normativo.formatos[k]) E.normativo.formatos[k] = nd.formatos[k]; });
   Object.keys(nd.topes).forEach((k) => { if (!E.normativo.topes[k]) E.normativo.topes[k] = nd.topes[k]; });
   if (!E.empresas.find((x) => x.id === E.activa)) E.activa = E.empresas[0] ? E.empresas[0].id : null;
+  if (migradasCompras) { guardar(); setTimeout(() => toast(`Inventarios y activos fijos pasan a "compras netas de devoluciones" (${migradasCompras} reglas).`), 3900); }
   if (migrado) { guardar(); setTimeout(() => toast("Parámetros normativos actualizados: columnas, conceptos y países del prevalidador DIAN."), 300); }
   render();
 })();

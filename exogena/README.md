@@ -170,8 +170,17 @@ formato,prefijo,concepto,columna,base,notas
 
 - Dentro de cada formato gana el **prefijo más largo**. `5105` manda todo el gasto de personal a 5001, y
   `510569` envía la EPS a 5011.
-- `base` indica qué cifra del balance se toma: `neto_deb`, `neto_cred`, `debito`, `credito`, `saldo_deb`
-  o `saldo_cred`.
+- `base` indica qué cifra del balance se toma, por tercero: `neto_deb` (débito − crédito), `neto_cred`
+  (crédito − débito), `compras_netas`, `debito`, `credito`, `saldo_deb` o `saldo_cred`.
+- `compras_netas` es para inventarios (14) y activos fijos (15, 16): débito − crédito **solo del tercero que
+  tiene débitos** (el proveedor, neto de sus notas crédito). Los créditos de terceros sin compras son
+  salidas al costo de ventas o bajas y no se restan. `neto_deb` en esas cuentas restaría el costo de ventas.
+- Autocorrección (aplicativo, activable por empresa): sociedades con tipo 13 y NIT de 9 dígitos que empieza
+  por 8 o 9 pasan a 31; el DV se recalcula; un NIT de 10 dígitos con el DV pegado se separa. Todo queda en
+  *Correcciones de terceros* para llevarlo al software. Lo que necesita un dato externo (dirección, tercero
+  real de un movimiento) sigue como hallazgo.
+- La severidad de un dato faltante sale del prevalidador: ERROR si la columna es obligatoria (p. ej.
+  dirección en el 1003), ALERTA si el prevalidador la acepta vacía (dirección en 1001, 1008, 1009).
 - `EXCLUIR` corta una rama completa, por ejemplo las depreciaciones, que no son pagos.
 - `PRORRATA` reparte la retención de IVA entre los conceptos 1001 del tercero en proporción a sus pagos.
   Así la retención queda en la misma fila que el pago que la originó.

@@ -9,13 +9,13 @@ import json
 import pandas as pd
 import yaml
 
-from .prevalidador import estado_columnas
+from .prevalidador import campos_obligatorios, estado_columnas
 from .utils import clave
 
 RAIZ = Path(__file__).resolve().parent.parent
 CONFIG_DIR = RAIZ / "config"
 
-BASES_VALIDAS = {"neto_deb", "neto_cred", "debito", "credito", "saldo_deb", "saldo_cred",
+BASES_VALIDAS = {"neto_deb", "neto_cred", "debito", "credito", "saldo_deb", "saldo_cred", "compras_netas",
                  # saldo de toda la cuenta asignado a un solo tercero (bancos, DIAN, fondos)
                  "saldo_deb_cuenta", "saldo_cred_cuenta"}
 
@@ -109,6 +109,7 @@ def cargar(config_dir: Path | str = CONFIG_DIR) -> Config:
     for k, f in formatos.items():
         f["verificacion_columnas"] = estado_columnas(k, f, prevalidadores)
         f["columnas_verificadas"] = f["verificacion_columnas"]["verificado"]
+        f["obligatorios"] = campos_obligatorios(k, f, prevalidadores)
 
     mapeo = pd.read_csv(d / "mapeo_cuentas.csv", dtype=str, comment="#").fillna("")
     if "tercero" not in mapeo.columns:

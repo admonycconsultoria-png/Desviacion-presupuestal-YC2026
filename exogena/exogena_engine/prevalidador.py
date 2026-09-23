@@ -96,6 +96,17 @@ def estado_columnas(fmt: str, spec: dict, prevalidadores: list[dict]) -> dict:
     return {"verificado": False, "fuente": "", "diferencias": [], "omitidas": []}
 
 
+def campos_obligatorios(fmt: str, spec: dict, prevalidadores: list[dict]) -> list[str]:
+    """Campos que el prevalidador exige (fila 5 = S). Se toma el layout de la misma versión y, si no hay,
+    el de cualquier versión del formato, emparejando por encabezado."""
+    lays = [p["formatos"][fmt] for p in prevalidadores if fmt in (p.get("formatos") or {})]
+    lays.sort(key=lambda l: int(l["version"]) != int(spec["version"]))
+    for lay in lays:
+        oblig = {clave(c["encabezado"]): c["obligatorio"] for c in lay["columnas"]}
+        return [campo for campo, enc in spec["columnas"] if oblig.get(clave(enc))]
+    return []
+
+
 def main() -> None:
     from . import config as config_mod
 
