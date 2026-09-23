@@ -40,6 +40,7 @@ alias_terceros: &alias_terceros
   pais: ["pais"]
   codigo_municipio_dane: ["codigo ciudad", "codigo municipio", "codigo dane", "cod ciudad"]
   email: ["correo", "email", "correo electronico"]
+  sucursal: ["sucursal"]      # Siigo: el mismo NIT aparece una vez por sucursal (0 = principal)
 
 siigo:
   descripcion: "Siigo Nube — Balance de prueba por tercero + Terceros"

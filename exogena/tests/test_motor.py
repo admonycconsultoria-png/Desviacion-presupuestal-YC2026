@@ -218,3 +218,26 @@ def test_facturas_zip_de_zips(tmp_path):
     orden = lambda l: sorted(l, key=lambda r: (r["nit"], r["fuente"]))  # noqa: E731
     assert orden(leer_facturas([drive])) == orden(leer_facturas([fe]))
     assert {r["nit"] for r in leer_facturas([drive])} == {"79555111", "830045123", "900123456"}
+
+
+def test_nit_repetido_usa_sucursal_principal_o_fila_mas_completa():
+    import pandas as pd
+    from exogena_engine.terceros import depurar
+    cfg = _cfg(2026)
+    bal = pd.DataFrame({"nit": ["900555111", "71234567"], "nombre_tercero": ["EPS DEMO SAS", "PEREZ JUAN"],
+                        "dv_fuente": ["", ""]})
+    maestro = pd.DataFrame([
+        # Siigo: una fila por sucursal; la 1 viene primero pero la principal es la 0
+        {"nit": "900555111", "razon_social": "EPS DEMO SAS SEDE NORTE", "direccion": "CL 80 10 20", "ciudad": "Bogotá", "sucursal": "1"},
+        {"nit": "900555111", "razon_social": "EPS DEMO SAS", "direccion": "CR 50 30 40", "ciudad": "Medellín", "sucursal": "0"},
+        # sin sucursal: la fila más completa, aunque venga segunda
+        {"nit": "71234567", "razon_social": "PEREZ JUAN", "direccion": "", "ciudad": "", "sucursal": ""},
+        {"nit": "71234567", "razon_social": "PEREZ JUAN", "direccion": "CL 1 2 34", "ciudad": "Itagüí", "sucursal": ""},
+    ])
+    h = []
+    t = depurar(bal, maestro, cfg, h)
+    assert t.loc["900555111", "direccion"] == "CR 50 30 40" and t.loc["900555111", "codigo_municipio"] == "001"
+    assert t.loc["71234567", "direccion"] == "CL 1 2 34"
+    textos = {x[2]: x[3] for x in h if x[1] == "Duplicado en maestro"}
+    assert "sucursales 1, 0" in textos["900555111"] and "principal (0)" in textos["900555111"]
+    assert "más completa" in textos["71234567"]

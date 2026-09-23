@@ -156,7 +156,7 @@ def cargar_terceros(ruta: str | None, fuente: str, cfg: Config) -> pd.DataFrame:
     """Maestro de terceros normalizado. Columnas canónicas (las que no vengan quedan vacías)."""
     canon = ["nit", "dv", "tipo_documento", "tipo_persona", "razon_social", "primer_nombre",
              "otros_nombres", "primer_apellido", "segundo_apellido", "direccion", "ciudad",
-             "departamento", "pais", "codigo_municipio_dane", "email"]
+             "departamento", "pais", "codigo_municipio_dane", "email", "sucursal"]
     if not ruta:
         return pd.DataFrame(columns=canon)
     alias = cfg.fuentes[fuente]["terceros"]

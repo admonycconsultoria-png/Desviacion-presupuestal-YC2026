@@ -205,7 +205,7 @@
 
   const CANON_TERCEROS = ["nit", "dv", "tipo_documento", "tipo_persona", "razon_social", "primer_nombre",
     "otros_nombres", "primer_apellido", "segundo_apellido", "direccion", "ciudad", "departamento", "pais",
-    "codigo_municipio_dane", "email"];
+    "codigo_municipio_dane", "email", "sucursal"];
 
   function cargarTerceros(filas, fuente, cfg) {
     if (!filas) return [];
@@ -418,9 +418,21 @@
       if (r.dv_fuente && !dvBal.has(r.nit)) dvBal.set(r.nit, r.dv_fuente);
     }
     const mMap = new Map();
+    // NIT repetido (en Siigo, una fila por sucursal): se usa la sucursal principal (0) y, si no, la fila más completa
+    const secundaria = (m) => (["", "0"].includes(soloDigitos(m.sucursal || "").replace(/^0+(?=\d)/, "")) ? 0 : 1);
+    const completitud = (m) => ["direccion", "tipo_documento", "dv"].filter((c) => String(m[c] || "").trim()).length
+      + (String(m.ciudad || "").trim() || String(m.codigo_municipio_dane || "").trim() ? 1 : 0)
+      + (textoDian(m.direccion || "").length >= 8 ? 1 : 0);
     for (const [nit, g] of agrupar(maestro, (m) => m.nit)) {
-      if (g.length > 1) hallazgos.push(["ALERTA", "Duplicado en maestro", nit, `NIT repetido ${g.length} veces en el maestro de terceros; se usa el primero`]);
-      mMap.set(nit, g[0]);
+      const orden = g.map((m, i) => [m, i]).sort((a, b) => secundaria(a[0]) - secundaria(b[0]) || completitud(b[0]) - completitud(a[0]) || a[1] - b[1]);
+      const elegida = orden[0][0];
+      if (g.length > 1) {
+        const haySucursal = g.some((m) => String(m.sucursal || "").trim());
+        const sucs = haySucursal ? g.map((m) => soloDigitos(m.sucursal || "").replace(/^0+/, "") || "0") : [];
+        const porque = sucs.length && !secundaria(elegida) ? `la sucursal principal (${String(elegida.sucursal).trim() || "0"})` : "la fila más completa";
+        hallazgos.push(["ALERTA", "Duplicado en maestro", nit, `NIT repetido ${g.length} veces en el maestro de terceros${sucs.length ? ` (sucursales ${sucs.join(", ")})` : ""}; se usa ${porque}`]);
+      }
+      mMap.set(nit, elegida);
     }
     const cm = cfg.parametros.cuantias_menores, emp = cfg.parametros.empresa;
     const correcciones = cfg.parametros.correcciones_terceros || {};

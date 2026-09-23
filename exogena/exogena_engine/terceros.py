@@ -130,12 +130,37 @@ def depurar(balance: pd.DataFrame, maestro: pd.DataFrame, cfg: Config, hallazgos
                        .agg(lambda s: sorted({texto_dian(x) for x in s if str(x).strip()})))
     dv_balance = balance[balance["dv_fuente"] != ""].groupby("nit")["dv_fuente"].first()
 
-    maestro = maestro.copy()
-    dup_maestro = maestro[maestro.duplicated("nit", keep=False)]
-    for nit, g in dup_maestro.groupby("nit"):
+    # NIT repetido (en Siigo, una fila por sucursal): se usa la sucursal principal (0) y, si no, la fila más completa
+    maestro = maestro.copy().reset_index(drop=True)
+    for c in ("sucursal", "direccion", "tipo_documento", "dv", "ciudad", "codigo_municipio_dane"):
+        if c not in maestro.columns:
+            maestro[c] = ""
+    maestro = maestro.fillna("")
+
+    def _secundaria(v) -> int:
+        d = solo_digitos(str(v)).lstrip("0")
+        return 0 if d == "" else 1
+
+    def _completitud(f) -> int:
+        return (sum(bool(str(f[c]).strip()) for c in ("direccion", "tipo_documento", "dv"))
+                + int(bool(str(f["ciudad"]).strip() or str(f["codigo_municipio_dane"]).strip()))
+                + int(len(texto_dian(f["direccion"])) >= 8))
+
+    maestro["_sec"] = maestro["sucursal"].map(_secundaria)
+    maestro["_comp"] = maestro.apply(_completitud, axis=1)
+    maestro["_pos"] = range(len(maestro))
+    maestro = maestro.sort_values(["nit", "_sec", "_comp", "_pos"], ascending=[True, True, False, True], kind="stable")
+    for nit, g in maestro[maestro.duplicated("nit", keep=False)].groupby("nit", sort=False):
+        g = g.sort_values(["_sec", "_comp", "_pos"], ascending=[True, False, True], kind="stable")
+        hay_sucursal = any(str(s).strip() for s in g["sucursal"])
+        sucs = [solo_digitos(str(s)).lstrip("0") or "0" for s in g.sort_values("_pos")["sucursal"]] if hay_sucursal else []
+        elegida = g.iloc[0]
+        porque = (f"la sucursal principal ({str(elegida['sucursal']).strip() or '0'})"
+                  if sucs and not elegida["_sec"] else "la fila más completa")
         hallazgos.append(("ALERTA", "Duplicado en maestro", nit,
-                          f"NIT repetido {len(g)} veces en el maestro de terceros; se usa el primero"))
-    maestro = maestro.drop_duplicates("nit").set_index("nit")
+                          f"NIT repetido {len(g)} veces en el maestro de terceros"
+                          + (f" (sucursales {', '.join(sucs)})" if sucs else "") + f"; se usa {porque}"))
+    maestro = maestro.drop_duplicates("nit").drop(columns=["_sec", "_comp", "_pos"]).set_index("nit")
     # NIT corregido (p. ej. DV pegado): el NIT nuevo hereda la ficha del maestro del NIT viejo
     for viejo, c in (cfg.parametros.get("correcciones_terceros") or {}).items():
         nuevo = str((c or {}).get("nit_correcto") or "")
