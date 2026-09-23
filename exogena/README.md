@@ -15,7 +15,45 @@ editar sin programar. El código no tiene cuentas ni conceptos fijos.
 > | Consolidado anual de nómina electrónica (`nomina.csv`) | 2276 |
 > | Tabla de renglones de las declaraciones (pendiente de parametrizar) | 1011 |
 
-## Uso
+## Aplicativo (uso diario)
+
+**`app/dist/Exogena_YC.html`** es un solo archivo. Se abre con doble clic en Chrome o Edge, no requiere
+instalación ni internet, y **los balances nunca salen del equipo**: se leen en memoria y no se guardan.
+En el navegador solo se guarda la parametrización.
+
+Flujo por empresa:
+
+1. **+ Nueva empresa**: razón social, NIT, año gravable, software (Siigo, Alegra, Dataico o genérico) y
+   dirección del informante.
+2. **Procesar exógena**: arrastre el balance de prueba por tercero y el listado de terceros, más el libro de
+   accionistas y la nómina si aplica, y pulse **Generar exógena**.
+3. Revise los resultados:
+   - **Hallazgos**: errores de NIT, DV, duplicados, direcciones y municipios.
+   - **Cuadres**: formato frente a balance.
+   - **Cuentas sin parametrizar**: se pueden asignar ahí mismo con un clic.
+4. **Formatos y descargas**: un Excel por formato, con las columnas en el orden del prevalidador, más el
+   informe de validación.
+
+La configuración está en dos niveles:
+
+| Nivel | Qué contiene | Dónde se edita |
+|---|---|---|
+| Por empresa | Reglas cuenta → formato/concepto/columna, cuentas bancarias, NIT excluidos | Pestaña *Parametrización de cuentas*: se exporta e importa en Excel y se puede copiar de otra empresa |
+| Común | Conceptos, topes de cuantías menores, versiones de formato, marca "verificado" | *Parámetros normativos* |
+
+**Respaldo:** la configuración vive en el navegador, así que conviene usar **Exportar configuración**
+(genera un JSON) después de parametrizar. Con ese archivo se restaura todo en otro equipo o navegador.
+
+Para reconstruir el HTML después de cambiar `config/` o el motor:
+
+```bash
+python app/construir.py      # empaqueta config/ + app/motor.js + app/ui.js + SheetJS en app/dist/Exogena_YC.html
+```
+
+`app/motor.js` es el mismo motor portado a JavaScript. La prueba `tests/test_paridad_js.py` garantiza que
+produce exactamente los mismos formatos, hallazgos y parámetros sin verificar que la versión en Python.
+
+## Uso por línea de comandos (procesos en lote)
 
 ```bash
 cd exogena
@@ -78,8 +116,13 @@ exogena/
 │   ├── externos.py          1010 (accionistas) y 2276 (nómina)
 │   ├── validaciones.py      cuadres e inconsistencias contables
 │   └── exportar.py          archivos de formatos e informe
+├── app/
+│   ├── motor.js             motor en JavaScript (paridad exacta con Python)
+│   ├── ui.js, plantilla.html interfaz del aplicativo
+│   ├── construir.py         empaqueta todo en dist/Exogena_YC.html
+│   └── vendor/              SheetJS 0.18.5 (Apache 2.0) para leer y escribir Excel
 ├── ejemplos/generar_ejemplo.py   caso Siigo con 7 errores sembrados
-└── tests/                   21 pruebas
+└── tests/                   22 pruebas (incluye paridad Python ↔ JavaScript)
 ```
 
 ### Cómo funciona `mapeo_cuentas.csv`
@@ -141,4 +184,5 @@ formato,prefijo,concepto,columna,base,notas
 | 3. Verificación normativa | Contrastar `conceptos.csv`, topes y `formatos.yaml` con la resolución y los anexos del AG 2026, y cambiar las marcas a SI | Pendiente, **crítico** |
 | 4. Calibración por software | Un export real de cada software (Siigo, Alegra, Dataico) de un cliente piloto, con ajuste de alias y del filtro de totales | Pendiente |
 | 5. 1011 | Tabla de renglones de las declaraciones, en modo `sin_tercero` | Pendiente |
-| 6. Escalamiento | Carpeta `config_clientes/<cliente>` por cliente, ejecución en lote y generación del XML Muisca directo | Pendiente |
+| 6. Aplicativo | HTML sin conexión con multiempresa, parametrización por empresa y descargas para el prevalidador | **Hecho** |
+| 7. Escalamiento | Generación directa del XML Muisca y comparación contra la exógena del año anterior | Pendiente |

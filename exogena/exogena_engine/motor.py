@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 
+import numpy as np
 import pandas as pd
 
 from .config import Config
@@ -201,7 +202,9 @@ _CAMPOS_TERCERO = {"tipo_documento", "numero_identificacion", "dv", "primer_apel
 def _redondear(df: pd.DataFrame, valores: list[str]) -> pd.DataFrame:
     df = df.copy()
     for c in valores:
-        df[c] = df[c].astype(float).round(0).astype("int64")
+        x = df[c].astype(float)
+        # redondeo comercial (0,5 hacia arriba), no el de banquero que usa round() de Python
+        df[c] = (np.sign(x) * np.floor(x.abs() + 0.5)).astype("int64")
     return df.reset_index(drop=True)
 
 

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exógena YC</title>
+<style>
+:root {
+  --azul: #0C447C; --azul-2: #1560a8; --azul-suave: #e8f0f9;
+  --fondo: #f5f7fa; --panel: #ffffff; --borde: #dde3ea; --texto: #1c2733; --texto-2: #5b6b7c;
+  --error: #b42318; --error-f: #fdecea; --alerta: #9a6700; --alerta-f: #fff6dd; --info: #475467; --info-f: #eef1f4;
+  --ok: #1a7f37; --ok-f: #e7f5ec; --sombra: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  --radio: 10px; --fuente: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --azul: #6ea8e8; --azul-2: #8dbcf0; --azul-suave: #182a3f; --fondo: #0f141a; --panel: #171e26; --borde: #2a3440;
+    --texto: #e4e9ef; --texto-2: #9aa8b6; --error: #ff8a80; --error-f: #3a1a18; --alerta: #f2c14e; --alerta-f: #33290f;
+    --info: #b6c2cf; --info-f: #202a35; --ok: #6fd08c; --ok-f: #15301f; --sombra: none;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--fuente); background: var(--fondo); color: var(--texto); font-size: 14px; }
+header { background: var(--azul); color: #fff; padding: 12px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) header { background: #0b2745; } }
+header h1 { font-size: 18px; margin: 0; font-weight: 600; letter-spacing: .2px; }
+header .sello { margin-left: auto; font-size: 12px; background: rgba(255,255,255,.14); padding: 5px 10px; border-radius: 99px; }
+.app { display: grid; grid-template-columns: 250px 1fr; min-height: calc(100vh - 50px); }
+@media (max-width: 800px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid var(--borde); } }
+aside { background: var(--panel); border-right: 1px solid var(--borde); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+aside h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .8px; color: var(--texto-2); margin: 8px 0 2px; }
+.empresa-item { padding: 9px 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+.empresa-item:hover { background: var(--azul-suave); }
+.empresa-item.activa { background: var(--azul-suave); border-color: var(--azul); }
+.empresa-item b { display: block; font-size: 13px; }
+.empresa-item small { color: var(--texto-2); }
+main { padding: 20px; min-width: 0; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--borde); margin-bottom: 16px; flex-wrap: wrap; }
+.tab { padding: 9px 14px; cursor: pointer; border: 0; background: none; color: var(--texto-2); font: inherit; border-bottom: 2px solid transparent; }
+.tab.activa { color: var(--azul); border-bottom-color: var(--azul); font-weight: 600; }
+.panel { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 16px; box-shadow: var(--sombra); margin-bottom: 16px; }
+.panel h2 { font-size: 15px; margin: 0 0 12px; }
+.panel p.ayuda { color: var(--texto-2); margin: -6px 0 12px; font-size: 13px; }
+button, .btn { font: inherit; border-radius: 8px; border: 1px solid var(--borde); background: var(--panel); color: var(--texto); padding: 7px 12px; cursor: pointer; }
+button:hover { border-color: var(--azul); }
+button.prim { background: var(--azul); color: #fff; border-color: var(--azul); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.prim { color: #0f141a; } }
+button.prim:hover { background: var(--azul-2); }
+button.peligro { color: var(--error); }
+button.mini { padding: 3px 8px; font-size: 12px; }
+button:disabled { opacity: .5; cursor: not-allowed; }
+input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--borde); border-radius: 6px; background: var(--panel); color: var(--texto); min-width: 0; }
+input:focus, select:focus { outline: 2px solid var(--azul); outline-offset: -1px; }
+.grid-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.grid-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--texto-2); }
+.drops { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.drop { border: 2px dashed var(--borde); border-radius: var(--radio); padding: 14px; text-align: center; cursor: pointer; position: relative; min-height: 104px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.drop:hover, .drop.sobre { border-color: var(--azul); background: var(--azul-suave); }
+.drop.cargado { border-style: solid; border-color: var(--ok); background: var(--ok-f); }
+.drop b { font-size: 13px; }
+.drop small { color: var(--texto-2); font-size: 12px; word-break: break-all; }
+.drop input { display: none; }
+.req { color: var(--error); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi { background: var(--panel); border: 1px solid var(--borde); border-radius: var(--radio); padding: 12px 14px; }
+.kpi span { display: block; font-size: 12px; color: var(--texto-2); }
+.kpi b { font-size: 22px; font-variant-numeric: tabular-nums; }
+.kpi.e b { color: var(--error); } .kpi.a b { color: var(--alerta); } .kpi.o b { color: var(--ok); }
+.dictamen { padding: 12px 14px; border-radius: var(--radio); margin-bottom: 16px; font-weight: 600; }
+.dictamen.no { background: var(--error-f); color: var(--error); } .dictamen.si { background: var(--ok-f); color: var(--ok); }
+.tabla-wrap { overflow: auto; max-height: 520px; border: 1px solid var(--borde); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th { position: sticky; top: 0; background: var(--azul-suave); text-align: left; padding: 7px 8px; font-weight: 600; border-bottom: 1px solid var(--borde); white-space: nowrap; z-index: 1; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.ERROR td:first-child { border-left: 3px solid var(--error); } tr.ALERTA td:first-child { border-left: 3px solid var(--alerta); } tr.INFO td:first-child { border-left: 3px solid var(--info); }
+.chip { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 99px; font-weight: 600; }
+.chip.ERROR { background: var(--error-f); color: var(--error); } .chip.ALERTA { background: var(--alerta-f); color: var(--alerta); } .chip.INFO { background: var(--info-f); color: var(--info); }
+.chip.OK { background: var(--ok-f); color: var(--ok); } .chip.REVISAR { background: var(--error-f); color: var(--error); }
+td input, td select { width: 100%; padding: 4px 6px; font-size: 12.5px; }
+.barra { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.barra .esp { flex: 1; }
+.vacio { text-align: center; color: var(--texto-2); padding: 40px 10px; }
+.formatos-lista { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.fmt-card { border: 1px solid var(--borde); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.fmt-card b { font-size: 15px; } .fmt-card small { color: var(--texto-2); }
+.aviso { background: var(--alerta-f); color: var(--alerta); padding: 10px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; }
+.oculto { display: none !important; }
+#toast { position: fixed; bottom: 18px; right: 18px; background: var(--texto); color: var(--panel); padding: 10px 14px; border-radius: 8px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 420px; white-space: pre-line; }
+#toast.ver { opacity: .95; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Exógena YC</h1>
+  <span id="hdr-empresa" style="opacity:.85"></span>
+  <span class="sello">🔒 Sin conexión: los balances no salen de este equipo</span>
+</header>
+<div class="app">
+  <aside>
+    <h3>Empresas</h3>
+    <div id="lista-empresas"></div>
+    <button class="prim" id="btn-nueva">+ Nueva empresa</button>
+    <h3>Configuración general</h3>
+    <div class="empresa-item" id="nav-normativo"><b>Parámetros normativos</b><small>Conceptos, topes, versiones</small></div>
+    <h3>Respaldo</h3>
+    <button id="btn-exportar-todo">Exportar configuración</button>
+    <button id="btn-importar-todo">Importar configuración</button>
+    <input type="file" id="in-importar" accept=".json" class="oculto">
+    <small style="color:var(--texto-2)">La configuración se guarda en este navegador. Exporte un respaldo después de parametrizar.</small>
+  </aside>
+  <main id="principal"></main>
+</div>
+<div id="toast"></div>
+<script>/*__XLSX__*/</script>
+<script>/*__MOTOR__*/</script>
+<script>/*__CONFIG__*/</script>
+<script>/*__UI__*/</script>
+</body>
+</html>
