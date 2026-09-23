@@ -13,7 +13,8 @@
   ];
   const CAMPOS_TERCERO = new Set(["tipo_documento", "numero_identificacion", "dv", "primer_apellido", "segundo_apellido",
     "primer_nombre", "otros_nombres", "razon_social", "direccion", "codigo_departamento", "codigo_municipio", "pais"]);
-  const CAMPOS_TEXTO = new Set([...CAMPOS_TERCERO, "concepto", "entidad_informante"]);
+  const CAMPOS_TEXTO = new Set([...CAMPOS_TERCERO, "concepto", "entidad_informante",
+    "tipo_doc_dependiente", "nit_dependiente", "id_fideicomiso", "tipo_doc_colaboracion", "nit_colaboracion"]);
 
   // ------------------------------------------------------------------ utilidades
   const $ = (s, el = document) => el.querySelector(s);
@@ -33,8 +34,8 @@
   function normativoDefecto() {
     const p = DEF.parametros;
     const formatos = {};
-    Object.entries(DEF.formatos).forEach(([k, f]) => { formatos[k] = { version: f.version, verificado: !!f.verificado, columnas_verificadas: f.columnas_verificadas !== false }; });
-    return { version: NORMATIVO_VERSION, formatos, topes: copia(p.topes), uvt: copia(p.uvt), cuantias_menores: copia(p.cuantias_menores),
+    Object.entries(DEF.formatos).forEach(([k, f]) => { formatos[k] = { version: f.version, verificado: !!f.verificado }; });
+    return { version: NORMATIVO_VERSION, formatos, prevalidadores: [], topes: copia(p.topes), uvt: copia(p.uvt), cuantias_menores: copia(p.cuantias_menores),
       conceptos: copia(DEF.conceptos), paises: copia(DEF.paises), no_agrupar_si_retencion: p.no_agrupar_si_retencion !== false };
   }
   function empresaNueva(nombre, nit) {
@@ -42,10 +43,11 @@
       direccion: "", codigo_departamento: "", codigo_municipio: "", fuente: "siigo", orden_nombre: "apellidos_nombres",
       cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas), reglasVersion: REGLAS_VERSION, correcciones: {}, revisiones: {}, diagnostico: {} };
   }
-  const NORMATIVO_VERSION = 2, REGLAS_VERSION = 2;   // 2 = Res. 227/2025 (mod. 233/2025)
+  // normativo 2 = Res. 227/2025 (mod. 233/2025); 3 = columnas, conceptos y países del prevalidador DIAN
+  const NORMATIVO_VERSION = 3, REGLAS_VERSION = 2;
   let normGuardado = leerLS(LS_NORMATIVO, null);
   const migrado = normGuardado && (normGuardado.version || 1) < NORMATIVO_VERSION;
-  if (!normGuardado || migrado) normGuardado = normativoDefecto();
+  if (!normGuardado || migrado) normGuardado = { ...normativoDefecto(), prevalidadores: (normGuardado && normGuardado.prevalidadores) || [] };
   const E = {
     empresas: leerLS(LS_EMPRESAS, []),
     normativo: normGuardado,
@@ -76,8 +78,8 @@
     Object.entries(n.formatos).forEach(([k, f]) => {
       if (!cfg.formatos[k]) return;
       cfg.formatos[k].version = f.version; cfg.formatos[k].verificado = f.verificado;
-      if (f.columnas_verificadas !== undefined) cfg.formatos[k].columnas_verificadas = f.columnas_verificadas;
     });
+    cfg.prevalidadores = prevalidadores();
     cfg.conceptos = copia(n.conceptos);
     if (n.paises) cfg.paises = copia(n.paises);
     cfg.reglas = copia(emp.reglas);
@@ -310,7 +312,7 @@
       `<option value="EXCLUIR" ${sel === "EXCLUIR" ? "selected" : ""}>EXCLUIR — no se reporta</option>`;
   }
   function subVerificar(s, r) {
-    s.innerHTML = r.sinVerificar.length ? `<div class="aviso">Estos parámetros se usaron sin haber sido contrastados con la resolución DIAN y el anexo técnico del año gravable. Verifíquelos en <b>Parámetros normativos</b> y márquelos como verificados.</div>
+    s.innerHTML = r.sinVerificar.length ? `<div class="aviso">Estos parámetros se usaron sin haber sido contrastados con la resolución DIAN del año gravable. Verifíquelos en <b>Parámetros normativos</b>. El orden de columnas se verifica solo al cargar allí el prevalidador DIAN de la misma versión del formato.</div>
       <div class="tabla-wrap"><table><thead><tr><th>Parámetro</th></tr></thead><tbody>${r.sinVerificar.map((x) => `<tr><td>${esc(x)}</td></tr>`).join("")}</tbody></table></div>
       <div class="barra" style="margin-top:12px"><button class="prim" id="ir-norm">Ir a Parámetros normativos</button></div>`
       : `<div class="vacio">Todos los parámetros usados están verificados.</div>`;
@@ -507,17 +509,68 @@
     pintar(); errores();
   }
 
+  // ---------------- Prevalidadores DIAN (fuente del orden de columnas)
+  function prevalidadores() {
+    const propios = E.normativo.prevalidadores || [];   // los cargados reemplazan a los de fábrica con el mismo nombre
+    return (DEF.prevalidadores || []).filter((d) => !propios.some((x) => x.nombre === d.nombre)).concat(propios);
+  }
+  // Estado del orden de columnas de un formato para una versión dada (la vigente y las de años anteriores)
+  function estadoCols(k, version) {
+    return Exogena.estadoColumnas(k, { columnas: DEF.formatos[k].columnas, version }, prevalidadores());
+  }
+  function celdaCols(k) {
+    const f = DEF.formatos[k], vs = [[E.normativo.formatos[k].version, "vigente"]], anios = {};
+    Object.entries(f.version_por_anio || {}).forEach(([a, v]) => { (anios[v] = anios[v] || []).push(a); });
+    Object.entries(anios).forEach(([v, as]) => { if (!vs.some(([x]) => Number(x) === Number(v))) vs.push([v, "AG " + as.sort().join(" y ")]); });
+    return vs.map(([v, et]) => {
+      const e = estadoCols(k, v);
+      const txt = e.verificado ? `✓ v${v} (${et}) = ${esc(e.fuente)}${e.omitidas.length ? ` · omite ${e.omitidas.length} opcional(es)` : ""}`
+        : e.diferencias.length ? `✗ v${v} (${et}) difiere de ${esc(e.fuente)}: ${esc(e.diferencias.slice(0, 3).join(" · "))}`
+        : `— v${v} (${et}): falta el prevalidador de esa versión`;
+      return `<div class="${e.verificado ? "" : "ayuda"}" title="${esc(e.omitidas.join("; "))}">${txt}</div>`;
+    }).join("");
+  }
+  // Carga un prevalidador .xlsm: guarda su layout y completa conceptos y países con sus tablas
+  function cargarPrevalidador(file, alTerminar) {
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const p = Exogena.leerPrevalidador(XLSX, new Uint8Array(fr.result), file.name);
+        if (!Object.keys(p.formatos).length) throw new Error("no se encontraron hojas de formatos");
+        const n = E.normativo;
+        n.prevalidadores = (n.prevalidadores || []).filter((x) => x.nombre !== p.nombre)
+          .concat([{ nombre: p.nombre, formatos: Object.fromEntries(Object.entries(p.formatos).map(([k, v]) => [k, { version: v.version, columnas: v.columnas }])) }]);
+        let nuevos = 0, marcados = 0;
+        Object.entries(p.formatos).forEach(([fmt, v]) => v.conceptos.forEach(([c, d]) => {
+          const ex = n.conceptos.find((x) => x.formato === fmt && x.concepto === c);
+          if (!ex) { n.conceptos.push({ formato: fmt, concepto: c, descripcion: d, verificado: "SI", fuente: p.nombre }); nuevos++; }
+          else if (String(ex.verificado).toUpperCase() !== "SI") { ex.verificado = "SI"; ex.fuente = (ex.fuente ? ex.fuente + "; " : "") + p.nombre; marcados++; }
+        }));
+        let paises = 0;
+        n.paises = n.paises || copia(DEF.paises);
+        p.paises.forEach(([c, nom]) => { if (!n.paises.some((x) => x.codigo === c)) { n.paises.push({ codigo: c, nombre: nom, alias: "" }); paises++; } });
+        guardar(); E.resultado = null;
+        const vers = Object.entries(p.formatos).map(([k, v]) => `${k} v${v.version}`).join(", ");
+        toast(`Prevalidador ${p.nombre} cargado (${vers}). Conceptos nuevos: ${nuevos}, verificados: ${marcados}, países nuevos: ${paises}.`);
+        alTerminar();
+      } catch (err) { toast("No se pudo leer el prevalidador: " + err.message); }
+    };
+    fr.readAsArrayBuffer(file);
+  }
+
   // ---------------- Parámetros normativos (comunes a todas las empresas)
   function renderNormativo(m) {
     const n = E.normativo;
     m.innerHTML = `<div class="panel"><h2>Parámetros normativos</h2>
       <div class="aviso">Aplican a todas las empresas. Contraste cada valor con la resolución de exógena vigente para el año gravable y su anexo técnico, y márquelo como verificado. Mientras haya parámetros usados sin verificar, el aplicativo no da el dictamen "Listo para prevalidador".</div>
       <div class="barra"><button class="peligro" id="n-reset">Restaurar valores de fábrica</button></div></div>
-      <div class="panel"><h2>Formatos</h2><div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Nombre</th><th>Versión</th><th>Versión verificada</th><th>Columnas verificadas (anexo)</th></tr></thead><tbody>
+      <div class="panel"><h2>Formatos</h2><div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Nombre</th><th>Versión</th><th>Versión verificada</th><th>Orden de columnas vs. prevalidador DIAN</th></tr></thead><tbody>
       ${Object.entries(DEF.formatos).map(([k, f]) => `<tr><td>${k}</td><td>${esc(f.nombre)}</td><td><input type="number" data-fv="${k}" value="${esc(n.formatos[k].version)}" style="width:80px"></td>
         <td><input type="checkbox" data-fchk="${k}" ${n.formatos[k].verificado ? "checked" : ""}></td>
-        <td><input type="checkbox" data-fcol="${k}" ${n.formatos[k].columnas_verificadas ? "checked" : ""}></td></tr>`).join("")}</tbody></table></div>
-      <p class="ayuda" style="margin-top:8px">Versión verificada contra la Res. 227/2025 art. 1.3.10.1 y sus modificaciones. El orden de columnas sale del anexo técnico de cada formato (PDF de la DIAN): márquelo solo después de compararlo.</p></div>
+        <td style="font-size:12px">${celdaCols(k)}</td></tr>`).join("")}</tbody></table></div>
+      <p class="ayuda" style="margin-top:8px">Versión verificada contra la Res. 227/2025 art. 1.3.10.1 y sus modificaciones. El orden de columnas no se marca a mano: se compara, encabezado por encabezado, con el prevalidador oficial de la DIAN de la <b>misma versión</b>.</p>
+      <div class="barra"><button class="prim" id="n-prev-b">Cargar prevalidador DIAN (.xlsm)</button><input type="file" id="n-prev" accept=".xlsm,.xlsx" class="oculto">
+        <span class="ayuda">Cargados: ${prevalidadores().map((p) => esc(p.nombre)).join(", ") || "ninguno"}. Cuando la DIAN publique el prevalidador del año gravable, cárguelo aquí: verifica el orden de columnas y completa conceptos y países.</span></div></div>
       <div class="panel"><h2>Cuantías menores</h2><p class="ayuda">Por debajo del tope (por tercero y concepto) los valores se agrupan en el NIT de cuantías menores.</p>
       <div class="grid-form"><label>NIT cuantías menores<input data-cm="nit" value="${esc(n.cuantias_menores.nit)}"></label>
         <label>Tipo de documento<input data-cm="tipo_documento" value="${esc(n.cuantias_menores.tipo_documento)}"></label>
@@ -540,7 +593,8 @@
     const cambio = () => { guardar(); E.resultado = null; };
     $$("[data-fv]", m).forEach((i) => i.oninput = () => { n.formatos[i.dataset.fv].version = Number(i.value); cambio(); });
     $$("[data-fchk]", m).forEach((i) => i.onchange = () => { n.formatos[i.dataset.fchk].verificado = i.checked; cambio(); });
-    $$("[data-fcol]", m).forEach((i) => i.onchange = () => { n.formatos[i.dataset.fcol].columnas_verificadas = i.checked; cambio(); });
+    $("#n-prev-b").onclick = () => $("#n-prev").click();
+    $("#n-prev").onchange = (e) => { const f = e.target.files[0]; if (f) cargarPrevalidador(f, () => renderNormativo(m)); };
     $$("[data-cm]", m).forEach((i) => i.oninput = () => { n.cuantias_menores[i.dataset.cm] = i.value.trim(); cambio(); });
     $("[data-cmchk]", m).onchange = (e) => { n.cuantias_menores.verificado = e.target.checked; cambio(); };
     $("#n-noag").onchange = (e) => { n.no_agrupar_si_retencion = e.target.checked; cambio(); };
@@ -570,7 +624,7 @@
     $("#p-add").onclick = () => { n.paises.push({ codigo: "", nombre: "", alias: "" }); cambio(); pintarP(); };
     $("#c-add").onclick = () => { n.conceptos.push({ formato: "1001", concepto: "", descripcion: "", verificado: "NO" }); cambio(); pintarC(); };
     $("#c-todos").onclick = () => { if (confirm("¿Confirma que contrastó TODOS los conceptos con el anexo técnico vigente?")) { n.conceptos.forEach((c) => { c.verificado = "SI"; }); cambio(); pintarC(); } };
-    $("#n-reset").onclick = () => { if (confirm("¿Restaurar todos los parámetros normativos a los valores de fábrica?")) { E.normativo = normativoDefecto(); guardar(); render(); } };
+    $("#n-reset").onclick = () => { if (confirm("¿Restaurar todos los parámetros normativos a los valores de fábrica? Se conservan los prevalidadores cargados.")) { E.normativo = { ...normativoDefecto(), prevalidadores: n.prevalidadores || [] }; guardar(); render(); } };
   }
 
 
@@ -1043,6 +1097,6 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
   Object.keys(nd.formatos).forEach((k) => { if (!E.normativo.formatos[k]) E.normativo.formatos[k] = nd.formatos[k]; });
   Object.keys(nd.topes).forEach((k) => { if (!E.normativo.topes[k]) E.normativo.topes[k] = nd.topes[k]; });
   if (!E.empresas.find((x) => x.id === E.activa)) E.activa = E.empresas[0] ? E.empresas[0].id : null;
-  if (migrado) { guardar(); setTimeout(() => toast("Parámetros normativos actualizados a la Res. 227/2025 (mod. 233/2025)."), 300); }
+  if (migrado) { guardar(); setTimeout(() => toast("Parámetros normativos actualizados: columnas, conceptos y países del prevalidador DIAN."), 300); }
   render();
 })();

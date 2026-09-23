@@ -1,0 +1,3972 @@
+{
+ "nombre": "Prevalidador_Tributario_Informantes_AG2025_v3.3.0-26",
+ "formatos": {
+  "1001": {
+   "version": 10,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto3",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Dirección",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Código dpto",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Código mcp",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": false,
+     "tabla": "D_2_109",
+     "xml": "mun"
+    },
+    {
+     "encabezado": "País de Residencia o domicilio",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Pago o abono en cuenta deducible",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pago"
+    },
+    {
+     "encabezado": "Pago o abono en cuenta NO deducible",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pnded"
+    },
+    {
+     "encabezado": "IVA mayor valor del costo o gasto, deducible",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ided"
+    },
+    {
+     "encabezado": "IVA mayor valor del costo o gasto no deducible",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "inded"
+    },
+    {
+     "encabezado": "Retención en la fuente practicada Renta",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "retp"
+    },
+    {
+     "encabezado": "Retención en la fuente asumida Renta",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "reta"
+    },
+    {
+     "encabezado": "Retención en la fuente practicada IVA a responsables del IVA",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "comun"
+    },
+    {
+     "encabezado": "Retención en la fuente practicada IVA a no residentes o no domiciliados",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ndom"
+    }
+   ],
+   "conceptos": [
+    [
+     "5002",
+     "Honorarios"
+    ],
+    [
+     "5003",
+     "Comisiones"
+    ],
+    [
+     "5004",
+     "Servicios"
+    ],
+    [
+     "5005",
+     "Arrendamientos"
+    ],
+    [
+     "5006",
+     "Intereses y rendimientos financieros causados"
+    ],
+    [
+     "5007",
+     "Compra de activos movibles (E.T.Art 60)"
+    ],
+    [
+     "5008",
+     "Compra de Activos Fijos (E.T. Art 60)"
+    ],
+    [
+     "5010",
+     "Pagos o Abonos en cuenta por concepto de aportes parafiscales al SENA, a las Cajas de Compensación Familiar y al Instituto Colombiano de Bienestar Familiar"
+    ],
+    [
+     "5011",
+     "Pagos o abonos en cuenta efectuado a las empresas promotoras de salud EPS y los aportes al Sistema de Riesgos Laborales, incluidos los aportes del trabajador"
+    ],
+    [
+     "5012",
+     "Pagos o abonos en cuenta por concepto de aportes obligatorios para pensiones efectuados a los Fondos de Pensiones, incluidos los aportes del trabajador"
+    ],
+    [
+     "5013",
+     "Donaciones en dinero efectuadas a las entidades señaladas en los artículos 125, 125-4,126-2 y 158-1 del Estatuto Tributario y la establecida en el artículo 16 de la Ley 814 de 2003, y demás que determine la ley"
+    ],
+    [
+     "5014",
+     "Donaciones en activos diferentes a dinero efectuadas a las entidades señaladas en los artículos 125, 125-4,126-2 y 158-1 del Estatuto Tributario y la establecida en el artículo 16 de la Ley 814 de 2003, y demás que determine la ley"
+    ],
+    [
+     "5015",
+     "El valor de los impuestos solicitados como deducción"
+    ],
+    [
+     "5016",
+     "Los demás costos y deducciones"
+    ],
+    [
+     "5018",
+     "Importe de las primas de reaseguros pagados o abonados en cuenta"
+    ],
+    [
+     "5019",
+     "El monto de las amortizaciones realizadas"
+    ],
+    [
+     "5020",
+     "Compra de activos fijos reales productivos sobre los cuales solicitó deducción, art. 158-3 E.T. No debe incluirse en concepto 5008."
+    ],
+    [
+     "5023",
+     "Valor acumulado de los pagos o abonos en cuenta al exterior por asistencia técnica"
+    ],
+    [
+     "5024",
+     "Valor acumulado de los pagos o abonos en cuenta al exterior por marcas"
+    ],
+    [
+     "5025",
+     "Valor acumulado de los pagos o abonos en cuenta al exterior por patentes"
+    ],
+    [
+     "5026",
+     "valor acumulado de los pagos o abonos en cuenta al exterior por regalías"
+    ],
+    [
+     "5027",
+     "Valor acumulado de los pagos o abonos en cuenta al exterior por servicios técnicos"
+    ],
+    [
+     "5028",
+     "El valor acumulado de la devolución de pagos o abonos en cuenta y retenciones correspondientes a operaciones de años anteriores."
+    ],
+    [
+     "5029",
+     "Gastos pagados por anticipado por Compras"
+    ],
+    [
+     "5030",
+     "Gastos pagados por anticipado por Honorarios"
+    ],
+    [
+     "5031",
+     "Gastos pagados por anticipado por Comisiones"
+    ],
+    [
+     "5032",
+     "Gastos pagados por anticipado por Servicios"
+    ],
+    [
+     "5033",
+     "Gastos pagados por anticipado por Arrendamientos"
+    ],
+    [
+     "5034",
+     "Gastos pagados por anticipado por intereses y rendimientos financieros"
+    ],
+    [
+     "5035",
+     "Gastos pagados por anticipado por otros conceptos"
+    ],
+    [
+     "5044",
+     "El pago por loterías, rifas, apuestas y similares"
+    ],
+    [
+     "5045",
+     "Retención sobre ingresos de tarjetas débito y crédito"
+    ],
+    [
+     "5046",
+     "Enajenación de activos fijos de personas naturales ante oficinas de tránsito y otras entidades autorizadas"
+    ],
+    [
+     "5047",
+     "Importe de los siniestros por lucro cesante pagados o abonados en cuenta"
+    ],
+    [
+     "5048",
+     "Importe de los siniestros por daño emergente pagados o abonados en cuenta"
+    ],
+    [
+     "5053",
+     "Retenciones practicas a titulo de timbre"
+    ],
+    [
+     "5054",
+     "La devolución de retenciones a título de impuesto de timbre, correspondientes a operaciones de años anteriores"
+    ],
+    [
+     "5055",
+     "Viaticos"
+    ],
+    [
+     "5056",
+     "Gastos de representacion"
+    ],
+    [
+     "5058",
+     "Valor de los Aportes, Tasas y Contribuciones solicitado como deducción"
+    ],
+    [
+     "5059",
+     "El pago o abono en cuenta realizado a cada uno de los cooperados, del valor del Fondo para revalorización de aportes"
+    ],
+    [
+     "5060",
+     "Redención de inversiones en lo que corresponde al reembolso del capital por titulos de capitalizacion"
+    ],
+    [
+     "5061",
+     "Utilidades Pagadas o abonadas en cuenta, cuando el beneficiario es diferente al fideicomitente"
+    ],
+    [
+     "5063",
+     "Intereses y rendimientos financieros efectivamente pagados"
+    ],
+    [
+     "5064",
+     "Devoluciones de saldos de aportes pensionales pagados"
+    ],
+    [
+     "5065",
+     "Excedentes pensionales de libre disponibilidad componente de capital pagados"
+    ],
+    [
+     "5066",
+     "El valor del impuesto nacional al consumo"
+    ],
+    [
+     "5067",
+     "El valor acumulado de los pagos o abonos en cuenta al exterior por consultoría"
+    ],
+    [
+     "5068",
+     "Participaciones o dividendos pagados o abonados en cuenta en calidad de exigibles correspondientes a 2016 y anteriores, parágrafo 2 artículo 49 E.T."
+    ],
+    [
+     "5069",
+     "Participaciones o dividendos pagados o abonados en cuenta en calidad de exigibles correspondientes a 2016 y anteriores, numeral 3 del artículo 49 E.T."
+    ],
+    [
+     "5070",
+     "Participaciones o dividendos pagados o abonados en cuenta en calidad de exigibles correspondientes a 2017 y siguientes, parágrafo 2 artículo 49 E.T."
+    ],
+    [
+     "5071",
+     "Participaciones o dividendos pagados o abonados en cuenta en calidad de exigibles correspondientes a 2017 y siguientes, numeral 3 del artículo 49 E.T."
+    ],
+    [
+     "5072",
+     "El importe de los siniestros por seguros de vida pagados o abonados en cuenta"
+    ],
+    [
+     "5073",
+     "Desembolsos por depósitos judiciales. Se debe identificar al beneficiario"
+    ],
+    [
+     "5074",
+     "Desembolsos por reintegros de depósitos judiciales. Se debe identificar al beneficiario"
+    ],
+    [
+     "5075",
+     "Regalías y explotación de la propiedad intelectual"
+    ],
+    [
+     "5076",
+     "Valor de utilidades distribuidas provenientes de diferimiento de ingresos, inciso 4 del art. 23-1 del E.T."
+    ],
+    [
+     "5079",
+     "Intereses por deuda a vinculados en subcapitalización art.118-1 E.T."
+    ],
+    [
+     "5080",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por servicios audiovisuales digitales (entre otros, de música, videos, películas y juegos de cualquier tipo, así como la radiodifusión de cualquier tipo de evento).Art.437-2 num.8 E.T."
+    ],
+    [
+     "5081",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por servicios prestados a través de plataformas digitales. Art.437-2 num.8 E.T."
+    ],
+    [
+     "5082",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por suministro de servicios de publicidad online. Art.437-2 num.8 E.T."
+    ],
+    [
+     "5083",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por suministro de enseñanza o entrenamiento a distancia. Art.437-2 num.8 E.T."
+    ],
+    [
+     "5084",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por suministro de derechos de uso o explotación de intangibles. Art.437-2 num.8 E.T."
+    ],
+    [
+     "5085",
+     "El valor acumulado de los pagos o abonos efectuados a proveedores del exterior por Otros servicios electrónicos o digitales con destino a usuarios ubicados en Colombia. Art.437-2 num.8 E.T."
+    ],
+    [
+     "5086",
+     "Valor retención en la fuente trasladada a terceros por participaciones o dividendos recibidos de sociedades nacionales E.T. art. 242-1 par.1"
+    ],
+    [
+     "5087",
+     "Valor de los puntos premio redimidos en el período que afectan el gasto directamente, procedentes de programas de fidelización."
+    ],
+    [
+     "5088",
+     "Costos y gastos por diferencia en cambio.Se debe repoortar con el NIT del informante"
+    ],
+    [
+     "5089",
+     "Valor compra de acciones, cuotas o partes de interés social o aportes de sociedades que no cotizan en bolsa"
+    ],
+    [
+     "5090",
+     "Valor donación de acciones, cuotas o partes de interés social o aportes de sociedades que no cotizan en bolsa"
+    ],
+    [
+     "5091",
+     "Valor cesión de acciones, cuotas o partes de interés social o aportes de sociedades que no cotizan en bolsa"
+    ],
+    [
+     "5092",
+     "Valor del pago que constituye ingreso en especie para el beneficio Art 29-1E. T"
+    ],
+    [
+     "5093",
+     "Donaciones de bebidas ultraprocesadas y azucaradas a los bancos de alimentos por los responsables del impuesto a estos bienes ET art 513-1, par 5 adicionado por el art 54 L 2277/2022"
+    ],
+    [
+     "5094",
+     "Donaciones de productos comestibles ultraprocesados industrialmente y/o con alto contenido de azucares añadidos, sodio o grasas saturadas a los bancos de alimentos por los responsables del impuesto a estos bienes ET art 513-1, par 5 adicionado por el art 54 L 2277/2022"
+    ],
+    [
+     "5095",
+     "Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de hidrocarburos por entes diferentes a los organismos descentralizados. ET art 115 par 1"
+    ],
+    [
+     "5096",
+     "Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de gas por entes diferentes a los organismos descentralizados. ET art 115 par 1"
+    ],
+    [
+     "5097",
+     "Pago por concepto de regalías pagadas a la nación u otros entes territoriales por la explotación de carbón por entes diferentes a los organismos descentralizados. ET art 115 par 1"
+    ],
+    [
+     "5098",
+     "Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de otros minerales y piedras preciosas por entes diferentes a los organismos descentralizados. ET art 115 par 1"
+    ],
+    [
+     "5099",
+     "Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de sal y materiales de construcción por entes diferentes a los organismos descentralizados. ET art 115 par 1"
+    ],
+    [
+     "5100",
+     "Valor del Pago o abono en cuenta por prima en colocación de acciones y otros conceptos patrimoniales, sin incluir los reembolsos de aportes."
+    ],
+    [
+     "5101",
+     "Valor del Gravamen a los movimientos financieros – GMF."
+    ],
+    [
+     "5102",
+     "Valor de los pagos por apoyos económicos no reembolsables o condonados para financiar educación con recurso públicos art. 46 E.T"
+    ]
+   ]
+  },
+  "1003": {
+   "version": 7,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto5",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDoctoBB",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación del informado",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Dirección",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Código del Departamento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Código del Municipio",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": true,
+     "tabla": "D_2_109",
+     "xml": "mcpo"
+    },
+    {
+     "encabezado": "Valor acumulado del pago o abono sujeto a Retención en la fuente",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "valor"
+    },
+    {
+     "encabezado": "Retención que le practicaron",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ret"
+    }
+   ],
+   "conceptos": [
+    [
+     "1301",
+     "Retenciones por salarios y demàs pagos laborales"
+    ],
+    [
+     "1302",
+     "Retenciones por ventas"
+    ],
+    [
+     "1303",
+     "Retenciones por Servicios"
+    ],
+    [
+     "1304",
+     "Retenciones por Honorarios"
+    ],
+    [
+     "1305",
+     "Retenciones por Comisiones"
+    ],
+    [
+     "1306",
+     "Retenciones por Intereses y Rendimientos Financieros"
+    ],
+    [
+     "1307",
+     "Retenciones por Arrendamientos"
+    ],
+    [
+     "1308",
+     "Retencion por Otros conceptos"
+    ],
+    [
+     "1309",
+     "Retención en la fuente en el Impuesto a las ventas."
+    ],
+    [
+     "1310",
+     "Retención por dividendos y participaciones"
+    ],
+    [
+     "1311",
+     "Retención por enajenación de activos fijos de personas naturales ante oficinas de tránsito y otras entidades autorizadas"
+    ],
+    [
+     "1312",
+     "Retención por ingresos de tarjetas débito y crédito"
+    ],
+    [
+     "1313",
+     "Retención por loterías, rifas, apuestas y similares"
+    ],
+    [
+     "1314",
+     "Retención por Impuesto de Timbre"
+    ],
+    [
+     "1320",
+     "Retención por dividendos y participaciones recibidas por sociedades nacionales art. 242-1 del E.T."
+    ]
+   ]
+  },
+  "1005": {
+   "version": 8,
+   "columnas": [
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Impuesto Descontable",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "vimp"
+    },
+    {
+     "encabezado": "IVA resultante por devoluciones en ventas anuladas, rescindidas o resueltas",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ivade"
+    },
+    {
+     "encabezado": "IVA tratado como mayor valor del costo o gasto (Art.490 E.T)",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "ivavcg"
+    }
+   ],
+   "conceptos": []
+  },
+  "1006": {
+   "version": 8,
+   "columnas": [
+    {
+     "encabezado": "Tipo de Documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTIPOSDOCTO",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Impuesto generado",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "imp"
+    },
+    {
+     "encabezado": "IVA recuperado en devoluciones en compras anuladas. rescindidas o resueltas",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "iva"
+    },
+    {
+     "encabezado": "Impuesto nacional al consumo",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "icon"
+    }
+   ],
+   "conceptos": []
+  },
+  "1007": {
+   "version": 9,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto_F1007_V9",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "País de Residencia o domicilio",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Ingresos brutos recibidos",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ibru"
+    },
+    {
+     "encabezado": "Devoluciones, rebajas y descuentos",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "dred"
+    }
+   ],
+   "conceptos": [
+    [
+     "4001",
+     "Ingresos Brutos de Actividades Ordinarias"
+    ],
+    [
+     "4002",
+     "Otros Ingresos Brutos"
+    ],
+    [
+     "4003",
+     "Ingresos por intereses y rendimientos financieros"
+    ],
+    [
+     "4004",
+     "Ingresos por intereses Correspondientes a Creditos Hipotecarios"
+    ],
+    [
+     "4005",
+     "Ingresos a traves de Consorcios o Uniones Temporales"
+    ],
+    [
+     "4006",
+     "Ingresos a traves de Mandato o Administracion Delegada"
+    ],
+    [
+     "4007",
+     "Ingresos a traves de Exploracion y Explotacion de Hidrocarburos, Gases y Minerales"
+    ],
+    [
+     "4008",
+     "Ingresos a traves de Fiducia"
+    ],
+    [
+     "4009",
+     "Ingresos a traves de Terceros (Beneficiario)"
+    ],
+    [
+     "4011",
+     "Ingresos a traves de joint venture"
+    ],
+    [
+     "4012",
+     "Ingresos a traves de Cuentas en Participacion"
+    ],
+    [
+     "4013",
+     "Ingresos a traves de Convenios de Cooperacion con Entidades Publicas"
+    ],
+    [
+     "4014",
+     "Ingresos por ventas con puntos premio redimidos en el período, procedentes de programas de fidelización"
+    ],
+    [
+     "4015",
+     "Ingresos por puntos premio vencidos y no reclamados en el periodo, procedentes de programas de fidelización, artículo 28 numeral 8 del Estatuto Tributario. Se debe reportar con el NIT del informante."
+    ],
+    [
+     "4016",
+     "Ingresos por ventas con puntos premio redimidos en el período, incluidos en el concepto 4015 que corresponden en años anteriores, en virtud de la aplicación del artículo 28 numeral 8 del Estatuto Tributario. Se debe reportar con el NIT del informante."
+    ],
+    [
+     "4017",
+     "Ingresos por recuperaciones de costos y deducciones que constituyen renta líquida. Art.195 al 198 E.T. Las transacciones donde no se identifique un tercero informado se deben reportar con el NIT del informante."
+    ],
+    [
+     "4018",
+     "Ingresos por diferencia en cambio. Se debe reportar con el NIT del informante."
+    ],
+    [
+     "4019",
+     "Ingresos brutos constitutivos de ganancia ocasional"
+    ],
+    [
+     "4020",
+     "Ingresos brutos por ventas de acciones, cuotas o partes de interés social o aportes de sociedades que no cotizan en bolsa que constituyen renta (Incluye los títulos recibidos por cesión o donación)"
+    ],
+    [
+     "4021",
+     "Ingresos brutos por ventas de acciones, cuotas o partes de interés social o aportes de sociedades que no cotizan en bolsa que constituyen ganancia ocasional (Incluye los títulos recibidos por cesión o donación)"
+    ]
+   ]
+  },
+  "1008": {
+   "version": 7,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto7_2",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación deudor",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido deudor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido deudor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre deudor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres deudor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social deudor",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Dirección",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Código dpto",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Código mcp",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": false,
+     "tabla": "D_2_109",
+     "xml": "mun"
+    },
+    {
+     "encabezado": "País de Residencia o domicilio",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Saldo cuentas por cobrar al 31-12",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "sal"
+    }
+   ],
+   "conceptos": [
+    [
+     "1315",
+     "Saldo de las cuentas por cobrar a clientes"
+    ],
+    [
+     "1316",
+     "Saldo de las cuentas por cobrar a accionistas, socios, comuneros, cooperados y compañías vinculadas"
+    ],
+    [
+     "1317",
+     "Otras Cuentas por Cobrar"
+    ],
+    [
+     "1318",
+     "Valor total del saldo fiscal del deterioro de cartera, identificándolo con el NIT del deudor"
+    ]
+   ]
+  },
+  "1009": {
+   "version": 7,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto8",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación acreedor",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido acreedor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido acreedor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre acreedor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres acreedor",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social acreedor",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Dirección",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Código dpto",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Código mcp",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": false,
+     "tabla": "D_2_109",
+     "xml": "mun"
+    },
+    {
+     "encabezado": "País de Residencia o domicilio",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Saldo cuentas por pagar al 31-12",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "sal"
+    }
+   ],
+   "conceptos": [
+    [
+     "2201",
+     "Saldo de los pasivos con proveedores"
+    ],
+    [
+     "2202",
+     "Saldo de los pasivos con compañías vinculadas accionistas y socios"
+    ],
+    [
+     "2203",
+     "Saldo de las obligaciones financieras"
+    ],
+    [
+     "2204",
+     "Saldo de los pasivos por impuestos, gravámenes y tasas"
+    ],
+    [
+     "2206",
+     "Saldo de los demás pasivos,"
+    ],
+    [
+     "2207",
+     "Saldo del Pasivo determinado por el cálculo Actuarial, con el NIT del informante"
+    ],
+    [
+     "2208",
+     "Pasivos respaldados en documento de fecha cierta"
+    ],
+    [
+     "2209",
+     "Pasivos exclusivos de las compañías de seguros"
+    ],
+    [
+     "2211",
+     "Valor de los pasivos por depósitos judiciales. Se debe identicar al beneficiario"
+    ],
+    [
+     "2212",
+     "valor del pasivo por ingresos diferidos por puntos premio otorgados en programas de fidelización"
+    ],
+    [
+     "2213",
+     "valor del pasivo por ingresos diferidos contemplados en el art. 23-1 del E.T.,"
+    ],
+    [
+     "2214",
+     "Saldo de los pasivos por aportes parafiscales, salud, pensión y cesantías."
+    ],
+    [
+     "2215",
+     "Saldo de los pasivos laborales consolidados en cabeza del trabajador, sin incluir cesantías."
+    ],
+    [
+     "2216",
+     "El valor de saldo de los pasivos de entidades financieras donde no sea posible identificar al acreedor nacional. Se debe reportar con el NIT de la entidad informante."
+    ],
+    [
+     "2217",
+     "El valor de saldo de los pasivos de entidades financieras donde no sea posible identificar al acreedor del exterior. Se debe reportar con el NIT de la entidad informante."
+    ]
+   ]
+  },
+  "1010": {
+   "version": 9,
+   "columnas": [
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "Número identificación del socio o accionista",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido del accionista",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del accionista",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del accionista",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del accionista",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social del accionista",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "Dirección",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Código Departamento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Código Municipio",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": false,
+     "tabla": "D_2_109",
+     "xml": "mun"
+    },
+    {
+     "encabezado": "PAIS RESIDENCIA O DOMICILIO",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Valor Nominal de la Accion, Aporte o Derecho Social a 31 diciembre",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "valnom"
+    },
+    {
+     "encabezado": "Valor prima en colocacion de acciones a 31 diciembre",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "valprm"
+    },
+    {
+     "encabezado": "Porcentaje de participación",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "por"
+    },
+    {
+     "encabezado": "Porcentaje de participación (posición decimal)",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "dec"
+    }
+   ],
+   "conceptos": []
+  },
+  "1011": {
+   "version": 6,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConceptos_F1011_V6_2013",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Saldos al 31-12",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "sal"
+    }
+   ],
+   "conceptos": [
+    [
+     "1105",
+     "Saldo a 31 de Diciembre en caja"
+    ],
+    [
+     "1502",
+     "Valor patrimonial de vehiculos, maquinaria y equipo."
+    ],
+    [
+     "1512",
+     "Valor patrimonial de activos fijos intangibles"
+    ],
+    [
+     "1513",
+     "Valor patrimonial de los activos fijos agotables"
+    ],
+    [
+     "1519",
+     "Valor Patrimonial a 31 de diciembre de Activos Biológicos Plantas"
+    ],
+    [
+     "1520",
+     "Valor Patrimonial a 31 de diciembre de Activos Biológicos Animales"
+    ],
+    [
+     "1521",
+     "Valor Patrimonial de la casa o apartamento de habitación (inciso 2 art 295-3ET)"
+    ],
+    [
+     "1522",
+     "Valor Patrimonial de lotes rurales y fincas"
+    ],
+    [
+     "1523",
+     "Valor Patrimonial de lotes urbanos"
+    ],
+    [
+     "1524",
+     "Valor Patrimonial de otros bienes inmuebles. (No relacionados en los conceptos 1512, 1513y 1519)"
+    ],
+    [
+     "1525",
+     "Valor Patrimonial de otros bienes muebles."
+    ],
+    [
+     "1526",
+     "Valor Patrimonial de otros activos. (No relacionados en los artículos 29 y 30 de la presente resolución y en los conceptos de este articulo)"
+    ],
+    [
+     "1601",
+     "Inversiones Zomac realizadas en el año representadas en inventarios, propiedad planta y equipo y otras inversiones"
+    ],
+    [
+     "1602",
+     "Inversiones en Megainversiones en el año representadas en propiedad, planta y equipo."
+    ],
+    [
+     "1603",
+     "Inversiones realizadas por empresas de economía naranja de que trata el numeral 1 del artículo 235-2 del E.T., en propiedad, planta y equipo, intangibles de que trata el numeral 1 del artículo 74 e inversiones del numeral 3 del artículo 74-1, del E.T"
+    ],
+    [
+     "1604",
+     "Inversiones realizadas por empresas dedicas al desarrollo del campo colombiano de que trata el numeral 2 del artículo 235-2 del E.T., en propiedad, planta y equipo y activos biológicos productores"
+    ],
+    [
+     "8104",
+     "Renta exenta por venta energía eléctrica generada con base en energía eólica, biomasa o residuos agrícolas, solar, geotérmica o de los mares. Art.235-2 numeral 3."
+    ],
+    [
+     "8106",
+     "Renta exenta por aprovechamiento de nuevas plantaciones forestales incluida la guadua el caucho y el marañón. Art. 235-2 numeral 5 , Inciso 1"
+    ],
+    [
+     "8109",
+     "Renta exenta por prestación de servicio de transporte fluvial con embarcaciones y planchones de bajo calado Art. 235-2 numeral 6."
+    ],
+    [
+     "8111",
+     "Rentas exentas por la utilidad en la enajenación de predios destinados a fines de utilidad pública. Num 9 Art. 207-2 E.T. Sentencia C-083 del 2018"
+    ],
+    [
+     "8120",
+     "Rentas exentas por aplicación de algún convenio para evitar la doble tributación."
+    ],
+    [
+     "8121",
+     "Renta exenta por creaciones literarias dela economía naranja contenidas en el artículo 28 de la Ley 98 de 1993. Art. 235-2 numeral 8."
+    ],
+    [
+     "8125",
+     "Rentas exentas por Intereses, comisiones y pagos por deuda pública externa, E.T. art. 218 E.T."
+    ],
+    [
+     "8127",
+     "Rentas exentas por inversión en nuevos aserríos, plantas de procesamiento y plantaciones de árboles maderables y árboles en producción de frutos. E.T., art. 235-2, numeral 5.Incisos 2 y 3"
+    ],
+    [
+     "8133",
+     "Rentas exentas por servicios prestados en hoteles nuevos. E.T., Art. 207-2, Num 3 Sentencia C 235 del 29 de mayo de 2019"
+    ],
+    [
+     "8134",
+     "Rentas exentas por servicios prestados en hoteles remodelado y/o ampliados. E.T., Art. 207-2 E.T, Num. 4. Sentencia C 235 del 29 de mayo de 2019"
+    ],
+    [
+     "8140",
+     "Rentas exentas por aportes voluntarios a los fondos de pensiones. E.T. art. 126-1, inc. 2"
+    ],
+    [
+     "8141",
+     "Rentas exentas por los ahorros a largo plazo para el fomento de la construcción. E.T., art. 126-4."
+    ],
+    [
+     "8142",
+     "Rentas exentas del beneficio neto o excedente para las entidades sin ánimo de lucro. E.T., art 358 E.T."
+    ],
+    [
+     "8145",
+     "Rentas exentas de fondos provenientes de auxilios o donaciones de entidades o gobiernos extranjeros. Convenidos con el Gobierno colombiano, destinados a programas de utilidad común y registrados por la Agencia Presidencial de la Cooperación Internacional. Art. 96 L. 788/2002"
+    ],
+    [
+     "8156",
+     "Rentas exentas prestaciones provenientes de un fondo de pensiones. E.T. art. 207."
+    ],
+    [
+     "8159",
+     "Renta exenta pago principal y demás rendimientos generados en actividades financieras por parte de entidades gubernamentales de carácter financiero y de cooperación para el desarrollo. E.T., art. 207-2, numeral 12."
+    ],
+    [
+     "8160",
+     "Rentas exentas de los industriales de la cinematografía, personas naturales. L. 397/1997, art. 46."
+    ],
+    [
+     "8164",
+     "Renta exenta por la utilidad en la enajenación de predios destinados al desarrollo de proyectos de vivienda interés social y/o prioritario. Art. 235-2 numeral 4, literal a)"
+    ],
+    [
+     "8165",
+     "Renta exenta por la utilidad en la primera enajenación de viviendas de interés social y/o prioritario. E.T., art. 235-2, numeral 4, literal b)."
+    ],
+    [
+     "8167",
+     "Renta exenta de que trata L. 546/1999, art. 16. Modificado. L. 964/2005 asociados a proyectos de vivienda de interés y prioritario. E.T., art. 235-2, numeral 4, literal d)."
+    ],
+    [
+     "8168",
+     "Renta exenta por rendimientos financieros provenientes de créditos para adquisición de vivienda de interés social y/o prioritario. E.T., art. 235-2, numeral 4 literal e)"
+    ],
+    [
+     "8169",
+     "Renta exenta por los rendimientos generados por la reserva de estabilización que constituyen las entidades administradoras de fondos de pensiones y cesantías. Art. 101 de la Ley 100 de 1993. Art. 235-2 numeral 9."
+    ],
+    [
+     "8171",
+     "Renta exenta. Incentivo tributario para empresas de economía naranja E.T., Art. 235-2 numeral 1, E.T."
+    ],
+    [
+     "8172",
+     "Renta exenta. Incentivo tributario para el desarrollo del campo colombiano E.T., Art. 235-2 numeral 2, E.T."
+    ],
+    [
+     "8173",
+     "Renta exenta de capital por dividendos o participaciones distribuidos por no residentes a CHC y por prima en colocación de acciones. Art.895 E.T.."
+    ],
+    [
+     "8174",
+     "Renta exenta ganancia ocasional derivada de la venta o transmisión de la participación de una CHC en entidades no residentes. Art. 896 E.T"
+    ],
+    [
+     "8175",
+     "Renta exenta de las sumas destinadas al pago de los seguros de invalidez y de sobrevivientes dentro del mismo régimen de ahorro individual con solidaridad. L. 100/93, art. 135"
+    ],
+    [
+     "8176",
+     "Rentas exentas provenientes de bienes inmuebles situados en otro país de la CAN. Decisión 578 de 2004, art. 4"
+    ],
+    [
+     "8177",
+     "Rentas exentas provenientes de la explotación de recursos naturales en otro país de la CAN . Decisión 578 de 2004, art. 5"
+    ],
+    [
+     "8178",
+     "Rentas exentas por actividades empresariales efectuadas en otro país de la CAN. Decisión 578 de 2004, art. 6"
+    ],
+    [
+     "8179",
+     "Rentas exentas de empresas de transporte domiciliadas en otro país de la CAN. Decisión 578 de 2004, art. 8"
+    ],
+    [
+     "8180",
+     "Rentas exentas por regalías de bienes intangibles en un país miembro de la CAN. Decisión 578 de 2004, art. 9"
+    ],
+    [
+     "8181",
+     "Rentas exentas por intereses y demás rendimientos financieros cuyo pago se registra e imputa en otro país miembro de la CAN. Decisión 578 de 2004, art. 10"
+    ],
+    [
+     "8182",
+     "Rentas exentas por dividendos y participaciones distribuidos por empresas domiciliadas en otro país miembro de la CAN. Decisión 578 de 2004, art. 11."
+    ],
+    [
+     "8183",
+     "Rentas exentas por ganancias de capital obtenidas en la venta de bienes situados en otro país miembro de la CAN. Decisión 578 de 2004, art. 12"
+    ],
+    [
+     "8184",
+     "Renta exenta generados por la prestación de servicios personales prestados en otro país miembro de la CAN. Decisión 578 de 2004, art. 13."
+    ],
+    [
+     "8185",
+     "Rentas exentas por beneficios empresariales en servicios, servicios técnicos, asistencia técnica y consultoría prestados en otro país de la CAN. Decisión 578 de 2004, art. 14"
+    ],
+    [
+     "8186",
+     "Rentas exentas por pensiones y anualidades obtenidas de fuentes productoras situadas en otro país miembro de la CAN. . Decisión 578 de 2004, art. 15"
+    ],
+    [
+     "8187",
+     "Rentas exentas provenientes de actividades de entretenimiento público efectuadas en otro país miembro de la CAN. Decisión 578 de 2004, art. 16"
+    ],
+    [
+     "8200",
+     "Deducción en la declaración de renta por las inversiones realizadas en activos fijos reales productivos. E.T., Art. 158-3."
+    ],
+    [
+     "8207",
+     "Costo o deducción por salarios, prestaciones sociales y demás pagos laborales. No debe contener los valores especificados en otros conceptos."
+    ],
+    [
+     "8208",
+     "Deducción por pagos efectuados a la casa matriz. E.T., art. 124."
+    ],
+    [
+     "8209",
+     "Deducción por gastos en el exterior. E.T., art. 121. No debe contener los valores especificados en el concepto 8282 ni la diferencia en cambio."
+    ],
+    [
+     "8210",
+     "Costo en la enajenación de activos fijos poseídos por menos de dos años. E.T., art. 179."
+    ],
+    [
+     "8211",
+     "Deducción del gravamen a los movimientos financieros. E.T., art. 115."
+    ],
+    [
+     "8212",
+     "Deducción por agotamiento en explotación de hidrocarburos, E.T., art. 161."
+    ],
+    [
+     "8215",
+     "Deducción por intereses sobre préstamos educativos del Icetex y para adquisición de vivienda. E.T., art. 119, modificado por L. 2010/2019, art. 89."
+    ],
+    [
+     "8217",
+     "Deducción por donación o inversión en producción cinematográfica. L. 814/2003, art. 16."
+    ],
+    [
+     "8218",
+     "Deducción por protección, mantenimiento y conservación muebles e inmuebles de interés cultural, L. 1185/2008, art. 14."
+    ],
+    [
+     "8225",
+     "Deducción por donaciones del sector privado en la red nacional de bibliotecas públicas y biblioteca nacional. E.T., art 125. Modificado. L. 1819/2016, art. 75."
+    ],
+    [
+     "8228",
+     "Costo o deducción por las reparaciones locativas realizadas sobre inmuebles."
+    ],
+    [
+     "8230",
+     "Deducción por las inversiones realizadas en librerías. L. 98/1993, art. 30."
+    ],
+    [
+     "8231",
+     "Deducción por la inversión realizada en centros de reclusión. L.633/2000, art.98"
+    ],
+    [
+     "8233",
+     "Deducción de impuestos devengados y pagados. E.T. arts.115 y 115-1. No debe contener los valores especificados en otros conceptos."
+    ],
+    [
+     "8234",
+     "Costo o deducción de intereses. E.T., art. 117. No debe contener los valores especificados en el concepto 8236."
+    ],
+    [
+     "8236",
+     "Costo o deducción por contratos de leasing. E.T., art. 127-1."
+    ],
+    [
+     "8237",
+     "Deducción por costos y gastos por campañas de publicidad de productos extranjeros. E.T., art. 88-1"
+    ],
+    [
+     "8238",
+     "Deducción de la provisión de cartera de créditos y provisión de coeficiente de riesgo, provisiones realizadas durante el respectivo año gravable sobre bienes recibidos en dación en pago y sobre contratos de leasing. E.T., art.145, par.1. (Modificado. L. 1819/2016, art. 87)."
+    ],
+    [
+     "8239",
+     "Deducción por deudas manifiestamente pérdidas o sin valor. E.T., art. 146."
+    ],
+    [
+     "8240",
+     "Deducción por pérdida de activos. E.T. art. 148."
+    ],
+    [
+     "8241",
+     "Costo o deducción por aportes al Instituto Colombiano de Bienestar Familiar, (ICBF). E.T., art. 114."
+    ],
+    [
+     "8242",
+     "Costo o deducción por aportes a Cajas de Compensación Familiar. E.T., art. 115.1."
+    ],
+    [
+     "8243",
+     "Costo o deducción por aportes al Servicio Nacional de Aprendizaje, (SENA). E.T., art. 114."
+    ],
+    [
+     "8244",
+     "Deducción de contribuciones a fondos de pensiones de jubilación e invalidez y fondos de cesantías. E.T. Art. 126-1, modificado L. 1819/2016, art. 15."
+    ],
+    [
+     "8245",
+     "Deducción por concepto de cesantías pagadas, E.T., art. 109. No debe contener los valores especificados en los conceptos 8248, 8250, 8263 y 8271."
+    ],
+    [
+     "8246",
+     "Deducción por concepto de aportes a cesantías por los trabajadores independientes. E.T., art- 126-1, inciso 6."
+    ],
+    [
+     "8247",
+     "Deducción por concepto de contribuciones parafiscales agropecuarias efectuadas por los productores a los fondos de estabilización de la L. 101/1993. art 29"
+    ],
+    [
+     "8248",
+     "Deducción por salarios, prestaciones sociales y demás pagos laborales, pagados a viudas y huérfanos de miembros de las Fuerzas Armadas muertos en combate, secuestrados o desaparecidos. Art. 108-1 del E.T."
+    ],
+    [
+     "8249",
+     "Costo o deducción por apoyo de sostenimiento mensual de los trabajadores contratados como aprendices. L.115/1994, art. 189."
+    ],
+    [
+     "8250",
+     "Costo o deducción por salarios pagados, durante el cautiverio, a sus empleados víctimas de secuestros. L. 986/2005, art. 21."
+    ],
+    [
+     "8255",
+     "Costo o deducción por pagos a terceros por concepto de alimentación del trabajador y su familia o suministro de alimentación para los mismos."
+    ],
+    [
+     "8256",
+     "Costo o deducción por el pago de estudios a trabajadores en instituciones de educación superior. L. 30/1992, art. 124"
+    ],
+    [
+     "8257",
+     "Deducción por factor especial de agotamiento en explotación de hidrocarburos, E.T. art. 166."
+    ],
+    [
+     "8259",
+     "Deducción por tasas y contribuciones fiscales pagadas Art 115 ET"
+    ],
+    [
+     "8261",
+     "Deducción de la provisión para el pago de futuras pensiones. E.T., art. 112."
+    ],
+    [
+     "8263",
+     "Costo o deducción por salarios y prestaciones sociales a trabajadores con discapacidad no inferior al 25%. L.361/1997, art. 31."
+    ],
+    [
+     "8265",
+     "Deducción por aumento en la reserva técnica de FOGAFIN Y FOGACOOP. E.T., art. 19-3."
+    ],
+    [
+     "8271",
+     "Deducción por salarios y prestaciones sociales pagados a mujeres víctimas de violencia comprobada. L. 1257/2008, art. 23."
+    ],
+    [
+     "8272",
+     "Deducción del 100% por inversiones en infraestructura para la realización de espectáculos públicos. Art. 4 L. 1493/11."
+    ],
+    [
+     "8273",
+     "Deducción por inversiones en jardines botánicos. L. 299/1996, art. 12"
+    ],
+    [
+     "8274",
+     "Deducción por inversiones en fuentes de energía no convencional. L.1715/2014, art. 11."
+    ],
+    [
+     "8275",
+     "Deducción por depreciación de maquinarias, equipos y obras civiles de proyectos de fuentes de energía no convencionales. Art. 14 L. 1715/2014"
+    ],
+    [
+     "8276",
+     "Costos y deducciones fiscales no reconocidas contablemente (diferencias temporarias), E.T., art. 59 y 105, num.1."
+    ],
+    [
+     "8277",
+     "Deducciones por atenciones a clientes, proveedores y trabajadores. E.T., art. 107-1, inciso 1."
+    ],
+    [
+     "8278",
+     "Deducciones por pagos salariales y prestacionales, provenientes de litigios. E.T., art. 107-1, inciso 2."
+    ],
+    [
+     "8279",
+     "Deducción de cesantías consolidadas. E.T., art.110. No debe contener los valores especificados en otros conceptos."
+    ],
+    [
+     "8282",
+     "Pagos a jurisdicciones no cooperantes, de baja o nula imposición y a entidades con regímenes preferentes. E.T., art. 124-2"
+    ],
+    [
+     "8283",
+     "Deducción por depreciación. E.T., art. 128."
+    ],
+    [
+     "8284",
+     "Costo por depreciación"
+    ],
+    [
+     "8285",
+     "Costo o deducción por obsolescencia. E.T., art. 129"
+    ],
+    [
+     "8286",
+     "Deducción de inversiones. E.T., art. 142"
+    ],
+    [
+     "8287",
+     "Deducción por amortización de activos intangibles. E.T., Art. 143 del E.T. (Modificado por el artículo 85 de la Ley 1819 de 2016)"
+    ],
+    [
+     "8288",
+     "Amortización inversiones en exploración, desarrollo y construcción de minas, y yacimientos de petróleo y gas. E.T., art. 143-1, modificado L. 1819/2016, art. 86"
+    ],
+    [
+     "8290",
+     "Pérdidas sufridas en actividades agropecuarias. E.T., art. 150"
+    ],
+    [
+     "8292",
+     "Deducción por inversiones en evaluación y exploración de recursos naturales no renovables. E.T., Art.159, modificado L. 1819/2016, art. 92."
+    ],
+    [
+     "8293",
+     "Deducción por agotamiento en explotación de minas, gases distintos de hidrocarburos y depósitos naturales. E.T., art. 167"
+    ],
+    [
+     "8294",
+     "Deducción por pago impuesto al carbono, como mayor valor del costo del bien. L. 1819/2016, Art. 222, parágrafo 2. Sujeto pasivo del impuesto"
+    ],
+    [
+     "8295",
+     "Deducción por pagos efectuados a las empresas promotoras de salud EPS y los aportes al Sistema de Riesgos Laborales."
+    ],
+    [
+     "8296",
+     "Deducciones por contribución a educación destinados a programas de becas de estudios totales o parciales. E.T., art. 107-2 literal a)"
+    ],
+    [
+     "8297",
+     "Deducciones por contribución a educación destinados a programas o centros de atención, estimulación y desarrollo integral. E.T., art. 107-2 literal b)"
+    ],
+    [
+     "8298",
+     "Deducciones por contribución a educación por aportes a instituciones de educación básica-primaria y secundaria y media reconocidas por el Ministerio de Educación y educación técnica, tecnológica y educación superior. E.T., art. 107-2 literal c)"
+    ],
+    [
+     "8299",
+     "Deducciones de otros pagos a casas matrices o sucursales 124-1 E.T."
+    ],
+    [
+     "8400",
+     "Deducción del 120% de los pagos que el empleador realice por concepto de salario, en relación con los empleados que sean menores de veintiocho (28) años, siempre y cuando se trate del primer empleo de la persona. E.T., art. 108-5, adicionado L. 2010 de 2019, art. 88."
+    ],
+    [
+     "8401",
+     "Deducción de las instituciones prestadoras de salud (IPS) contribuyentes por la cartera, reconocida y certificada por el liquidador, correspondiente a los patrimonios de las Entidades Promotoras de Salud (EPS) que se encuentren en medida de intervención forzosa administrativa para liquidar por parte de la Superintendencia Nacional de Salud. L. 2010 de 2019, art. 97."
+    ],
+    [
+     "8402",
+     "Deducción por inversiones o donaciones en proyectos de economía creativa del artículo 195 de la Ley 1607 de 2012 (adicionado por la Ley 1955 de 2019 Art. 180)."
+    ],
+    [
+     "8403",
+     "Deducción por donaciones realizadas por entidades del régimen tributario especial parágrafo 1 del artículo 357 del estatuto Tributario."
+    ],
+    [
+     "8405",
+     "Deducción por deterioro (provisión individual) de cartera de dudoso o difícil cobro. E.T.,art.145, DUR 1625 de 2016 arts.1.2.1.18.19 y 1.2.1.18.20."
+    ],
+    [
+     "8406",
+     "Deducción por deterioro (provisión general) de cartera de dudoso o difícil cobro. E.T.,art.145, DUR 1625 de 2016 art.1.2.1.18.21."
+    ],
+    [
+     "8407",
+     "Deducción por inversiones realizadas en investigación, desarrollo tecnológico e innovación. E.T., art.158-1, inc. 1"
+    ],
+    [
+     "8412",
+     "Depreciación especial aplicada por contribuyentes del régimen de Mega-inversiones que realicen nuevas inversiones. E.T. art.235-3, num.2."
+    ],
+    [
+     "8413",
+     "Deducción por provisiones de cartera hipotecaria de dudoso o difícil cobro. DUR 1625 de 2016 art.1.2.1.18.26."
+    ],
+    [
+     "8414",
+     "Deducción deterioro de cartera de Entidades Promotoras de Salud -EPS en liquidación forzosa intervenidas por la Superintendencia Nacional de Salud. L. 1819/2016, art.375,modificado por L. 2010/ 2019, art.97"
+    ],
+    [
+     "8415",
+     "Deducción deterioro de cartera de dudoso o difícil cobro E.T. art. 145. Par. 1."
+    ],
+    [
+     "8421",
+     "Deducción por pérdida en Ia enajenación de activos. E.T., art. 149"
+    ],
+    [
+     "8422",
+     "Deducción por pérdida en Ia enajenación de plusvalía. E.T., art. 154."
+    ],
+    [
+     "8423",
+     "Deducción por perdida en la enajenación de bonos para la seguridad art 4 L 345/1996 derogado por el art 96 L 2277/2022"
+    ],
+    [
+     "8424",
+     "Deducción por perdida en la enajenación de bonos para la seguridad para la paz art 5 L 487/1998 derogado por el art 96 L 2277/2022"
+    ],
+    [
+     "8425",
+     "Deducción del 120% de salarios y prestaciones sociales por contratación de adulto mayor sin pensión L 2040/2020 art 2."
+    ],
+    [
+     "9001",
+     "Exclusión de IVA por venta de materias primas químicas con destinación específica. E.T., art. 424, num. 1."
+    ],
+    [
+     "9002",
+     "Exclusión de IVA por venta de materias primas destinadas a la producción de vacunas. Num 2 Art. 424 E.T."
+    ],
+    [
+     "9003",
+     "Exclusión de IVA por venta de computadores personales. E.T., art. 424, num. 3, modificado L.1819/2016, art.175, num. 5."
+    ],
+    [
+     "9004",
+     "Exclusión de IVA por venta de anticonceptivos femeninos. E.T., art.424, num.4."
+    ],
+    [
+     "9007",
+     "Exclusión de IVA por venta de equipos, entre otros, para construcción, instalación, montaje y operación de sistemas de control y monitoreo ambiental. E.T., art. 424, num. 7."
+    ],
+    [
+     "9008",
+     "Exclusión de IVA por venta de dispositivos móviles inteligentes. E.T., art. 424, num.6."
+    ],
+    [
+     "9009",
+     "Exclusión de IVA por donaciones de alimentos de consumo humano a Bancos de Alimentos. E.T., art. 424, num.9"
+    ],
+    [
+     "9012",
+     "Exclusiones de IVA por venta de objetos con interés artístico, cultural e histórico. E.T., art. 424, num. 13, modificado L. 1819/2016, art. 175, num. 11"
+    ],
+    [
+     "9013",
+     "Exclusiones de IVA por venta de combustible para aviación para el servicio de transporte aéreo nacional con origen y destino a Guainía, Amazonas, Vaupés, San Andrés Islas y Providencia, Arauca y Vichada. E.T., art. 424, num 14"
+    ],
+    [
+     "9014",
+     "Exclusiones de IVA en la venta de pólizas de seguros de carácter individual. E.T., art. 427. E.T."
+    ],
+    [
+     "9015",
+     "Exclusión de IVA en la venta de equipos, entre otros, para fuentes de energía no convencionales. Art. 12 Ley 1715 de 2014."
+    ],
+    [
+     "9016",
+     "Exclusión de IVA por venta de servicios médicos odontológicos, entre otros. E.T., art. 476, num. 1. Art. 476 E.T."
+    ],
+    [
+     "9017",
+     "Exclusión de IVA por venta de servicios de transporte. E.T., art. 476, num. 9."
+    ],
+    [
+     "9018",
+     "Exclusión en IVA en intereses y rendimientos financieros por operaciones de crédito, E.T., art. 476, num. 16."
+    ],
+    [
+     "9019",
+     "Exclusión de IVA en venta de servicios públicos. E.T., art. 476, numerales 11, 12, 13."
+    ],
+    [
+     "9020",
+     "Exclusión de IVA en venta de servicio de arrendamiento. E.T., art. 476, num. 15."
+    ],
+    [
+     "9021",
+     "Exclusión de IVA en venta de servicios de educación. E.T., art. 476, num.5"
+    ],
+    [
+     "9023",
+     "Exclusión de IVA en venta de planes obligatorios de salud, ahorro individual, riesgos laborales y servicios de seguros y reaseguros. E.T., art. 476, num. 3."
+    ],
+    [
+     "9025",
+     "Exclusión de IVA en servicios de promoción y fomento deportivo. E.T., art. 476, num. 29."
+    ],
+    [
+     "9026",
+     "Exclusión de IVA en cine, en eventos y espectáculos. E.T., art. 476, num. 18, modificado por L 2277/2022 art 76."
+    ],
+    [
+     "9027",
+     "Exclusión de IVA en venta de servicios de adecuación de tierras, producción agropecuaria y pesquera. E.T., art. 476, num. 24, modificado por L 2277/2022 art 76."
+    ],
+    [
+     "9028",
+     "Exclusión de IVA comisiones pagadas en procesos de titularización de activos. E.T., art. 476, num. 22"
+    ],
+    [
+     "9029",
+     "Exclusión de IVA en servicios funerarios, cremación, inhumación y exhumación E.T., art. 476, num. 19."
+    ],
+    [
+     "9030",
+     "Exclusión de IVA en servicios de conexión y acceso a Internet estrato 3. E.T., art. 476, num 7."
+    ],
+    [
+     "9031",
+     "Exclusión de IVA en comisiones por intermediación por la colocación de los planes de salud del sistema general de seguridad social. E.T., art. 476, num. 4"
+    ],
+    [
+     "9032",
+     "Exclusión de IVA en comisiones percibidas por utilización de tarjetas crédito y débito. E.T., art. 476, num. 28"
+    ],
+    [
+     "9033",
+     "Exclusión de IVA en servicios de alimentación contratados con recursos públicos y destinados al sistema penitenciario, de asistencia social y escuelas de educación pública. E.T., art. 476, num. 14."
+    ],
+    [
+     "9034",
+     "Exclusión de IVA en servicios de transporte aéreo nacional donde no exista transporte terrestre organizado y hacia los demás destinos contemplados. E.T., art. 476, num. 10."
+    ],
+    [
+     "9035",
+     "Exclusión de IVA en publicidad a través de periódicos y medios regionales. E.T., art. 476, num. 31"
+    ],
+    [
+     "9036",
+     "Exclusión de IVA en la venta de productos de soporte nutricional del régimen especial. E.T., art. 424, num. 3, adicionado por L. 1819/2016 art. 175"
+    ],
+    [
+     "9037",
+     "Exclusión de IVA en la venta de alimentos para propósitos médicos especiales para pacientes que requieren nutrición enteral. E.T., art. 424, num. 3, adicionado por L. 1819/2016 art. 175"
+    ],
+    [
+     "9038",
+     "Exclusión de IVA en el territorio intendencia de San Andrés y Providencia. E.T., art. 423."
+    ],
+    [
+     "9039",
+     "Exclusión de IVA en la venta de alimentos de consumo humano y animales importados de países colindantes de Vichada, Guajira, Guainía y Vaupés, destinados a consumo local en el departamento. E.T., art. 424, num. 8, modificado L. 1819/2016, art. 175, num. 8"
+    ],
+    [
+     "9041",
+     "Exclusión de IVA en compraventa de maquinaria y equipos registrados en el registro nacional de reducción de emisiones de gases efecto invernadero. E.T., art. 424, num. 16, adicionado L. 1819/2016, art. 175, num. 16."
+    ],
+    [
+     "9042",
+     "Exclusión de IVA en el petróleo crudo recibido por la Agencia Nacional de Hidrocarburos por regalías para su respectiva monetización. E.T., art. 424, parágrafo, adicionado L. 1819/2016, art. 175."
+    ],
+    [
+     "9043",
+     "Exclusión de IVA en los servicios de educación virtual para el desarrollo de contenidos digitales. E.T., art. 476, num. 6, adicionado por L. 1819/2016 art. 187."
+    ],
+    [
+     "9044",
+     "Exclusión de IVA en suministro de páginas web, servidores, computadora en la nube y mantenimiento a distancia. E.T., art. 476, num. 21, adicionado por L. 1819/2016 art. 187."
+    ],
+    [
+     "9045",
+     "Exclusión de IVA en adquisición de licencias de software para el desarrollo comercial de contenidos digitales. E.T., art. 476, num. 20, adicionado por L. 1819/2016 art. 187."
+    ],
+    [
+     "9046",
+     "Exclusión de IVA en servicios de reparación y mantenimiento de naves y artefactos marítimos y fluviales. E.T., art. 476, num. 30, adicionado por L. 1819/2016 art. 187."
+    ],
+    [
+     "9047",
+     "Exclusión de IVA por servicios de hotelería y turismo prestados en zonas del régimen aduanero especial de Urabá, Tumaco, Guapi, Inírida, Puerto Carreño, La Primavera y Cumaribo, Maicao, Uribía y Manaure. E.T., art. 476, num. 26"
+    ],
+    [
+     "9048",
+     "Exclusión de IVA por operaciones cambiarias de compra y venta de divisas. E.T., art. 476, num. 27"
+    ],
+    [
+     "9049",
+     "Exclusión de IVA por servicios de intermediación para el pago de incentivos o transferencias monetarias condicionadas en el marco de los programas sociales. E.T., art. 476, num. 17"
+    ],
+    [
+     "9051",
+     "Exclusión de IVA en la venta de alimentos consumo humano o animal, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13."
+    ],
+    [
+     "9052",
+     "Exclusión de IVA en la venta de elementos de aseo, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13."
+    ],
+    [
+     "9053",
+     "Exclusión de IVA en la venta de vestuario, destinado a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13."
+    ],
+    [
+     "9054",
+     "Exclusión de IVA en la venta de medicamentos de uso humano y veterinario, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13"
+    ],
+    [
+     "9055",
+     "Exclusión de IVA en la venta de materiales de construcción destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13."
+    ],
+    [
+     "9056",
+     "Exclusión de IVA en la venta de bicicletas, bicicletas eléctricas, motos eléctricas, patines, monopatines, monopatines eléctricos, patinetas, y patinetas eléctricas, de hasta 50 UVT. E.T., art. 424, num 17."
+    ],
+    [
+     "9057",
+     "Exclusión de IVA en la venta de bienes facturados por los comerciantes definidos en el parágrafo 2 del artículo 34 de la Ley 98 de 1993. E.T., art. 424, num 18"
+    ],
+    [
+     "9058",
+     "Exclusión de IVA en la venta de productos comprados o introducidos al Amazonas en el marco del convenio Colombo-Peruano y el convenio con la República Federativa del Brasil. E.T., art. 424, num 15"
+    ],
+    [
+     "9059",
+     "Exclusión de IVA en servicios de administración de fondos del Estado y los servicios vinculados con la seguridad social de acuerdo con lo previsto en la Ley 100 de 1993, E.T., art. 476, num. 2"
+    ],
+    [
+     "9060",
+     "Exclusión de IVA, primeros trescientos veinticinco (325) minutos mensuales del servicio telefónico local facturado a los usuarios estratos 1, 2 y 3 y servicio prestado desde teléfonos públicos, E.T., art. 476, num. 8"
+    ],
+    [
+     "9061",
+     "Exclusión de IVA en comisiones percibidas por la administración de fondos de inversión colectiva, E.T., art. 476, num. 23."
+    ],
+    [
+     "9062",
+     "Exclusión de IVA en servicios de corretaje de contratos de reaseguros, E.T., art. 476, num.32"
+    ],
+    [
+     "9065",
+     "Exclusión de IVA en los servicios prestados a la ONU y a las entidades multilaterales de crédito, de acuerdo con los convenios ratificados por Colombia. Reglamentación Dec. 2076/1992, art. 21"
+    ],
+    [
+     "9066",
+     "Exclusión de IVA en venta de chatarra de las subpartidas 72.04, 74.04 y 76.02. cuando no intervenga como enajenante o adquiriente una siderúrgica. Art.437-4 E.T., Art.1.3.2.1.9. Decreto 1625 de 2016"
+    ],
+    [
+     "9067",
+     "Exclusión del IVA por la venta de bienes de diferentes partidas arancelarias que inician con la partida 01.03 y termina con la subpartida 96.09.10.00.00, contempladas en el inciso 1 del art. 424 E.T."
+    ],
+    [
+     "9069",
+     "Exclusión de IVA por venta de bienes inmuebles numeral 12 Artículo 424 E.T"
+    ],
+    [
+     "9070",
+     "Exclusión de IVA en comercialización de animales vivos, excepto los animales domésticos de compañía. ET art 476 núm. 25 modificado ley 2277/2020 art 76, art. 1"
+    ],
+    [
+     "9072",
+     "Exclusión de IVA en el servicio de faenamiento ET art 476 núm. 25 A"
+    ],
+    [
+     "9073",
+     "Exclusión de IVA en los contratos de Obras Públicas que celebren las personas naturales o jurídicas con las Entidades Territoriales y/o Entidades Descentralizadas del Orden Departamental y Municipal. Art. 100 L.21/1992"
+    ],
+    [
+     "9100",
+     "Tarifa del 5% venta de servicios de almacenamiento y comisiones productos agrícolas. E.T., art. 468-3, num. 1,"
+    ],
+    [
+     "9101",
+     "Tarifa del 5% por venta de seguro agropecuario. E.T., art. 468-3, num. 2."
+    ],
+    [
+     "9102",
+     "Tarifa del 5% por venta de servicios prestados mediante entidades del Num. 1 Art. 19 E.T., con discapacidad. E.T., art. 468-3, num. 4, modificado por L. 1819/2016, art. 186."
+    ],
+    [
+     "9103",
+     "Tarifa de 5% en venta de servicios de medicina prepagada y pólizas relacionadas. E.T., art. 468-3, num. 3,"
+    ],
+    [
+     "9105",
+     "Tarifa del 5% en venta de bienes sujetos a participación o impuesto al consumo de licores, vinos, aperitivos y similares del art. 202 L. 223/1995. E.T., art. 468-1, num. 2, adicionado L. 1819/2016, art. 185, num. 2."
+    ],
+    [
+     "9106",
+     "Tarifa del 5% en las neveras nuevas para sustitución, sujetas al reglamento técnico de etiquetado (RETIQ). E.T., art. 468-1, num. 3, adicionado L. 1819/2016, art. 185, num.3."
+    ],
+    [
+     "9107",
+     "Tarifa del 5%. El ingreso al productor en la venta de Gasolina y ACPM. E.T. Numeral 4 art. 468-1 del Art. 174 Ley 1955 de 2019."
+    ],
+    [
+     "9110",
+     "Tarifa del 5% en la venta de bienes de las partidas que inician desde la 09.01. y termina en la partida 90.32., contemplados en el inciso 1 del artículo 468-1 E.T.."
+    ],
+    [
+     "9200",
+     "Exención de IVA en venta de alcohol carburante. E.T., art. 477, num. 1."
+    ],
+    [
+     "9202",
+     "Exención de IVA venta de libros y revistas de carácter científico y cultural. E.T., art. 478."
+    ],
+    [
+     "9203",
+     "Exención de IVA por prestación servicios en el país utilizados en el exterior. E.T., art. 481, lit. c."
+    ],
+    [
+     "9204",
+     "Exención de IVA por prestación de servicios turísticos a extranjeros en el territorio colombiano. E.T., art. 481, lit. d."
+    ],
+    [
+     "9205",
+     "Exención de IVA por cuadernos subpartida 48.20.20.00.00, diarios, publicaciones periódicas, impresos, demás subpartida 49.02. E.T., art. 481, lit. f."
+    ],
+    [
+     "9206",
+     "Exención de IVA por servicio de conexión estrato 1 y 2. E.T., art. 481, lit. h."
+    ],
+    [
+     "9207",
+     "Exención de IVA en venta de municiones y material de guerra y elementos pertenecientes a Fuerzas Militares y Policía Nacional. E.T., art. 477, num. 3."
+    ],
+    [
+     "9208",
+     "Exención de IVA en la venta de vehículos automotores de transporte público de pasajeros completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo, de transporte público de pasajeros. E.T., art. 477, num. 4"
+    ],
+    [
+     "9209",
+     "Exención de IVA en la venta de vehículos automotores de servicio público o particular, de transporte de carga completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo de transporte de carga de más de 10.5 toneladas de peso bruto vehicular. E.T., art. 477, num. 5.."
+    ],
+    [
+     "9210",
+     "Exención en IVA en la venta de bicicletas y sus partes; motocicletas y sus partes y motocarros y sus partes, que se introduzcan y comercialicen en los departamentos de Amazonas, Guainía, Guaviare, Vaupés y Vichada, siempre y cuando se destinen exclusivamente al consumo dentro del mismo departamento. Numeral 6 del art. 477 del E.T.."
+    ],
+    [
+     "9211",
+     "Exención de IVA en la venta de alimentos consumo humano o animal que se introduzcan y comercialicen al departamento de Amazonas E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019"
+    ],
+    [
+     "9212",
+     "Exención de IVA en la venta de elementos de aseo que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019"
+    ],
+    [
+     "9213",
+     "Exención de IVA en la venta de vestuario, que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019"
+    ],
+    [
+     "9214",
+     "Exención de IVA en la venta de medicamentos de uso humano y veterinario, que se introduzcan y comercialicen al departamento de Amazonas E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019"
+    ],
+    [
+     "9215",
+     "Exención de IVA en la venta de materiales de construcción que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019"
+    ],
+    [
+     "9216",
+     "Exención por prestación de servicios turísticos a extranjeros en el territorio colombiano. E.T., art. 481, lit. d, inc. 2"
+    ],
+    [
+     "9217",
+     "Exención de IVA en la venta de bienes que inician desde la partida 01.02, y termina en la partida 96.19. contemplados en el inciso 1 del artículo 477 del E.T. y Sentencia C117 de 2018."
+    ],
+    [
+     "9218",
+     "Exención de IVA por uso de recursos de auxilios o donaciones de entidades o gobiernos extranjeros convenidos con el Gobierno colombiano, destinados a realizar programas de utilidad común y registrados en la Agencia Presidencial de la Cooperación Internacional. L. 788/2002, art. 96, modificado por el art. 38 de la Ley 2010 de 2019."
+    ],
+    [
+     "9221",
+     "Exención de IVA en compra o donación de vehículos, equipos o elementos nuevos o usados utilizados para la gestión integral del riesgo, preparativos y atención de rescate a la actividad bomberil y la atención de incidentes con materiales peligrosos. L.1575/2012, art. 32, modificado por L.2010/2019, art. 32"
+    ],
+    [
+     "9222",
+     "Exención de IVA por exportación de servicios relacionados con la producción de obra de cine, televisión, audiovisuales de cualquier género y con el desarrollo de software. Parágrafo del Art. 481 del E.T."
+    ]
+   ]
+  },
+  "1012": {
+   "version": 7,
+   "columnas": [
+    {
+     "encabezado": "Concepto",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "DConcepto16",
+     "xml": "cpt"
+    },
+    {
+     "encabezado": "Tipo de documento",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDocto",
+     "xml": "tdoc"
+    },
+    {
+     "encabezado": "NIT informado",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nid"
+    },
+    {
+     "encabezado": "DV",
+     "tipo": "N",
+     "longitud": 1,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dv"
+    },
+    {
+     "encabezado": "Primer apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl1"
+    },
+    {
+     "encabezado": "Segundo apellido del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "apl2"
+    },
+    {
+     "encabezado": "Primer nombre del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom1"
+    },
+    {
+     "encabezado": "Otros nombres del informado",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nom2"
+    },
+    {
+     "encabezado": "Razón social informado",
+     "tipo": "A",
+     "longitud": 450,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "raz"
+    },
+    {
+     "encabezado": "País de Residencia o domicilio",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Valor al 31-12",
+     "tipo": "N",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "val"
+    }
+   ],
+   "conceptos": [
+    [
+     "1110",
+     "Saldo a 31 de Diciembre de las cuentas corrientes y/o ahorro que posea en el país"
+    ],
+    [
+     "1115",
+     "Valor total del saldo de las cuentas corrientes y/o ahorro poseídas en el exterior"
+    ],
+    [
+     "1200",
+     "Valor Patrimonial de los Bonos"
+    ],
+    [
+     "1201",
+     "Valor Patrimonial de los Certificados de Depósito"
+    ],
+    [
+     "1202",
+     "Valor Patrimonial de los Títulos"
+    ],
+    [
+     "1203",
+     "Valor Patrimonial de los Derechos Fiduciarios"
+    ],
+    [
+     "1204",
+     "Valor Patrimonial de las Demás Inversiones Poseídas"
+    ],
+    [
+     "1205",
+     "Valor Patrimonial de las Acciones o Aportes poseidos a 31 de Diciembre"
+    ],
+    [
+     "1206",
+     "Valor patrimonial de los criptoactivos"
+    ]
+   ]
+  },
+  "2276": {
+   "version": 4,
+   "columnas": [
+    {
+     "encabezado": "Entidad Informante",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DEntidadInfor",
+     "xml": "entinfo"
+    },
+    {
+     "encabezado": "Tipo de documento del beneficiario",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": true,
+     "tabla": "DTiposDoctoBB",
+     "xml": "tdocb"
+    },
+    {
+     "encabezado": "Número de Identificación del beneficiario",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "nitb"
+    },
+    {
+     "encabezado": "Primer Apellido del beneficiario",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "pap"
+    },
+    {
+     "encabezado": "Segundo Apellido del beneficiario",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "sap"
+    },
+    {
+     "encabezado": "Primer Nombre del beneficiario",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "pno"
+    },
+    {
+     "encabezado": "Otros Nombres del beneficiario",
+     "tipo": "A",
+     "longitud": 60,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "ono"
+    },
+    {
+     "encabezado": "Dirección del beneficiario",
+     "tipo": "A",
+     "longitud": 200,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "dir"
+    },
+    {
+     "encabezado": "Departamento del beneficiario",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "D_2_108",
+     "xml": "dpto"
+    },
+    {
+     "encabezado": "Municipio del beneficiario",
+     "tipo": "N",
+     "longitud": 3,
+     "obligatorio": false,
+     "tabla": "D_2_109",
+     "xml": "mun"
+    },
+    {
+     "encabezado": "País del beneficiario",
+     "tipo": "N",
+     "longitud": 4,
+     "obligatorio": true,
+     "tabla": "D_2_107",
+     "xml": "pais"
+    },
+    {
+     "encabezado": "Pagos por Salarios",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pasa"
+    },
+    {
+     "encabezado": "Pagos por emolumentos eclesiásticos",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "paec"
+    },
+    {
+     "encabezado": "Pagos realizados con bonos electrónicos o de papel de servicio, cheques, tarjetas, vales, etc.",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pabop"
+    },
+    {
+     "encabezado": "Valor del exceso de los pagos por alimentación mayores a 41 UVT, art. 387-1 E.T.",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "vaex"
+    },
+    {
+     "encabezado": "Pagos por honorarios",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "paho"
+    },
+    {
+     "encabezado": "Pagos por servicios",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pase"
+    },
+    {
+     "encabezado": "Pagos por comisiones",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "paco"
+    },
+    {
+     "encabezado": "Pagos por prestaciones sociales",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "papre"
+    },
+    {
+     "encabezado": "Pagos por viáticos",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pavia"
+    },
+    {
+     "encabezado": "Pagos por gastos de representación",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "paga"
+    },
+    {
+     "encabezado": "Pagos por compensaciones trabajo asociado cooperativo",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "patra"
+    },
+    {
+     "encabezado": "Valor apoyos económicos no reembolsables o condonados, entregados por el Estado o financiados con recursos públicos, para financiar programas educativos.",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "vapo"
+    },
+    {
+     "encabezado": "Otros pagos",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "potro"
+    },
+    {
+     "encabezado": "Cesantías e intereses de cesantías efectivamente pagadas al empleado",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "cein"
+    },
+    {
+     "encabezado": "Cesantías consignadas al fondo de cesantías",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ceco"
+    },
+    {
+     "encabezado": "Auxilio de cesantías reconocido a trabajadores del régimen tradicional del Código Sustantivo del Trabajo, Capítulo VII, Título VIII Parte Primera",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "auce"
+    },
+    {
+     "encabezado": "Pensiones de Jubilación, vejez o invalidez",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "peju"
+    },
+    {
+     "encabezado": "Total ingresos brutos por rentas de trabajo y pensión",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "tingbtp"
+    },
+    {
+     "encabezado": "Aportes obligatorios por salud a cargo del trabajador",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "apos"
+    },
+    {
+     "encabezado": "Aportes obligatorios a fondos de pensiones y solidaridad pensional a cargo del trabajador",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "apof"
+    },
+    {
+     "encabezado": "Aportes voluntarios al régimen de ahorro individual con solidaridad - RAIS",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "aprais"
+    },
+    {
+     "encabezado": "Aportes voluntarios a fondos de pensiones voluntarias",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "apov"
+    },
+    {
+     "encabezado": "Aportes a cuentas AFC",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "apafc"
+    },
+    {
+     "encabezado": "Aportes a cuentas AVC",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "apavc"
+    },
+    {
+     "encabezado": "Valor de las retenciones en la fuente por pagos de rentas de trabajo o pensiones",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "vare"
+    },
+    {
+     "encabezado": "Impuesto sobre las ventas – IVA, mayor valor del costo o gasto",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "ivav"
+    },
+    {
+     "encabezado": "Retención en la fuente a título de impuesto sobre las ventas – IVA.",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "rfiva"
+    },
+    {
+     "encabezado": "Pagos por alimentación hasta 41 UVT",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "pagahuvt"
+    },
+    {
+     "encabezado": "Valor ingreso laboral promedio de los últimos seis meses.",
+     "tipo": "N",
+     "longitud": 18,
+     "obligatorio": true,
+     "tabla": "",
+     "xml": "vilap"
+    },
+    {
+     "encabezado": "Tipo de documento del dependiente económico",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "DTiposDoctoBB",
+     "xml": "tdocde"
+    },
+    {
+     "encabezado": "Número de Identificación del dependiente económico",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nitde"
+    },
+    {
+     "encabezado": "Identificación del fideicomiso",
+     "tipo": "A",
+     "longitud": 14,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "identfc"
+    },
+    {
+     "encabezado": "Tipo documento participante en contrato de colaboración",
+     "tipo": "N",
+     "longitud": 2,
+     "obligatorio": false,
+     "tabla": "DTiposDoctoBB",
+     "xml": "tdocpcc"
+    },
+    {
+     "encabezado": "Identificación participante en contrato colaboración",
+     "tipo": "A",
+     "longitud": 20,
+     "obligatorio": false,
+     "tabla": "",
+     "xml": "nitpcc"
+    }
+   ],
+   "conceptos": []
+  }
+ },
+ "paises": [
+  [
+   "013",
+   "AFGANISTAN"
+  ],
+  [
+   "017",
+   "ALBANIA"
+  ],
+  [
+   "023",
+   "ALEMANIA"
+  ],
+  [
+   "037",
+   "ANDORRA"
+  ],
+  [
+   "040",
+   "ANGOLA"
+  ],
+  [
+   "041",
+   "ANGUILLA"
+  ],
+  [
+   "043",
+   "ANTIGUA Y BARBUDA"
+  ],
+  [
+   "047",
+   "ANTILLAS HOLANDESAS"
+  ],
+  [
+   "053",
+   "ARABIA SAUDITA"
+  ],
+  [
+   "059",
+   "ARGELIA"
+  ],
+  [
+   "063",
+   "ARGENTINA"
+  ],
+  [
+   "026",
+   "ARMENIA"
+  ],
+  [
+   "027",
+   "ARUBA"
+  ],
+  [
+   "069",
+   "AUSTRALIA"
+  ],
+  [
+   "072",
+   "AUSTRIA"
+  ],
+  [
+   "074",
+   "AZERBAIJAN"
+  ],
+  [
+   "077",
+   "BAHAMAS"
+  ],
+  [
+   "080",
+   "BAHREIN"
+  ],
+  [
+   "081",
+   "BANGLADESH"
+  ],
+  [
+   "083",
+   "BARBADOS"
+  ],
+  [
+   "087",
+   "BELGICA"
+  ],
+  [
+   "088",
+   "BELICE"
+  ],
+  [
+   "091",
+   "BELORUS"
+  ],
+  [
+   "229",
+   "BENIN"
+  ],
+  [
+   "090",
+   "BERMUDAS"
+  ],
+  [
+   "093",
+   "BIRMANIA MYANMAR"
+  ],
+  [
+   "097",
+   "BOLIVIA"
+  ],
+  [
+   "029",
+   "BOSNIA-HERZEGOVINA"
+  ],
+  [
+   "101",
+   "BOTSWANA"
+  ],
+  [
+   "105",
+   "BRASIL"
+  ],
+  [
+   "108",
+   "BRUNEI DARUSSALAM"
+  ],
+  [
+   "111",
+   "BULGARIA"
+  ],
+  [
+   "031",
+   "BURKINA FASSO"
+  ],
+  [
+   "115",
+   "BURUNDI"
+  ],
+  [
+   "119",
+   "BUTAN"
+  ],
+  [
+   "127",
+   "CABO VERDE"
+  ],
+  [
+   "137",
+   "CAIMAN ISLAS"
+  ],
+  [
+   "145",
+   "CAMERUN REPUBLICA U"
+  ],
+  [
+   "149",
+   "CANADA"
+  ],
+  [
+   "155",
+   "CANAL NORMANDAS ISL"
+  ],
+  [
+   "157",
+   "CANTON ENDERBURY ISL"
+  ],
+  [
+   "203",
+   "CHAD"
+  ],
+  [
+   "211",
+   "CHILE"
+  ],
+  [
+   "215",
+   "CHINA"
+  ],
+  [
+   "221",
+   "CHIPRE"
+  ],
+  [
+   "159",
+   "CIUDAD DEL VATICANO"
+  ],
+  [
+   "165",
+   "COCOS KEELING ISL"
+  ],
+  [
+   "169",
+   "COLOMBIA"
+  ],
+  [
+   "173",
+   "COMORAS"
+  ],
+  [
+   "998",
+   "COMUNIDAD EUROPEA"
+  ],
+  [
+   "177",
+   "CONGO"
+  ],
+  [
+   "183",
+   "COOK ISLAS"
+  ],
+  [
+   "187",
+   "COREA DEL NORTE REPU"
+  ],
+  [
+   "190",
+   "COREA DEL SUR REPUB"
+  ],
+  [
+   "193",
+   "COSTA DE MARFIL"
+  ],
+  [
+   "196",
+   "COSTA RICA"
+  ],
+  [
+   "198",
+   "CROACIA"
+  ],
+  [
+   "199",
+   "CUBA"
+  ],
+  [
+   "789",
+   "CURACAO"
+  ],
+  [
+   "232",
+   "DINAMARCA"
+  ],
+  [
+   "783",
+   "DJIBOUTI"
+  ],
+  [
+   "235",
+   "DOMINICA"
+  ],
+  [
+   "239",
+   "ECUADOR"
+  ],
+  [
+   "240",
+   "EGIPTO"
+  ],
+  [
+   "242",
+   "EL SALVADOR"
+  ],
+  [
+   "244",
+   "EMIRATOS ARABES UNID"
+  ],
+  [
+   "243",
+   "ERITREA"
+  ],
+  [
+   "246",
+   "ESLOVAQUIA"
+  ],
+  [
+   "247",
+   "ESLOVENIA"
+  ],
+  [
+   "245",
+   "ESPAÑA"
+  ],
+  [
+   "249",
+   "ESTADOS UNIDOS"
+  ],
+  [
+   "251",
+   "ESTONIA"
+  ],
+  [
+   "253",
+   "ETIOPIA"
+  ],
+  [
+   "259",
+   "FEROE ISLAS"
+  ],
+  [
+   "870",
+   "FIJI"
+  ],
+  [
+   "267",
+   "FILIPINAS"
+  ],
+  [
+   "271",
+   "FINLANDIA"
+  ],
+  [
+   "275",
+   "FRANCIA"
+  ],
+  [
+   "281",
+   "GABON"
+  ],
+  [
+   "285",
+   "GAMBIA"
+  ],
+  [
+   "286",
+   "GAZA Y JERICO"
+  ],
+  [
+   "287",
+   "GEORGIA"
+  ],
+  [
+   "289",
+   "GHANA"
+  ],
+  [
+   "293",
+   "GIBRALTAR"
+  ],
+  [
+   "297",
+   "GRANADA"
+  ],
+  [
+   "301",
+   "GRECIA"
+  ],
+  [
+   "305",
+   "GROENLANDIA"
+  ],
+  [
+   "309",
+   "GUADALUPE"
+  ],
+  [
+   "313",
+   "GUAM"
+  ],
+  [
+   "317",
+   "GUATEMALA"
+  ],
+  [
+   "325",
+   "GUAYANA FRANCESA"
+  ],
+  [
+   "329",
+   "GUINEA"
+  ],
+  [
+   "334",
+   "GUINEA - BISSAU"
+  ],
+  [
+   "331",
+   "GUINEA ECUATORIAL"
+  ],
+  [
+   "337",
+   "GUYANA"
+  ],
+  [
+   "341",
+   "HAITI"
+  ],
+  [
+   "345",
+   "HONDURAS"
+  ],
+  [
+   "351",
+   "HONG KONG"
+  ],
+  [
+   "355",
+   "HUNGRIA"
+  ],
+  [
+   "361",
+   "INDIA"
+  ],
+  [
+   "365",
+   "INDONESIA"
+  ],
+  [
+   "369",
+   "IRAK"
+  ],
+  [
+   "372",
+   "IRAN REPUBLICA ISLA"
+  ],
+  [
+   "375",
+   "IRLANDA EIRE"
+  ],
+  [
+   "033",
+   "ISLA DE MAN"
+  ],
+  [
+   "379",
+   "ISLANDIA"
+  ],
+  [
+   "566",
+   "ISLAS MENORES DE ESTADOS UNIDOS"
+  ],
+  [
+   "383",
+   "ISRAEL"
+  ],
+  [
+   "386",
+   "ITALIA"
+  ],
+  [
+   "391",
+   "JAMAICA"
+  ],
+  [
+   "399",
+   "JAPON"
+  ],
+  [
+   "395",
+   "JOHNSTON ISLA"
+  ],
+  [
+   "403",
+   "JORDANIA"
+  ],
+  [
+   "141",
+   "KAMPUCHEA CAMBOYA"
+  ],
+  [
+   "406",
+   "KAZAJSTAN"
+  ],
+  [
+   "410",
+   "KENYA"
+  ],
+  [
+   "412",
+   "KIRGUIZISTAN"
+  ],
+  [
+   "411",
+   "KIRIBATI"
+  ],
+  [
+   "413",
+   "KUWAIT"
+  ],
+  [
+   "420",
+   "LAOS REPUBLICA POPUL"
+  ],
+  [
+   "426",
+   "LESOTHO"
+  ],
+  [
+   "429",
+   "LETONIA"
+  ],
+  [
+   "431",
+   "LIBANO"
+  ],
+  [
+   "434",
+   "LIBERIA"
+  ],
+  [
+   "438",
+   "LIBIA INCLUYE FEZZAN"
+  ],
+  [
+   "440",
+   "LIECHTENSTEIN"
+  ],
+  [
+   "443",
+   "LITUANIA"
+  ],
+  [
+   "445",
+   "LUXEMBURGO"
+  ],
+  [
+   "447",
+   "MACAO"
+  ],
+  [
+   "448",
+   "MACEDONIA"
+  ],
+  [
+   "450",
+   "MADAGASCAR"
+  ],
+  [
+   "455",
+   "MALASIA"
+  ],
+  [
+   "458",
+   "MALAWI"
+  ],
+  [
+   "461",
+   "MALDIVAS"
+  ],
+  [
+   "464",
+   "MALI"
+  ],
+  [
+   "467",
+   "MALTA"
+  ],
+  [
+   "469",
+   "MARIANAS DEL NORTE I"
+  ],
+  [
+   "474",
+   "MARRUECOS"
+  ],
+  [
+   "472",
+   "MARSHALL ISLAS"
+  ],
+  [
+   "477",
+   "MARTINICA"
+  ],
+  [
+   "485",
+   "MAURICIO"
+  ],
+  [
+   "488",
+   "MAURITANIA"
+  ],
+  [
+   "493",
+   "MEXICO"
+  ],
+  [
+   "494",
+   "MICRONESIA ESTADOS F"
+  ],
+  [
+   "495",
+   "MIDWAY ISLAS"
+  ],
+  [
+   "496",
+   "MOLDAVIA"
+  ],
+  [
+   "498",
+   "MONACO"
+  ],
+  [
+   "497",
+   "MONGOLIA"
+  ],
+  [
+   "501",
+   "MONSERRAT ISLA"
+  ],
+  [
+   "502",
+   "MONTENEGRO"
+  ],
+  [
+   "505",
+   "MOZAMBIQUE"
+  ],
+  [
+   "507",
+   "NAMIBIA"
+  ],
+  [
+   "508",
+   "NAURU"
+  ],
+  [
+   "511",
+   "NAVIDAD CHRISTMAS"
+  ],
+  [
+   "517",
+   "NEPAL"
+  ],
+  [
+   "521",
+   "NICARAGUA"
+  ],
+  [
+   "525",
+   "NIGER"
+  ],
+  [
+   "528",
+   "NIGERIA"
+  ],
+  [
+   "531",
+   "NIUE ISLA"
+  ],
+  [
+   "001",
+   "NIVE ISLA"
+  ],
+  [
+   "999",
+   "NO DECLARADOS"
+  ],
+  [
+   "535",
+   "NORFOLK ISLA"
+  ],
+  [
+   "538",
+   "NORUEGA"
+  ],
+  [
+   "542",
+   "NUEVA CALEDONIA"
+  ],
+  [
+   "548",
+   "NUEVA ZELANDIA"
+  ],
+  [
+   "556",
+   "OMAN"
+  ],
+  [
+   "573",
+   "PAISES BAJOS HOLANDA"
+  ],
+  [
+   "576",
+   "PAKISTAN"
+  ],
+  [
+   "578",
+   "PALAU ISLAS"
+  ],
+  [
+   "579",
+   "PALESTINA"
+  ],
+  [
+   "580",
+   "PANAMA"
+  ],
+  [
+   "545",
+   "PAPUASIA NUEV GUINEA"
+  ],
+  [
+   "586",
+   "PARAGUAY"
+  ],
+  [
+   "589",
+   "PERU"
+  ],
+  [
+   "593",
+   "PITCAIRN ISLA"
+  ],
+  [
+   "599",
+   "POLINESIA FRANCESA"
+  ],
+  [
+   "603",
+   "POLONIA"
+  ],
+  [
+   "607",
+   "PORTUGAL"
+  ],
+  [
+   "611",
+   "PUERTO RICO"
+  ],
+  [
+   "618",
+   "QATAR"
+  ],
+  [
+   "628",
+   "REINO UNIDO"
+  ],
+  [
+   "888",
+   "REPUBLICA DEMOCRATICA DEL CONGO"
+  ],
+  [
+   "640",
+   "REPUBLICA CENTROAFRI"
+  ],
+  [
+   "644",
+   "REPUBLICA CHECA"
+  ],
+  [
+   "647",
+   "REPUBLICA DOMINICANA"
+  ],
+  [
+   "660",
+   "REUNION"
+  ],
+  [
+   "670",
+   "RUMANIA"
+  ],
+  [
+   "676",
+   "RUSIA"
+  ],
+  [
+   "675",
+   "RWANDA"
+  ],
+  [
+   "685",
+   "SAHARA OCCIDENTAL"
+  ],
+  [
+   "677",
+   "SALOMON ISLAS"
+  ],
+  [
+   "687",
+   "SAMOA"
+  ],
+  [
+   "690",
+   "SAMOA NORTEAMERICANA"
+  ],
+  [
+   "695",
+   "SAN CRISTOBAL Y NIEVES"
+  ],
+  [
+   "697",
+   "SAN MARINO"
+  ],
+  [
+   "663",
+   "SAN MARTIN FRANCIA"
+  ],
+  [
+   "534",
+   "SAN MARTIN PAISES BAJOS"
+  ],
+  [
+   "700",
+   "SAN PEDRO Y MIGUELON"
+  ],
+  [
+   "705",
+   "SAN VICENTE Y LAS GR"
+  ],
+  [
+   "710",
+   "SANTA ELENA"
+  ],
+  [
+   "715",
+   "SANTA LUCIA"
+  ],
+  [
+   "720",
+   "SANTO TOME Y PRINCIP"
+  ],
+  [
+   "728",
+   "SENEGAL"
+  ],
+  [
+   "032",
+   "SERBIA"
+  ],
+  [
+   "731",
+   "SEYCHELLES"
+  ],
+  [
+   "735",
+   "SIERRA LEONA"
+  ],
+  [
+   "741",
+   "SINGAPUR"
+  ],
+  [
+   "744",
+   "SIRIA REPUBLICA ARAB"
+  ],
+  [
+   "748",
+   "SOMALIA"
+  ],
+  [
+   "750",
+   "SRI LANKA"
+  ],
+  [
+   "756",
+   "SUDAFRICA REPUBLICA"
+  ],
+  [
+   "759",
+   "SUDAN"
+  ],
+  [
+   "764",
+   "SUECIA"
+  ],
+  [
+   "767",
+   "SUIZA"
+  ],
+  [
+   "770",
+   "SURINAM"
+  ],
+  [
+   "773",
+   "SWAZILANDIA"
+  ],
+  [
+   "774",
+   "TADJIKISTAN"
+  ],
+  [
+   "776",
+   "TAILANDIA"
+  ],
+  [
+   "218",
+   "TAIWAN FORMOSA"
+  ],
+  [
+   "780",
+   "TANZANIA REPUBLICA U"
+  ],
+  [
+   "786",
+   "TERRI ANTARTICO BRIT"
+  ],
+  [
+   "787",
+   "TERRITORI BRITANICO"
+  ],
+  [
+   "788",
+   "TIMOR DEL ESTE"
+  ],
+  [
+   "800",
+   "TOGO"
+  ],
+  [
+   "805",
+   "TOKELAU"
+  ],
+  [
+   "810",
+   "TONGA"
+  ],
+  [
+   "815",
+   "TRINIDAD Y TOBAGO"
+  ],
+  [
+   "820",
+   "TUNICIA"
+  ],
+  [
+   "823",
+   "TURCAS Y CAICOS ISLA"
+  ],
+  [
+   "825",
+   "TURKMENISTAN"
+  ],
+  [
+   "827",
+   "TURQUIA"
+  ],
+  [
+   "828",
+   "TUVALU"
+  ],
+  [
+   "830",
+   "UCRANIA"
+  ],
+  [
+   "833",
+   "UGANDA"
+  ],
+  [
+   "845",
+   "URUGUAY"
+  ],
+  [
+   "847",
+   "UZBEKISTAN"
+  ],
+  [
+   "551",
+   "VANUATU"
+  ],
+  [
+   "850",
+   "VENEZUELA"
+  ],
+  [
+   "855",
+   "VIETNAM"
+  ],
+  [
+   "863",
+   "VIRGENES ISLAS BRITA"
+  ],
+  [
+   "866",
+   "VIRGENES ISLAS NORTE"
+  ],
+  [
+   "875",
+   "WALLIS Y FORTUNA ISL"
+  ],
+  [
+   "880",
+   "YEMEN"
+  ],
+  [
+   "885",
+   "YUGOSLAVIA"
+  ],
+  [
+   "890",
+   "ZAMBIA"
+  ],
+  [
+   "665",
+   "ZIMBABWE"
+  ],
+  [
+   "895",
+   "ZONA CANAL DE PANAMA"
+  ],
+  [
+   "897",
+   "ZONA NEUTRAL PALESTA"
+  ]
+ ],
+ "tipos_documento": [
+  [
+   "11",
+   "Registro civil de nacimiento"
+  ],
+  [
+   "12",
+   "Tarjeta de identidad"
+  ],
+  [
+   "13",
+   "Cédula de ciudadanía"
+  ],
+  [
+   "21",
+   "Tarjeta de extranjería"
+  ],
+  [
+   "22",
+   "Cédula de extranjería"
+  ],
+  [
+   "31",
+   "Nit"
+  ],
+  [
+   "41",
+   "Pasaporte"
+  ],
+  [
+   "42",
+   "Tipo de documento Extranjero"
+  ],
+  [
+   "43",
+   "Sin identificación del exterior o para uso definido por la DIAN"
+  ],
+  [
+   "47",
+   "Permiso Especial de Permanencia"
+  ],
+  [
+   "48",
+   "Permiso por Protección Temporal"
+  ]
+ ],
+ "entidad_informante_2276": [
+  [
+   "1",
+   "Informante General"
+  ],
+  [
+   "2",
+   "Fiduciarias"
+  ],
+  [
+   "3",
+   "Mandatario y/o Administrador Delegado"
+  ],
+  [
+   "4",
+   "Consorcio y/o Unión Temporal"
+  ],
+  [
+   "5",
+   "Exploración y Explotación hidrocarburos, gases y minerales"
+  ],
+  [
+   "6",
+   "Joint Venture"
+  ],
+  [
+   "7",
+   "Gestor en Cuentas en Participación"
+  ],
+  [
+   "8",
+   "Convenios de cooperación con entidades públicas"
+  ]
+ ]
+}

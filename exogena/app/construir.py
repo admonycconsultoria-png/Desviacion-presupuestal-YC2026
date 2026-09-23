@@ -50,6 +50,7 @@ def config_por_defecto(config_dir: Path | str | None = None) -> dict:
         "tiposDoc": cfg.tipos_doc.to_dict("records"),
         "paises": cfg.paises.to_dict("records"),
         "divipola": divipola,
+        "prevalidadores": cfg.prevalidadores,
         "doctrina": _doctrina(Path(config_dir or config_mod.CONFIG_DIR)),
         "criterios": _yaml_opcional(Path(config_dir or config_mod.CONFIG_DIR), "criterios.yaml", {"criterios": []})["criterios"],
     }

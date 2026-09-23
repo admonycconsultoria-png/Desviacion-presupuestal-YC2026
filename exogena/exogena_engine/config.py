@@ -4,9 +4,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import json
+
 import pandas as pd
 import yaml
 
+from .prevalidador import estado_columnas
 from .utils import clave
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -38,6 +41,7 @@ class Config:
     tipos_doc: pd.DataFrame
     paises: pd.DataFrame
     divipola: pd.DataFrame
+    prevalidadores: list = field(default_factory=list)
     sin_verificar_usados: set = field(default_factory=set)
 
     # ------------------------------------------------------------------ helpers
@@ -100,6 +104,11 @@ def cargar(config_dir: Path | str = CONFIG_DIR) -> Config:
     for f in formatos.values():
         f["columnas"] = _aplanar(f["columnas"])
         f["version"] = (f.get("version_por_anio") or {}).get(anio, f["version"])
+    # Orden de columnas: se verifica contra los prevalidadores DIAN guardados de la misma versión
+    prevalidadores = cargar_prevalidadores(d)
+    for k, f in formatos.items():
+        f["verificacion_columnas"] = estado_columnas(k, f, prevalidadores)
+        f["columnas_verificadas"] = f["verificacion_columnas"]["verificado"]
 
     mapeo = pd.read_csv(d / "mapeo_cuentas.csv", dtype=str, comment="#").fillna("")
     if "tercero" not in mapeo.columns:
@@ -129,4 +138,17 @@ def cargar(config_dir: Path | str = CONFIG_DIR) -> Config:
 
     return Config(parametros, formatos, reglas,
                   pd.read_csv(d / "conceptos.csv", dtype=str).fillna(""),
-                  fuentes, tipos, paises, divipola)
+                  fuentes, tipos, paises, divipola, prevalidadores)
+
+
+def cargar_prevalidadores(d: Path) -> list[dict]:
+    """Layouts de los prevalidadores DIAN guardados (solo nombre, versión y columnas por formato)."""
+    carpeta = Path(d) / "prevalidadores"
+    if not carpeta.exists():
+        carpeta = CONFIG_DIR / "prevalidadores"
+    salida = []
+    for ruta in sorted(carpeta.glob("*.json")) if carpeta.exists() else []:
+        p = json.loads(ruta.read_text(encoding="utf-8"))
+        salida.append({"nombre": p["nombre"], "formatos": {k: {"version": v["version"], "columnas": v["columnas"]}
+                                                           for k, v in p["formatos"].items()}})
+    return salida

@@ -731,18 +731,25 @@
     });
   }
 
+  // Campos numéricos del 2276 v4 (45 columnas); SUMAN_TOTAL_2276 forma el total de ingresos brutos
+  const VALORES_2276 = /^(pagos_|cesantias|pensiones|total_|aporte|retencion|otros_pagos|iva_mayor_valor|alimentacion_hasta_41uvt|ingreso_promedio_6m)/;
+  const SUMAN_TOTAL_2276 = /^(pagos_|cesantias|pensiones|otros_pagos)/;
   function formato2276(filas, balance, cfg, hallazgos) {
     const campos = cfg.formatos["2276"].columnas.map(([c]) => c);
-    const valores = campos.filter((c) => /^(pagos_|cesantias|pensiones|total_|aporte|retencion)/.test(c) || c === "otros_pagos");
-    const pagos = valores.filter((c) => /^(pagos_|cesantias|pensiones)/.test(c) || c === "otros_pagos");
-    const [ter, lista] = personas(filas, valores, cfg, hallazgos);
+    const valores = campos.filter((c) => VALORES_2276.test(c));
+    const pagos = valores.filter((c) => SUMAN_TOTAL_2276.test(c));
+    const PERSONA = new Set(["tipo_documento", "numero_identificacion", "dv", "primer_apellido", "segundo_apellido", "primer_nombre",
+      "otros_nombres", "razon_social", "direccion", "codigo_departamento", "codigo_municipio", "pais", "entidad_informante"]);
+    const textos = campos.filter((c) => !valores.includes(c) && !PERSONA.has(c));
+    const [ter, lista] = personas(filas, valores.concat(textos), cfg, hallazgos);
     const sinTotal = lista.every((m) => !aNumero(m._total_ingresos));
-    cfg._sinVerificar.add("2276: código de 'entidad informante'");
+    const entidad = String(cfg.parametros.entidad_informante_2276 || "1");
     const out = lista.map((m) => {
       const t = ter.get(m.nit) || {};
       const o = {};
       campos.forEach((c) => { o[c] = t[c] || ""; });
-      o.entidad_informante = "1";
+      textos.forEach((c) => { const v = m["_" + c]; o[c] = vacio(v) ? "" : (typeof v === "number" && Number.isInteger(v) ? String(v) : String(v).trim()); });
+      o.entidad_informante = entidad;
       valores.forEach((c) => { o[c] = r0(aNumero(m["_" + c])); });
       if (sinTotal) o.total_ingresos = suma(pagos, (c) => o[c]);
       return o;
@@ -809,10 +816,63 @@
     if (Math.abs(dif) > 1) hallazgos.push(["ERROR", "Balance descuadrado", "", `Débitos - créditos = ${dif.toFixed(2)}`]);
   }
 
+  // ------------------------------------------------------------------ prevalidador DIAN
+  // Compara el layout configurado (versión del año) con el de un prevalidador de la MISMA versión.
+  // Deben coincidir en orden; el prevalidador puede traer columnas extra al final solo si son opcionales.
+  function estadoColumnas(fmt, spec, prevalidadores) {
+    const nuestras = spec.columnas.map(([, e]) => e);
+    for (const p of prevalidadores || []) {
+      const lay = (p.formatos || {})[fmt];
+      if (!lay || Number(lay.version) !== Number(spec.version)) continue;
+      const suyas = lay.columnas, difs = [];
+      for (let k = 0; k < Math.max(nuestras.length, suyas.length); k++) {
+        const a = k < nuestras.length ? nuestras[k] : null, b = k < suyas.length ? suyas[k].encabezado : null;
+        if (a === null && !suyas[k].obligatorio) continue;
+        if (a === null || b === null || clave(a) !== clave(b)) difs.push(`col ${k + 1}: configurada '${a || "—"}' / prevalidador '${b || "—"}'`);
+      }
+      return { verificado: !difs.length, fuente: p.nombre, diferencias: difs, omitidas: suyas.slice(nuestras.length).map((c) => c.encabezado) };
+    }
+    return { verificado: false, fuente: "", diferencias: [], omitidas: [] };
+  }
+
+  const FORMATOS_PREVALIDADOR = ["1001", "1003", "1005", "1006", "1007", "1008", "1009", "1010", "1011", "1012", "2276"];
+  // Lee el prevalidador (.xlsm) con SheetJS: versiones (DefinicionFormatos), columnas (hojas F####) y catálogos (Tablas)
+  function leerPrevalidador(XLSX, datos, nombre) {
+    const wb = XLSX.read(datos, { type: "array", bookVBA: false });
+    const hoja = (n) => wb.Sheets[n] ? filasDeHoja(XLSX, wb.Sheets[n]) : null;
+    const txt = (v) => (vacio(v) ? "" : String(v).replace(/(?:_x000D_|\s)+/g, " ").trim());
+    const def = hoja("DefinicionFormatos"), tab = hoja("Tablas");
+    if (!def || !tab) throw new Error("El archivo no parece un prevalidador de exógena de la DIAN (faltan las hojas DefinicionFormatos/Tablas)");
+    const versiones = {};
+    def.slice(2).forEach((f) => { const m = /^\s*(\d{4})\s*\(V-(\d+)\)/.exec(txt(f[1])); if (m) versiones[m[1]] = Number(m[2]); });
+    const tablas = {};
+    for (let i = 1; i < tab.length;) {
+      const n = txt(tab[i][0]), c = txt(tab[i][1]);
+      if (n.startsWith("D") && /^\d+$/.test(c)) { tablas[n] = tab.slice(i + 1, i + 1 + Number(c)).map((f) => [txt(f[0]), txt(f[1])]); i += Number(c) + 1; } else i++;
+    }
+    const formatos = {};
+    for (const fmt of FORMATOS_PREVALIDADOR) {
+      const r = hoja("F" + fmt);
+      if (!r || !versiones[fmt]) continue;
+      const cols = [];
+      for (let j = 1; j < r[1].length && txt(r[1][j]) && !txt(r[1][j]).startsWith("|"); j++) {
+        cols.push({ encabezado: txt(r[1][j]), tipo: txt(r[2][j]), longitud: Math.trunc(Number(txt(r[3][j]) || 0)),
+          obligatorio: txt(r[4][j]).toUpperCase() === "S", tabla: txt(r[5][j]), xml: txt(r[9][j]) });
+      }
+      const conceptos = cols.length && cols[0].xml === "cpt" && tablas[cols[0].tabla] ? tablas[cols[0].tabla] : [];
+      formatos[fmt] = { version: versiones[fmt], columnas: cols, conceptos };
+    }
+    const base = String(nombre || "prevalidador").replace(/\.[^.]+$/, "");
+    return { nombre: /^[0-9a-f]{8}-/.test(base) ? base.slice(9) : base, formatos,
+      paises: (tablas.D_2_107 || []).map(([c, n]) => [c, textoDian(n)]),
+      tipos_documento: tablas.DTiposDocto || [], entidad_informante_2276: tablas.DEntidadInfor || [] };
+  }
+
   // ------------------------------------------------------------------ orquestación
   function prepararConfig(cfg) {
     const anio = String(cfg.parametros.anio_gravable);
     Object.values(cfg.formatos).forEach((f) => { if (f.version_por_anio && f.version_por_anio[anio]) f.version = f.version_por_anio[anio]; });
+    Object.entries(cfg.formatos).forEach(([k, f]) => { f.verificacion_columnas = estadoColumnas(k, f, cfg.prevalidadores); f.columnas_verificadas = f.verificacion_columnas.verificado; });
     cfg.divipola.forEach((d) => { d.k_mpio = clave(d.municipio); d.k_dpto = clave(d.departamento); });
     cfg._sinVerificar = new Set();
     return cfg;
@@ -842,7 +902,9 @@
     }
     for (const fmt of Object.keys(generados)) {
       if (!cfg.formatos[fmt].verificado) cfg._sinVerificar.add(`Layout formato ${fmt} v${cfg.formatos[fmt].version}`);
-      if (cfg.formatos[fmt].columnas_verificadas === false) cfg._sinVerificar.add(`Orden de columnas del formato ${fmt} v${cfg.formatos[fmt].version} (anexo técnico)`);
+      const ver = cfg.formatos[fmt].verificacion_columnas;
+      if (!ver.verificado) cfg._sinVerificar.add(`Orden de columnas del formato ${fmt} v${cfg.formatos[fmt].version} (${ver.diferencias.length ? "difiere del prevalidador" : "sin prevalidador DIAN de esa versión"})`);
+      if (ver.omitidas.length) hallazgos.push(["INFO", "Columnas opcionales no generadas", fmt, `El prevalidador del ${fmt} v${cfg.formatos[fmt].version} trae columnas opcionales que el aplicativo no calcula: ${ver.omitidas.join("; ")}. Diligéncielas si aplican`]);
       const ok = new Set(cfg.conceptos.filter((c) => c.formato === fmt && String(c.verificado).toUpperCase() === "SI").map((c) => c.concepto));
       new Set(generados[fmt].map((r) => r.concepto).filter(Boolean)).forEach((c) => { if (!ok.has(c)) cfg._sinVerificar.add(`Concepto ${c} del formato ${fmt}`); });
     }
@@ -882,6 +944,6 @@
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, estadoColumnas, leerPrevalidador, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);

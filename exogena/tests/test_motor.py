@@ -135,3 +135,51 @@ def test_correcciones_de_terceros(tmp_path):
     f1 = r["generados"]["1001"]
     ped = f1[f1["numero_identificacion"] == "79555111"].iloc[0]
     assert ped["primer_apellido"] == "RAMIREZ" and ped["codigo_departamento"] == "05"
+
+
+# ---------------------------------------------------------------- prevalidador DIAN
+def _cfg(anio):
+    from exogena_engine import config as config_mod
+    import shutil, tempfile
+    d = Path(tempfile.mkdtemp())
+    shutil.copytree(config_mod.CONFIG_DIR, d, dirs_exist_ok=True)
+    txt = (d / "parametros.yaml").read_text(encoding="utf-8")
+    (d / "parametros.yaml").write_text(txt.replace("anio_gravable: 2026", f"anio_gravable: {anio}"), encoding="utf-8")
+    return config_mod.cargar(d)
+
+
+def test_columnas_verificadas_contra_prevalidador_de_la_misma_version():
+    cfg = _cfg(2026)
+    # misma versión en AG 2025 y AG 2026 -> verificadas con el prevalidador AG 2025
+    for fmt in ("1003", "1006", "1007", "1008", "1009", "1010", "1011", "1012", "2276"):
+        assert cfg.formatos[fmt]["columnas_verificadas"], fmt
+    # 1001 v11 y 1005 v9 (AG 2026) no tienen prevalidador de esa versión todavía
+    assert not cfg.formatos["1001"]["columnas_verificadas"]
+    assert not cfg.formatos["1005"]["columnas_verificadas"]
+    assert cfg.formatos["2276"]["columnas"][13][0] == "pagos_bonos" and len(cfg.formatos["2276"]["columnas"]) == 45
+
+
+def test_ag2025_verifica_1001_v10_y_1005_v8_con_opcional_omitida():
+    cfg = _cfg(2025)
+    assert cfg.formatos["1001"]["version"] == 10 and cfg.formatos["1001"]["columnas_verificadas"]
+    v = cfg.formatos["1005"]["verificacion_columnas"]
+    assert cfg.formatos["1005"]["version"] == 8 and v["verificado"]
+    assert v["omitidas"] == ["IVA tratado como mayor valor del costo o gasto (Art.490 E.T)"]
+
+
+def test_estado_columnas_detecta_orden_distinto():
+    from exogena_engine.prevalidador import estado_columnas
+    cfg = _cfg(2026)
+    spec = dict(cfg.formatos["1008"])
+    cols = list(spec["columnas"])
+    cols[3], cols[4] = cols[4], cols[3]
+    e = estado_columnas("1008", {**spec, "columnas": cols}, cfg.prevalidadores)
+    assert not e["verificado"] and len(e["diferencias"]) == 2
+
+
+def test_2276_layout_prevalidador(resultado):
+    f = resultado["generados"]["2276"]
+    assert len(f.columns) == 45
+    assert (f["entidad_informante"] == "1").all()
+    fila = f.iloc[0]
+    assert fila["total_ingresos"] == fila["pagos_salarios"] + fila["pagos_prestaciones"] + fila["cesantias_fondo"]

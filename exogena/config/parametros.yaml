@@ -62,6 +62,11 @@ topes:
 # 1001 van en la columna NO deducible (el aplicativo lo activa según el diagnóstico de la empresa).
 forzar_no_deducible: false
 
+# 2276: código de la columna 'Entidad informante' (tabla DEntidadInfor del prevalidador):
+# 1 Informante general, 2 Fiduciarias, 3 Mandatario/administrador delegado, 4 Consorcio/UT,
+# 5 Exploración de hidrocarburos, 6 Joint venture, 7 Cuentas en participación, 8 Convenios con entidades públicas
+entidad_informante_2276: "1"
+
 # Cuenta auxiliar bancaria -> NIT de la entidad (1012). Si se deja vacío el motor intenta
 # inferirla entre los terceros de la cuenta y deja una ALERTA para confirmar.
 cuentas_bancarias: {}

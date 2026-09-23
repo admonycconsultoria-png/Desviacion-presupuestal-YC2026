@@ -53,8 +53,14 @@ def ejecutar(fuente: str, balance: str, terceros: str | None, salida: str,
     for fmt in generados:
         if not cfg.formatos[fmt].get("verificado"):
             cfg.marcar_uso(f"Layout formato {fmt} v{cfg.formatos[fmt]['version']}")
-        if not cfg.formatos[fmt].get("columnas_verificadas", True):
-            cfg.marcar_uso(f"Orden de columnas del formato {fmt} v{cfg.formatos[fmt]['version']} (anexo técnico)")
+        ver = cfg.formatos[fmt]["verificacion_columnas"]
+        if not ver["verificado"]:
+            cfg.marcar_uso(f"Orden de columnas del formato {fmt} v{cfg.formatos[fmt]['version']} "
+                           f"({'difiere del prevalidador' if ver['diferencias'] else 'sin prevalidador DIAN de esa versión'})")
+        if ver["omitidas"]:
+            hallazgos.append(("INFO", "Columnas opcionales no generadas", fmt,
+                              f"El prevalidador del {fmt} v{cfg.formatos[fmt]['version']} trae columnas opcionales que el "
+                              f"aplicativo no calcula: {'; '.join(ver['omitidas'])}. Diligéncielas si aplican"))
         usados = set(generados[fmt]["concepto"]) if "concepto" in generados[fmt] else set()
         ok = set(cfg.conceptos.loc[(cfg.conceptos["formato"] == fmt) &
                                    (cfg.conceptos["verificado"].str.upper() == "SI"), "concepto"])

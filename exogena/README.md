@@ -139,12 +139,14 @@ exogena/
 │   ├── tipos_documento.csv  CC, NIT, CE, PPT… -> códigos DIAN
 │   ├── divipola.csv         DIVIPOLA completa: 1.121 municipios (paquete npm `divipola`, MIT)
 │   ├── doctrina.yaml        criterios de obligatoriedad con su fuente
-│   └── paises.csv           códigos de país DIAN
+│   ├── paises.csv           tabla de países DIAN (248, del prevalidador)
+│   └── prevalidadores/      layouts y catálogos extraídos de los prevalidadores DIAN (.json)
 ├── exogena_engine/
 │   ├── fuentes.py           lectura y normalización: encabezados, totales, signos, formatos numéricos
 │   ├── terceros.py          depuración: DV, tipo de documento, nombres, DIVIPOLA, duplicados
 │   ├── motor.py             reglas, prorrateo, cuantías menores, base 1003
 │   ├── externos.py          1010 (accionistas) y 2276 (nómina)
+│   ├── prevalidador.py      lee el prevalidador DIAN (.xlsm) y verifica el orden de columnas
 │   ├── validaciones.py      cuadres e inconsistencias contables
 │   └── exportar.py          archivos de formatos e informe
 ├── app/
@@ -200,18 +202,34 @@ de 2025** (UVT 2026 = $52.374). Se contrastó con el texto oficial:
 | Cuantías menores: 1001 3 UVT por beneficiario sumando todos los conceptos; 1008/1009 12 UVT por tercero; 1006/1007 solo no identificables | arts. 1.3.5.2.1, 1.3.5.6.1, 1.3.5.7.1 | Verificado |
 | Aportes a seguridad social (empleador deducible / trabajador no deducible); RST y no contribuyentes todo no deducible; exterior sin dirección | art. 1.3.5.2.1 par. 6, 9, 10, 14 | Verificado |
 | 1010 v9: valor nominal + prima en colocación; 1005 v9 sin columna de prorrateo | arts. 1.3.5.1.1 y 1.3.5.5.1 (Res. 233) | Verificado |
-| **Orden exacto de columnas** de cada formato | Anexos técnicos (PDF aparte) | **Pendiente**: marcar en *Parámetros normativos* después de compararlo |
+| **Orden exacto de columnas**: 1003, 1006, 1007, 1008, 1009, 1010, 1011, 1012 y 2276 (45 columnas); 1001 v10 y 1005 v8 para AG 2025 | Prevalidador DIAN AG 2025 v3.3.0-26 (misma versión de formato) | Verificado automáticamente |
+| Orden de columnas 1001 v11 y 1005 v9 (AG 2026) | Prevalidador AG 2026 (la DIAN aún no lo publica) | **Pendiente**: cargarlo en *Parámetros normativos* cuando salga |
+| Catálogos de conceptos (incluye los 223 del 1011), países (248) y entidad informante del 2276 | Tablas del prevalidador AG 2025 | Verificado |
+
+### Verificación contra el prevalidador
+
+El orden de columnas **no se marca a mano**. Cada hoja `F####` del prevalidador de la DIAN trae el encabezado,
+tipo, longitud y obligatoriedad de cada columna, y la hoja `DefinicionFormatos` la versión. El aplicativo compara,
+encabezado por encabezado, el layout de `config/formatos.yaml` con el del prevalidador **de la misma versión**:
+si coincide queda verificado; si el prevalidador trae columnas opcionales adicionales al final, se informan como
+omitidas. Un prevalidador de otra versión no verifica nada.
+
+```bash
+python -m exogena_engine.prevalidador Prevalidador_AG2026.xlsm             # informe de diferencias
+python -m exogena_engine.prevalidador Prevalidador_AG2026.xlsm --guardar    # lo guarda en config/prevalidadores/
+```
+
+En el aplicativo: *Parámetros normativos → Cargar prevalidador DIAN (.xlsm)*. Además agrega los conceptos y países
+de sus tablas que falten.
 
 `config/criterios.yaml` reúne las reglas que el asistente muestra junto a cada cuenta, cada una con su fuente:
 el artículo de la resolución o "Práctica" cuando se trata de un criterio profesional.
 
 ## Riesgos
 
-1. **Parámetros sin verificar.** Al momento de escribir esto (sep-2026) no se ha revisado la resolución de
-   exógena que rige el AG 2026 ni la versión de sus anexos. Los códigos de concepto, los topes de cuantías
-   menores y las versiones de formato que trae `config/` son de referencia y **todos están marcados
-   `verificado: false` / `NO`**. El motor no dará el dictamen "listo" hasta que un contador los contraste
-   contra la resolución y cambie la marca. Esto es deliberado.
+1. **Formatos 1001 v11 y 1005 v9 (AG 2026).** Su versión está verificada en la resolución, pero el orden de
+   columnas no: el layout es el del prevalidador AG 2025 (v10/v8) hasta que la DIAN publique el del AG 2026.
+   El dictamen no dice "listo" mientras tanto. Esto es deliberado.
 2. **Dataico.** Su adaptador se basa en alias genéricos. Hay que probarlo con un export real antes de
    confiar en él.
 3. **IVA sin subcuentas.** Si el cliente lleva todo el IVA en `2408` sin separar generado de descontable,
@@ -221,11 +239,8 @@ el artículo de la resolución o "Práctica" cuando se trata de un criterio prof
    dan neto cero. El motor lo detecta y lo marca como ERROR.
 5. **Salarios en 1001 frente a 2276.** La regla `5105 -> 5001` queda activa, pero hay que confirmar en el
    anexo si los pagos laborales ya reportados en 2276 también van en 1001.
-6. **Tabla de países DIAN incompleta.** Solo trae Colombia (169) y Estados Unidos (249). La DIAN usa su propia
-   tabla, que no es la ISO, así que hay que completarla con el anexo técnico desde *Parámetros normativos* o
-   `config/paises.csv`.
-7. **Norma base.** Rige la Res. 000227 de 2025, modificada por la 000233 de 2025 y la 000012 de 2026. Los
-   conceptos, topes y versiones siguen marcados sin verificar hasta contrastarlos con esos textos.
+6. **Norma base.** Rige la Res. 000227 de 2025, modificada por la 000233 de 2025 (corregida por la 237) y la
+   238 de 2025 (UVT 2026).
 
 ## Hoja de ruta
 
@@ -233,7 +248,7 @@ el artículo de la resolución o "Práctica" cuando se trata de un criterio prof
 |---|---|---|
 | 1. Diagnóstico | Obligatoriedad por cliente (ingresos y patrimonio del año anterior contra el umbral de la resolución) y checklist de insumos | Pendiente |
 | 2. Arquitectura | Motor, parametrización, adaptadores y validaciones | **Hecho (esta versión)** |
-| 3. Verificación normativa | Contrastar `conceptos.csv`, topes y `formatos.yaml` con la resolución y los anexos del AG 2026, y cambiar las marcas a SI | Pendiente, **crítico** |
+| 3. Verificación normativa | Conceptos, topes y versiones contra la Res. 227; columnas y catálogos contra el prevalidador AG 2025 | **Hecho**, salvo columnas de 1001 v11 y 1005 v9 (falta prevalidador AG 2026) |
 | 4. Calibración por software | Un export real de cada software (Siigo, Alegra, Dataico) de un cliente piloto, con ajuste de alias y del filtro de totales | Pendiente |
 | 5. 1011 | Tabla de renglones de las declaraciones, en modo `sin_tercero` | Pendiente |
 | 6. Aplicativo | HTML sin conexión con multiempresa, parametrización por empresa y descargas para el prevalidador | **Hecho** |

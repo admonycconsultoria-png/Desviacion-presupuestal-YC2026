@@ -80,6 +80,14 @@ def formato_1010(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list)
     return _redondear(pd.DataFrame(filas)[campos], ["valor_nominal", "prima"])
 
 
+# Campos numéricos del 2276 v4 (prevalidador AG 2025, 45 columnas); el resto son texto.
+VALORES_2276 = ("pagos_", "cesantias", "pensiones", "total_", "aporte", "retencion", "otros_pagos",
+                "iva_mayor_valor", "alimentacion_hasta_41uvt", "ingreso_promedio_6m")
+# Suman al total de ingresos brutos por rentas de trabajo y pensión (no la alimentación hasta 41 UVT,
+# que no es ingreso del trabajador, ni el IVA ni el promedio de ingresos)
+SUMAN_TOTAL_2276 = ("pagos_", "cesantias", "pensiones", "otros_pagos")
+
+
 def formato_2276(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
     """nomina.csv: consolidado anual por empleado (reporte de nómina electrónica)
     con columnas iguales a los campos del formato 2276 en config/formatos.yaml."""
@@ -87,19 +95,20 @@ def formato_2276(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list)
     crudo = leer_tabla(ruta)
     terceros, df = _personas(crudo, cfg, hallazgos)
     crudo.columns = [clave(c).replace(" ", "_") for c in crudo.columns]
-    valores = [c for c in campos if c.startswith(("pagos_", "cesantias", "pensiones", "total_", "aporte",
-                                                    "retencion")) or c == "otros_pagos"]
+    valores = [c for c in campos if c.startswith(VALORES_2276)]
     for c in valores:
         crudo[c] = crudo[c].map(a_numero) if c in crudo.columns else 0.0
-    pagos = [c for c in valores if c.startswith(("pagos_", "cesantias", "pensiones")) or c == "otros_pagos"]
+    pagos = [c for c in valores if c.startswith(SUMAN_TOTAL_2276)]
     if (crudo["total_ingresos"] == 0).all():
         crudo["total_ingresos"] = crudo[pagos].sum(axis=1)
+    textos = [c for c in campos if c not in valores and c not in terceros.columns and c != "entidad_informante"]
+    entidad = str(cfg.parametros.get("entidad_informante_2276") or "1")
 
     filas = []
     for i, nit in enumerate(df["nit"]):
         t = terceros.loc[nit].to_dict()
-        filas.append({**t, "entidad_informante": "1", **{c: crudo.at[i, c] for c in valores}})
-    cfg.marcar_uso("2276: código de 'entidad informante'")
+        extra = {c: (a_texto(crudo.at[i, c]) if c in crudo.columns else "") for c in textos}
+        filas.append({**t, **extra, "entidad_informante": entidad, **{c: crudo.at[i, c] for c in valores}})
     out = _redondear(pd.DataFrame(filas)[campos], valores)
 
     # Cruce con contabilidad: salarios de nómina vs cuentas 5105/5205/7205 subcuenta 06 (sueldos)
