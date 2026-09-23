@@ -1087,6 +1087,6 @@
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, ubicar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);

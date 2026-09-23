@@ -180,6 +180,10 @@ formato,prefijo,concepto,columna,base,notas
   por 8 o 9 pasan a 31; el DV se recalcula; un NIT de 10 dígitos con el DV pegado se separa. Todo queda en
   *Correcciones de terceros* para llevarlo al software. Lo que necesita un dato externo (dirección, tercero
   real de un movimiento) sigue como hallazgo.
+- Terceros sin ubicación en bloque (aplicativo, *Corregir terceros*): se descarga un Excel con los terceros
+  reportados que el prevalidador rechazaría y los municipios homónimos, por prioridad y monto; el equipo lo
+  llena (RUT, facturas, RUES) y se carga de vuelta como corrección de cada tercero, con fecha y fuente. Las
+  filas con dirección inválida o municipio no encontrado se rechazan con el motivo.
 - La severidad de un dato faltante sale del prevalidador: ERROR si la columna es obligatoria, ALERTA si la
   acepta vacía. Ojo: la fila "obligatorio" de las hojas del prevalidador dice N para dirección, departamento y
   municipio, pero sus macros (E0074, E0075, E0076, E0100) los exigen cuando el país es Colombia y los

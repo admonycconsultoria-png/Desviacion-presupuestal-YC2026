@@ -1224,7 +1224,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, ubicar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
@@ -1335,7 +1335,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <b>${esc(x.razon_social)}</b><small>NIT ${esc(x.nit || "—")} · AG ${esc(x.anio)} · ${esc(x.fuente)}</small>
       </div>`).join("") : `<small style="color:var(--texto-2)">Aún no hay empresas.</small>`;
     $$(".empresa-item[data-id]", cont).forEach((el) => el.onclick = () => {
-      if (E.activa !== el.dataset.id) { E.archivos = {}; E.resultado = null; }
+      if (E.activa !== el.dataset.id) { E.archivos = {}; E.resultado = null; E.ultimoImporte = null; }
       E.activa = el.dataset.id; if (E.vista === "normativo") E.vista = "procesar"; guardar(); render();
     });
     $("#nav-normativo").classList.toggle("activa", E.vista === "normativo");
@@ -1478,7 +1478,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           if (auto.length) { auto.forEach((a) => guardarCorreccion(emp, a.nit, { ...(emp.correcciones[a.nit] || {}), ...a.s })); guardar(); r = correr(); }
         }
         r.autocorregidos = auto; r.fecha = new Date();
-        E.resultado = r; E.subvista = "hallazgos"; E.verFormato = null;
+        E.resultado = r; E.subvista = E.subvistaTrasGenerar || "hallazgos"; E.subvistaTrasGenerar = null; E.verFormato = null;
       } catch (e) {
         E.resultado = null;
         toast("Error al procesar:\n" + e.message);
@@ -2309,15 +2309,126 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
       emp.correcciones[nit_correcto] = { ...(emp.correcciones[nit_correcto] || {}), ...resto };
     } else { delete c.nit_correcto; emp.correcciones[nit] = c; }
   }
+  // ================================================================== TERCEROS SIN UBICACIÓN (Excel ida y vuelta)
+  const PROBLEMAS_UBICACION = new Set(["Falta direccion", "Falta codigo_departamento", "Falta codigo_municipio", "Dirección muy corta",
+    "Municipio no identificado", "Municipio homónimo", "Sin dirección", "Tercero sin maestro"]);
+  const NO_SUMAN = new Set(["porcentaje", "posicion_decimal"]);
+  // Terceros de Colombia reportados en algún formato con dirección o municipio faltante o inválido, del mayor al menor monto
+  function tercerosSinUbicacion(r) {
+    const reportados = new Map();
+    Object.entries(r.generados).forEach(([fmt, filas]) => filas.forEach((f) => {
+      const nit = String(f.numero_identificacion || ""); if (!nit) return;
+      const x = reportados.get(nit) || { monto: 0, formatos: new Set() };
+      camposValor(fmt).filter((c) => !NO_SUMAN.has(c)).forEach((c) => { x.monto += Math.abs(Number(f[c]) || 0); });
+      x.formatos.add(fmt); reportados.set(nit, x);
+    }));
+    const probs = new Map();
+    r.hallazgos.forEach((h) => { if (PROBLEMAS_UBICACION.has(h[1]) && reportados.has(String(h[2]))) (probs.get(String(h[2])) || probs.set(String(h[2]), new Set()).get(String(h[2]))).add(h[1]); });
+    // Entran los que el prevalidador rechazaría (ERROR) y los municipios homónimos; las alertas de terceros que solo
+    // van en formatos sin ubicación (1005, 1006, 1007, 1012) no generan trabajo
+    const DECIDEN = new Set(["Falta direccion", "Falta codigo_departamento", "Falta codigo_municipio", "Dirección muy corta", "Municipio homónimo"]);
+    return [...probs].filter(([, cats]) => [...cats].some((c) => DECIDEN.has(c))).map(([nit, cats]) => {
+      const t = r.terceros.get(nit) || {};
+      const obligatorio = [...cats].some((c) => c !== "Municipio homónimo" && DECIDEN.has(c));
+      return { nit, t, cats: [...cats], prioridad: obligatorio ? "1 Obligatorio: el prevalidador lo rechaza" : "2 Revisar: municipio homónimo", ...reportados.get(nit) };
+    }).filter((x) => ["", "169", undefined].includes(x.t.pais)).sort((a, b) => a.prioridad.localeCompare(b.prioridad) || b.monto - a.monto);
+  }
+  const COLS_UBIC = ["prioridad", "nit", "nombre o razon social", "tipo documento", "monto reportado", "formatos", "problema", "direccion actual", "municipio actual",
+    "direccion", "ciudad", "departamento", "codigo dane", "fuente del dato", "responsable"];
+  function descargarSinUbicacion(r, emp) {
+    const lista = tercerosSinUbicacion(r);
+    if (!lista.length) { toast("No hay terceros reportados con dirección o municipio pendiente."); return; }
+    const nombre = (t) => t.razon_social || [t.primer_apellido, t.segundo_apellido, t.primer_nombre, t.otros_nombres].filter(Boolean).join(" ");
+    const mp = (t) => { const d = DEF.divipola.find((x) => x.codigo_departamento === t.codigo_departamento && x.codigo_municipio === t.codigo_municipio); return d ? `${d.municipio} (${d.codigo_departamento}${d.codigo_municipio})` : ""; };
+    const filas = [COLS_UBIC].concat(lista.map((x) => [x.prioridad, x.nit, nombre(x.t), x.t.tipo_documento || "", Math.round(x.monto), [...x.formatos].sort().join(" "),
+      x.cats.join("; "), x.t.direccion || "", mp(x.t), "", "", "", "", "", ""]));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(filas);
+    ws["!cols"] = [34, 14, 36, 8, 14, 14, 34, 28, 22, 34, 18, 16, 11, 16, 14].map((w) => ({ wch: w }));
+    ws["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: filas.length - 1, c: COLS_UBIC.length - 1 } }) };
+    XLSX.utils.book_append_sheet(wb, ws, "Completar");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ["Terceros sin dirección o municipio · " + emp.razon_social + " · AG " + emp.anio], [],
+      ["Qué hacer"],
+      ["1. Llene solo las columnas direccion, ciudad y departamento (o codigo dane de 5 dígitos). No cambie los encabezados ni la columna nit."],
+      ["2. Empiece por arriba: primero los obligatorios (sin ellos el prevalidador rechaza el formato), del mayor al menor monto; luego los municipios homónimos, que el aplicativo asignó al primer departamento posible y hay que confirmar."],
+      ["3. Fuentes válidas: el RUT del tercero, sus facturas electrónicas o el RUES (rues.org.co) para sociedades. Anote cuál usó en 'fuente del dato'."],
+      ["4. La dirección debe tener mínimo 8 caracteres y no puede ser el nombre de la ciudad. No invente datos: es información errónea (art. 651 E.T.)."],
+      ["5. Puede repartir las filas entre varias personas (columna responsable) y cargar el archivo en el aplicativo las veces que quiera: solo aplica las filas llenas."],
+      ["6. Cárguelo en Procesar exógena → Corregir terceros → Cargar Excel completado."],
+    ]), "Instrucciones");
+    XLSX.writeFile(wb, `Terceros_sin_ubicacion_${sufijo(emp)}.xlsx`);
+    const nOb = lista.filter((x) => x.prioridad.startsWith("1")).length;
+    toast(`${lista.length} terceros exportados: ${nOb} obligatorios y ${lista.length - nOb} por revisar, del mayor al menor monto.`);
+  }
+  function cargarUbicaciones(file, emp) {
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const filas = Exogena.leerLibro(XLSX, new Uint8Array(fr.result), file.name);
+        const enc = (filas[0] || []).map((h) => Exogena.clave(h));
+        const ix = (n) => enc.indexOf(n);
+        if (ix("nit") < 0 || (ix("direccion") < 0 && ix("ciudad") < 0 && ix("codigo dane") < 0)) throw new Error("El archivo no tiene las columnas nit, direccion y ciudad de la plantilla descargada");
+        const cfg = Exogena.prepararConfig(construirCfg(emp));
+        const mpios = new Set(cfg.divipola.map((d) => d.k_mpio));
+        const val = (f, n) => (ix(n) >= 0 && f[ix(n)] !== undefined && f[ix(n)] !== null ? String(f[ix(n)]).trim() : "");
+        const hoy = new Date().toISOString().slice(0, 10);
+        let aplicados = 0; const rechazados = [];
+        filas.slice(1).forEach((f) => {
+          const nit = String(val(f, "nit")).replace(/\D/g, "");
+          const dir = Exogena.textoDian(val(f, "direccion")), ciudad = val(f, "ciudad"), dpto = val(f, "departamento"), dane = val(f, "codigo dane");
+          if (!nit || (!dir && !ciudad && !dane)) return;
+          const motivos = [];
+          if (dir && (dir.length < 8 || mpios.has(Exogena.clave(dir)))) motivos.push("dirección inválida (mínimo 8 caracteres y no el nombre de la ciudad)");
+          let ub = null;
+          if (ciudad || dane) {
+            const [dp, mp, homonimo] = Exogena.ubicar(ciudad, dpto, dane, cfg);
+            if (!dp) motivos.push(`municipio '${ciudad || dane}' no encontrado en DIVIPOLA`);
+            else if (homonimo && !dpto && !dane) motivos.push(`'${ciudad}' existe en varios departamentos: indique el departamento`);
+            else ub = [dp, mp];
+          }
+          if (motivos.length) { rechazados.push([nit, motivos.join("; ")]); return; }
+          const c = { ...(emp.correcciones[nit] || {}) };
+          if (dir) c.direccion = dir;
+          if (ub) { c.codigo_departamento = ub[0]; c.codigo_municipio = ub[1]; c.pais = "169"; }
+          c.origen = `Excel ${hoy}${val(f, "fuente del dato") ? " · " + val(f, "fuente del dato") : ""}`;
+          emp.correcciones[nit] = c; aplicados++;
+        });
+        guardar();
+        E.ultimoImporte = { aplicados, rechazados, archivo: file.name };
+        if (aplicados && E.archivos.balance) { E.vista = "procesar"; E.subvistaTrasGenerar = "corregir"; generar(emp); }
+        else render();
+        toast(`${aplicados} terceros actualizados${rechazados.length ? `, ${rechazados.length} filas rechazadas (ver detalle)` : ""}.`);
+      } catch (err) { toast("No se pudo cargar: " + err.message); }
+    };
+    fr.readAsArrayBuffer(file);
+  }
+  function avisoImporte() {
+    const u = E.ultimoImporte; if (!u) return "";
+    return `<div class="aviso" style="background:var(--info-f);color:var(--texto)"><b>${esc(u.archivo)}:</b> ${u.aplicados} terceros actualizados.
+      ${u.rechazados.length ? `<br><b>${u.rechazados.length} filas rechazadas</b> (corríjalas en el Excel y vuelva a cargarlo):<ul style="margin:4px 0 0 18px">${u.rechazados.slice(0, 50).map(([n, m]) => `<li>${esc(n)}: ${esc(m)}</li>`).join("")}</ul>` : ""}</div>`;
+  }
+
   function subCorregir(s, r, emp) {
     const lista = tercerosACorregir(r);
-    if (!lista.length) { s.innerHTML = `<div class="vacio">No hay terceros con errores corregibles.</div>`; return; }
-    s.innerHTML = datalists() + `<p class="ayuda">Corrija aquí los datos que el prevalidador rechazaría. Las correcciones se guardan <b>por empresa</b> y se aplican cada vez que se genera, pero lo correcto es llevarlas también al software contable: en <b>Correcciones de terceros</b> puede descargar el listado.</p>
+    const nUbic = tercerosSinUbicacion(r).length;
+    const barraUbic = `<div class="panel" style="margin:0 0 12px"><h2 style="font-size:15px;margin:0 0 6px">Terceros sin dirección o municipio: ${nUbic}</h2>
+      <p class="ayuda" style="margin:0 0 8px">Si son muchos, trabájelos en Excel: descargue la lista (ordenada por monto), repártala en el equipo, llénela con el RUT, las facturas o el RUES y cárguela de vuelta. Se guarda como corrección de cada tercero.</p>
+      <div class="barra"><button class="prim" id="ub-dl" ${nUbic ? "" : "disabled"}>Descargar terceros sin ubicación (Excel)</button>
+      <button id="ub-up">Cargar Excel completado</button><input type="file" id="ub-in" accept=".xlsx,.xls,.csv" class="oculto"></div></div>${avisoImporte()}`;
+    const enlazarUbic = () => {
+      $("#ub-dl").onclick = () => descargarSinUbicacion(r, emp);
+      $("#ub-up").onclick = () => $("#ub-in").click();
+      $("#ub-in").onchange = (e) => { const f = e.target.files[0]; if (f) cargarUbicaciones(f, emp); e.target.value = ""; };
+    };
+    if (!lista.length) { s.innerHTML = barraUbic + `<div class="vacio">No hay terceros con errores corregibles.</div>`; enlazarUbic(); return; }
+    s.innerHTML = datalists() + barraUbic + `<p class="ayuda">Corrija aquí los datos que el prevalidador rechazaría. Las correcciones se guardan <b>por empresa</b> y se aplican cada vez que se genera, pero lo correcto es llevarlas también al software contable: en <b>Correcciones de terceros</b> puede descargar el listado.</p>
       <div class="barra"><button class="prim" id="co-auto">Aplicar sugerencias automáticas (tipo 31 a empresas, DV correcto, NIT con DV pegado)</button>
       <button id="co-regen">Volver a generar con las correcciones</button></div>
       <div class="tabla-wrap" style="max-height:640px"><table><thead><tr><th>NIT y problemas</th><th>Tipo doc / persona</th><th>DV</th><th>Nombre o razón social</th><th>Dirección</th><th>Municipio</th><th>País</th><th></th></tr></thead>
       <tbody>${lista.slice(0, 300).map(({ nit, cats }) => filaCorreccion(emp, r.terceros.get(nit) || { nit, numero_identificacion: nit }, cats)).join("")}</tbody></table></div>
       ${lista.length > 300 ? `<small>Se muestran 300 de ${lista.length}.</small>` : ""}`;
+    enlazarUbic();
     $$("tbody tr[data-nit]", s).forEach((tr) => {
       const t = r.terceros.get(tr.dataset.nit) || { nit: tr.dataset.nit };
       $("button", tr).onclick = () => { guardarCorreccion(emp, t.nit, leerFilaCorreccion(tr, t)); guardar(); tr.classList.remove("ERROR"); toast(`Corrección de ${t.nit} guardada.`); };
@@ -2336,7 +2447,7 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
   }
   function renderCorrecciones(v, emp) {
     const cs = Object.entries(emp.correcciones || {});
-    const campos = ["nit_correcto", "tipo_documento", "persona", "dv", "razon_social", "primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres", "direccion", "codigo_departamento", "codigo_municipio", "pais"];
+    const campos = ["nit_correcto", "tipo_documento", "persona", "dv", "razon_social", "primer_apellido", "segundo_apellido", "primer_nombre", "otros_nombres", "direccion", "codigo_departamento", "codigo_municipio", "pais", "origen"];
     v.innerHTML = `<div class="panel"><h2>Correcciones de terceros de ${esc(emp.razon_social)}</h2>
       <p class="ayuda">Se aplican sobre el maestro del software cada vez que se genera. Descargue el listado y corríjalo también en el software, para que el año siguiente no se repita.</p>
       <div class="barra"><button class="prim" id="cr-dl" ${cs.length ? "" : "disabled"}>Descargar listado para corregir en el software</button></div>

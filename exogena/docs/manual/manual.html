@@ -274,7 +274,15 @@
   <h3>9a. Terceros (pestaña "Corregir terceros")</h3>
   <p>Muestra cada tercero con problemas y le deja corregir en la misma fila: tipo de documento, persona natural o jurídica, DV, nombres, dirección, municipio (escriba el nombre y elija de la lista) y país. Pulse <span class="boton p">Guardar</span> en cada fila y al final <span class="boton">Volver a generar con las correcciones</span>.</p>
   <figure><img src="img/09_corregir.png" style="max-height:72mm"><figcaption>Corrección de terceros: cada fila muestra los problemas en amarillo.</figcaption></figure>
-  <h3>9b. Lo que se corrige en el software contable, no aquí</h3>
+  <h3>9b. Muchos terceros sin dirección: trabajarlos en Excel</h3>
+  <p>Arriba de la pestaña <b>Corregir terceros</b> está el contador <b>"Terceros sin dirección o municipio"</b>. Si son muchos (y ya cargó las facturas electrónicas del Paso 6):</p>
+  <ol>
+    <li><span class="boton p">Descargar terceros sin ubicación (Excel)</span>. Trae solo los terceros que sí se reportan: primero los <b>obligatorios</b> (sin ellos el prevalidador rechaza el formato) y después los <b>municipios homónimos</b> por confirmar, cada grupo del mayor al menor monto.</li>
+    <li>Reparta las filas en el equipo (columna <i>responsable</i>). Cada persona llena <b>direccion</b>, <b>ciudad</b> y <b>departamento</b> (o el <b>codigo dane</b> de 5 dígitos) con el RUT, las facturas o el RUES, y anota la <i>fuente del dato</i>.</li>
+    <li><span class="boton">Cargar Excel completado</span>. Solo se aplican las filas llenas; puede cargar el archivo varias veces a medida que avanzan. El aplicativo vuelve a generar y muestra cuántos terceros se actualizaron.</li>
+  </ol>
+  <p>Las filas con problemas se rechazan con el motivo, sin aplicar nada: dirección de menos de 8 caracteres o que es el nombre de una ciudad, municipio que no existe en DIVIPOLA, o municipio homónimo sin departamento. Lo aplicado queda en <b>Correcciones de terceros</b> con su origen (fecha y fuente).</p>
+  <h3>9c. Lo que se corrige en el software contable, no aquí</h3>
   <table>
     <tr><th style="width:32%">Hallazgo</th><th>Solución</th></tr>
     <tr><td><span class="chip e">ERROR</span> Movimiento sin tercero</td><td>Hay valores en una cuenta sin NIT. Asígnele el tercero en el software, vuelva a exportar el balance y cárguelo de nuevo.</td></tr>
@@ -282,7 +290,7 @@
     <tr><td><span class="chip e">ERROR</span> Cuenta sin código contable</td><td>(Alegra) Hay una cuenta sin código PUC. Asígnele código en el software y vuelva a exportar.</td></tr>
     <tr><td><span class="chip e">ERROR</span> Cierre incluido</td><td>Exporte el balance sin el comprobante de cierre.</td></tr>
   </table>
-  <h3>9c. Cuentas sin parametrizar</h3>
+  <h3>9d. Cuentas sin parametrizar</h3>
   <p>Si la pestaña <b>Cuentas sin parametrizar</b> muestra cuentas, son gastos, costos o ingresos con movimiento que ninguna regla reporta. Vaya al <b>Asistente</b> (Paso 7) y decida su tratamiento, aunque sea "No se reporta".</p>
   <div class="caja ojo"><b>Lleve las correcciones al software</b>Las correcciones hechas aquí se guardan por empresa y se aplican cada vez que genera. Pero lo correcto es arreglarlas también en el software para que el próximo año no se repitan: en <b>Correcciones de terceros</b>, <span class="boton p">Descargar listado para corregir en el software</span>.</div>
 </section>
@@ -293,10 +301,10 @@
   <p class="cuando">Antes de descargar los formatos</p>
   <h3>10a. Cuadres</h3>
   <p>La pestaña <b>Cuadres</b> compara, por formato y columna, lo que dice la contabilidad con lo que quedó en los formatos. La columna "diferencia no explicada" debe estar en cero y el estado en <span class="chip v">OK</span>. Una diferencia significa que un valor se perdió o se duplicó.</p>
-  <figure><img src="img/11_cuadres.png"><figcaption>Cuadre contable de cada formato.</figcaption></figure>
+  <figure><img src="img/11_cuadres.png" style="max-height:68mm"><figcaption>Cuadre contable de cada formato.</figcaption></figure>
   <h3>10b. Conciliación con declaraciones</h3>
   <p>La DIAN cruza la exógena con sus declaraciones. Digite los valores declarados (IVA, retenciones 350, ingresos, cuentas por cobrar, pasivos, efectivo). <b>La diferencia no tiene que ser cero</b> (la renta es fiscal y la exógena contable), pero <b>toda diferencia debe quedar explicada</b> en la última columna.</p>
-  <figure><img src="img/12_conciliacion.png"><figcaption>Conciliación: declarado, exógena, diferencia y explicación.</figcaption></figure>
+  <figure><img src="img/12_conciliacion.png" style="max-height:68mm"><figcaption>Conciliación: declarado, exógena, diferencia y explicación.</figcaption></figure>
   <p>La pestaña <b>Sanciones (art. 651)</b> calcula la sanción posible sobre una diferencia y la reducción si se corrige antes de que la DIAN lo detecte.</p>
 </section>
 
