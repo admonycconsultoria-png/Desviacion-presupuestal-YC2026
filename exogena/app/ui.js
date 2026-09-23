@@ -146,6 +146,7 @@
     ["terceros", "Listado de terceros", true, "Con dirección, ciudad y tipo de documento"],
     ["accionistas", "Libro de accionistas", false, "Para el 1010: nit, nombre, ciudad, porcentaje o acciones"],
     ["nomina", "Consolidado de nómina", false, "Para el 2276: use la plantilla de nómina (botón abajo)"],
+    ["facturas", "Facturas electrónicas (XML o ZIP)", false, "Todas las del año, en bloque: completan direcciones, municipios, DV y tipo de documento"],
   ];
   function renderProcesar(v, emp) {
     const fuentes = Object.entries(DEF.fuentes);
@@ -154,9 +155,10 @@
       <div class="barra"><label>Software contable&nbsp;<select id="sel-fuente">${fuentes.map(([k, f]) => `<option value="${k}" ${emp.fuente === k ? "selected" : ""}>${esc(k)} — ${esc(f.descripcion)}</option>`).join("")}</select></label></div>
       <div class="drops">${INSUMOS.map(([k, t, req, ay]) => {
         const a = E.archivos[k];
-        return `<label class="drop ${a ? "cargado" : ""}" data-k="${k}"><input type="file" accept=".xlsx,.xls,.csv,.txt">
+        const multi = k === "facturas";
+        return `<label class="drop ${a ? "cargado" : ""}" data-k="${k}"><input type="file" ${multi ? 'multiple accept=".xml,.zip"' : 'accept=".xlsx,.xls,.csv,.txt"'}>
           <b>${t} ${req ? '<span class="req">*</span>' : ""}</b>
-          <small>${a ? "✓ " + esc(a.nombre) + ` (${a.filas.length} filas)` : ay}</small></label>`;
+          <small>${a ? "✓ " + esc(a.nombre) + (a.detalle ? ` (${esc(a.detalle)})` : ` (${a.filas.length} filas)`) : ay}</small></label>`;
       }).join("")}</div>
       <div class="barra" style="margin-top:14px"><button class="prim" id="btn-generar" ${E.archivos.balance ? "" : "disabled"}>Generar exógena</button>
       ${Object.keys(E.archivos).length ? '<button id="btn-limpiar">Quitar archivos</button>' : ""}
@@ -166,10 +168,14 @@
     $("#sel-fuente").onchange = (e) => { emp.fuente = e.target.value; guardar(); renderLateral(); };
     $$(".drop", v).forEach((d) => {
       const inp = $("input", d);
-      inp.onchange = () => inp.files[0] && cargarArchivo(d.dataset.k, inp.files[0]);
+      inp.onchange = () => { if (d.dataset.k === "facturas") { if (inp.files.length) cargarFacturas([...inp.files]); } else if (inp.files[0]) cargarArchivo(d.dataset.k, inp.files[0]); };
       d.ondragover = (e) => { e.preventDefault(); d.classList.add("sobre"); };
       d.ondragleave = () => d.classList.remove("sobre");
-      d.ondrop = (e) => { e.preventDefault(); d.classList.remove("sobre"); if (e.dataTransfer.files[0]) cargarArchivo(d.dataset.k, e.dataTransfer.files[0]); };
+      d.ondrop = (e) => {
+        e.preventDefault(); d.classList.remove("sobre");
+        if (d.dataset.k === "facturas") { if (e.dataTransfer.files.length) cargarFacturas([...e.dataTransfer.files]); }
+        else if (e.dataTransfer.files[0]) cargarArchivo(d.dataset.k, e.dataTransfer.files[0]);
+      };
     });
     $("#btn-generar").onclick = () => generar(emp);
     $("#btn-plantilla-nom").onclick = descargarPlantillaNomina;
@@ -193,6 +199,22 @@
     XLSX.writeFile(wb, "Plantilla_nomina_2276.xlsx");
   }
 
+  // Facturas electrónicas: muchos .xml/.zip a la vez; se leen en el navegador y se quedan en memoria
+  async function cargarFacturas(files) {
+    let registros = [], leidos = 0, sinTerceros = 0;
+    for (const f of files) {
+      try {
+        const r = Exogena.leerFacturasArchivo(XLSX, new Uint8Array(await f.arrayBuffer()), f.name, window.DOMParser);
+        leidos++; if (!r.length) sinTerceros++;
+        registros = registros.concat(r);
+      } catch (e) { sinTerceros++; }
+    }
+    const nits = new Set(registros.map((r) => r.nit));
+    E.archivos.facturas = { nombre: `${leidos} archivos`, filas: registros, detalle: `${nits.size} terceros` };
+    E.resultado = null; render();
+    toast(`${leidos} archivos leídos: ${nits.size} terceros distintos${sinTerceros ? `; ${sinTerceros} sin factura reconocible (se ignoran)` : ""}.`);
+  }
+
   function cargarArchivo(k, file) {
     const fr = new FileReader();
     fr.onload = () => {
@@ -214,6 +236,7 @@
         const correr = () => {
           const cfg = construirCfg(emp);
           const x = Exogena.ejecutar({ fuente: emp.fuente, balance: E.archivos.balance.filas, terceros: E.archivos.terceros && E.archivos.terceros.filas,
+            facturas: E.archivos.facturas && E.archivos.facturas.filas,
             accionistas: E.archivos.accionistas && E.archivos.accionistas.filas, nomina: E.archivos.nomina && E.archivos.nomina.filas }, cfg);
           x.cfg = cfg; return x;
         };

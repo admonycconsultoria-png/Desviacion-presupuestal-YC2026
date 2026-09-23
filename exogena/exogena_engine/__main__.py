@@ -9,6 +9,7 @@ import pandas as pd
 from . import config as config_mod
 from .exportar import escribir_formato, escribir_informe
 from .externos import formato_1010, formato_2276
+from .facturas import completar_maestro, leer_facturas
 from .fuentes import cargar_balance, cargar_terceros
 from .motor import construir_formato, generar_partidas
 from .terceros import depurar
@@ -17,7 +18,8 @@ from .validaciones import cuadres, inconsistencias
 
 def ejecutar(fuente: str, balance: str, terceros: str | None, salida: str,
              accionistas: str | None = None, nomina: str | None = None,
-             config_dir: str | None = None, formatos: list[str] | None = None) -> dict:
+             config_dir: str | None = None, formatos: list[str] | None = None,
+             facturas: list[str] | None = None) -> dict:
     cfg = config_mod.cargar(config_dir or config_mod.CONFIG_DIR)
     if fuente not in cfg.fuentes:
         raise SystemExit(f"Fuente '{fuente}' no configurada. Opciones: {', '.join(cfg.fuentes)}")
@@ -27,6 +29,8 @@ def ejecutar(fuente: str, balance: str, terceros: str | None, salida: str,
 
     bal = cargar_balance(balance, fuente, cfg, hallazgos)
     maestro = cargar_terceros(terceros, fuente, cfg)
+    if facturas:
+        maestro = completar_maestro(maestro, bal, leer_facturas(facturas), cfg, hallazgos)
     ter = depurar(bal, maestro, cfg, hallazgos)
     inconsistencias(bal, cfg, hallazgos)
     partidas = generar_partidas(bal, cfg, hallazgos)
@@ -86,8 +90,9 @@ def main() -> None:
     ap.add_argument("--salida", default="salida")
     ap.add_argument("--config", help="Carpeta de configuración alterna (por cliente)")
     ap.add_argument("--formatos", nargs="*", help="Solo estos formatos (ej. 1001 1007)")
+    ap.add_argument("--facturas", nargs="*", help="Facturas electrónicas (.xml, .zip o carpetas) para completar terceros")
     a = ap.parse_args()
-    r = ejecutar(a.fuente, a.balance, a.terceros, a.salida, a.accionistas, a.nomina, a.config, a.formatos)
+    r = ejecutar(a.fuente, a.balance, a.terceros, a.salida, a.accionistas, a.nomina, a.config, a.formatos, a.facturas)
 
     niveles = pd.Series([h[0] for h in r["hallazgos"]]).value_counts().to_dict()
     print(f"Formatos: {', '.join(p.name for p in r['formatos'])}")

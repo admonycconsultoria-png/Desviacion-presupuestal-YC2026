@@ -13,6 +13,7 @@ editar sin programar. El código no tiene cuentas ni conceptos fijos.
 > | Maestro de terceros (dirección, ciudad, tipo de documento) | Todos los que piden ubicación |
 > | Libro de accionistas (`accionistas.csv`) | 1010 |
 > | Consolidado anual de nómina en la plantilla `ejemplos/plantilla_nomina_2276.xlsx` (también se descarga desde el aplicativo) | 2276 |
+> | Facturas electrónicas del año (.xml o .zip, en bloque; `--facturas` en la CLI) | Completan el maestro de terceros: dirección, municipio, DV, tipo de documento |
 > | Tabla de renglones de las declaraciones (pendiente de parametrizar) | 1011 |
 
 ## Aplicativo (uso diario)

@@ -31,7 +31,11 @@ def test_paridad_python_js(tmp_path, con_correcciones):
     _paridad(tmp_path, con_correcciones, simple=con_correcciones)
 
 
-def _paridad(tmp_path, con_correcciones, simple=False):
+def test_paridad_con_facturas_electronicas(tmp_path):
+    _paridad(tmp_path, False, facturas=True)
+
+
+def _paridad(tmp_path, con_correcciones, simple=False, facturas=False):
     import shutil
     import yaml
     cfgdir = tmp_path / "config"
@@ -46,9 +50,22 @@ def _paridad(tmp_path, con_correcciones, simple=False):
     archivos = [str(ej / f) for f in ("siigo_balance_por_tercero.xlsx", "siigo_terceros.xlsx", "accionistas.csv", "nomina.csv")]
     cfg = tmp_path / "cfg.json"
     cfg.write_text(json.dumps(config_por_defecto(cfgdir), default=str), encoding="utf-8")
-    js = json.loads(subprocess.run(["node", str(RAIZ / "app" / "paridad.js"), str(cfg), "siigo", *archivos],
+    extra, fe = [], None
+    if facturas:   # el JS recibe las facturas ya leídas; su lector XML se prueba en el navegador
+        from exogena_engine.facturas import leer_facturas
+        fe = [str(ej / "facturas")]
+        (tmp_path / "fe.json").write_text(json.dumps(leer_facturas(fe)), encoding="utf-8")
+        extra = [str(tmp_path / "fe.json")]
+    js = json.loads(subprocess.run(["node", str(RAIZ / "app" / "paridad.js"), str(cfg), "siigo", *archivos, *extra],
                                    capture_output=True, text=True, check=True).stdout)
-    py = ejecutar("siigo", *archivos[:2], str(tmp_path / "out"), archivos[2], archivos[3], config_dir=str(cfgdir))
+    py = ejecutar("siigo", *archivos[:2], str(tmp_path / "out"), archivos[2], archivos[3], config_dir=str(cfgdir),
+                  facturas=fe)
+    if facturas:
+        assert any(h[1] == "Completado con factura electrónica" and h[2] == "79555111" for h in py["hallazgos"])
+        assert not any(h[1] == "Falta direccion" and h[2] == "79555111" for h in py["hallazgos"])
+        t = py["generados"]["1001"].set_index("numero_identificacion").loc["79555111"]
+        t = t.iloc[0] if hasattr(t, "iloc") and t.ndim > 1 else t
+        assert t["direccion"] == "CR 43A 1 50 OF 301" and t["codigo_municipio"] == "001"
 
     assert set(js["generados"]) == set(py["generados"])
     for fmt, df in py["generados"].items():

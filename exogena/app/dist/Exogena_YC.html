@@ -357,6 +357,113 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }).filter((o) => o.nit !== "");
   }
 
+  // ------------------------------------------------------------------ facturas electrónicas (UBL 2.1)
+  // Emisor y adquirente de cada factura o nota, con los datos validados por la DIAN. Espejo de facturas.py.
+  const CAMPOS_FE = ["nit", "dv", "tipo_documento", "tipo_persona", "razon_social", "primer_apellido", "segundo_apellido",
+    "primer_nombre", "otros_nombres", "direccion", "ciudad", "departamento", "codigo_municipio_dane", "pais"];
+  const local = (el) => el.localName || String(el.nodeName).split(":").pop();
+  const hijo = (el, n) => (el ? [...el.children].find((h) => local(h) === n) || null : null);
+  const desc = (el, n) => (el ? [...el.getElementsByTagName("*")].find((h) => local(h) === n) || null : null);
+  const txtEl = (el) => (el ? String(el.textContent || "").trim() : "");
+  function direccionFe(addr) {
+    if (!addr) return null;
+    const linea = hijo(addr, "AddressLine");
+    return { direccion: linea ? [...linea.children].filter((l) => local(l) === "Line").map(txtEl).join(" ") : "",
+      ciudad: txtEl(hijo(addr, "CityName")), departamento: txtEl(hijo(addr, "CountrySubentity")),
+      codigo_municipio_dane: soloDigitos(txtEl(hijo(addr, "ID"))), pais: txtEl(hijo(hijo(addr, "Country"), "IdentificationCode")) };
+  }
+  function parteFe(party, fuente) {
+    const tax = desc(party, "PartyTaxScheme"), legal = desc(party, "PartyLegalEntity");
+    let cid = tax ? hijo(tax, "CompanyID") : null;
+    if (!cid || !txtEl(cid)) cid = legal ? hijo(legal, "CompanyID") : null;
+    const nit = soloDigitos(txtEl(cid));
+    if (!nit) return null;
+    const razon = txtEl(hijo(tax, "RegistrationName")) || txtEl(hijo(legal, "RegistrationName")) || txtEl(desc(hijo(party, "PartyName"), "Name"));
+    // Dirección del RUT antes que la física: hay proveedores que ponen la razón social en la línea física
+    const cands = [tax ? direccionFe(hijo(tax, "RegistrationAddress")) : null, direccionFe(hijo(hijo(party, "PhysicalLocation"), "Address"))].filter(Boolean);
+    const buenas = cands.filter((c) => c.direccion && clave(c.direccion) !== clave(razon));
+    let ubic = (buenas.length ? buenas : cands.length ? cands : [{}])[0];
+    if (ubic.direccion && clave(ubic.direccion) === clave(razon)) ubic = { ...ubic, direccion: "" };
+    const persona = desc(party, "Person");
+    return { nit, dv: soloDigitos(cid.getAttribute("schemeID") || ""), tipo_documento: cid.getAttribute("schemeName") || "",
+      tipo_persona: "", razon_social: textoDian(razon),
+      primer_apellido: persona ? textoDian(txtEl(hijo(persona, "FamilyName"))) : "", segundo_apellido: "",
+      primer_nombre: persona ? textoDian(txtEl(hijo(persona, "FirstName"))) : "",
+      otros_nombres: persona ? textoDian(txtEl(hijo(persona, "MiddleName"))) : "",
+      direccion: ubic.direccion || "", ciudad: ubic.ciudad || "", departamento: ubic.departamento || "",
+      codigo_municipio_dane: ubic.codigo_municipio_dane || "", pais: ubic.pais || "", fuente };
+  }
+  // DOMParserClase: window.DOMParser en el navegador
+  function leerFacturaXml(texto, nombre, DOMParserClase) {
+    let doc;
+    try { doc = new DOMParserClase().parseFromString(texto, "application/xml"); } catch (e) { return []; }
+    const raiz = doc.documentElement;
+    if (!raiz || doc.getElementsByTagName("parsererror").length) return [];
+    if (local(raiz) === "AttachedDocument") {
+      const interno = desc(desc(raiz, "ExternalReference"), "Description");
+      return interno ? leerFacturaXml(txtEl(interno), nombre, DOMParserClase) : [];
+    }
+    if (!["Invoice", "CreditNote", "DebitNote"].includes(local(raiz))) return [];
+    const numero = txtEl(hijo(raiz, "ID")) || nombre;
+    const salida = [];
+    for (const [rol, etiqueta] of [["AccountingSupplierParty", "emisor"], ["AccountingCustomerParty", "adquirente"]]) {
+      const cont = hijo(raiz, rol), party = hijo(cont, "Party");
+      if (!party) continue;
+      const t = parteFe(party, `FE ${numero} (${etiqueta})`);
+      if (t) { t.tipo_persona = { 1: "juridica", 2: "natural" }[txtEl(hijo(cont, "AdditionalAccountID"))] || ""; salida.push(t); }
+    }
+    return salida;
+  }
+  // Archivos .xml o .zip (XML + PDF como llegan al correo). El ZIP se abre con el lector CFB de SheetJS.
+  function leerFacturasArchivo(XLSX, datos, nombre, DOMParserClase) {
+    const u8 = datos instanceof Uint8Array ? datos : new Uint8Array(datos);
+    const aTexto = (b) => new TextDecoder("utf-8").decode(b);
+    if (/\.zip$/i.test(nombre)) {
+      const cfb = XLSX.CFB.read(u8, { type: "array" });
+      return cfb.FileIndex.filter((e) => e.type === 2 && /\.xml$/i.test(e.name) && e.content)
+        .flatMap((e) => leerFacturaXml(aTexto(e.content instanceof Uint8Array ? e.content : new Uint8Array(e.content)), e.name, DOMParserClase));
+    }
+    return /\.xml$/i.test(nombre) ? leerFacturaXml(aTexto(u8), nombre, DOMParserClase) : [];
+  }
+
+  function direccionValida(d, mpios) { return textoDian(d).length >= 8 && !mpios.has(clave(d)); }
+  // Completa el maestro: solo campos vacíos, y la dirección si es inválida; agrega terceros del balance que no están
+  function completarMaestro(maestro, balance, registros, cfg, hallazgos) {
+    if (!registros || !registros.length) return maestro;
+    const usados = new Set(balance.map((r) => r.nit).filter(Boolean));
+    const mpios = new Set(cfg.divipola.map((d) => d.k_mpio || clave(d.municipio)));
+    const mejor = new Map();
+    for (const r of registros) {
+      if (!usados.has(r.nit)) continue;
+      const puntos = (r.direccion && direccionValida(r.direccion, mpios) ? 2 : 0) + (r.codigo_municipio_dane ? 1 : 0);
+      const previo = mejor.get(r.nit);
+      if (!previo || puntos > previo[0]) mejor.set(r.nit, [puntos, r]);
+    }
+    if (!mejor.size) return maestro;
+    const m = maestro.map((f) => { const o = { ...f }; CAMPOS_FE.forEach((c) => { if (o[c] === undefined || o[c] === null) o[c] = ""; }); return o; });
+    const cambios = new Map();
+    for (const f of m) {
+      const par = mejor.get(f.nit);
+      if (!par) continue;
+      const fe = par[1], hechos = [];
+      for (const c of ["dv", "tipo_documento", "tipo_persona", "razon_social", "primer_apellido", "primer_nombre", "otros_nombres", "pais"]) {
+        if (!String(f[c]).trim() && fe[c]) { f[c] = fe[c]; hechos.push(c); }
+      }
+      if (fe.direccion && direccionValida(fe.direccion, mpios) && !direccionValida(String(f.direccion), mpios)) { f.direccion = fe.direccion; hechos.push("direccion"); }
+      if (fe.codigo_municipio_dane && !soloDigitos(String(f.codigo_municipio_dane))) {
+        f.codigo_municipio_dane = fe.codigo_municipio_dane; f.ciudad = fe.ciudad; f.departamento = fe.departamento; hechos.push("municipio");
+      }
+      if (hechos.length) cambios.set(f.nit, hechos);
+    }
+    const presentes = new Set(m.map((f) => f.nit));
+    for (const [nit, [, r]] of mejor) {
+      if (presentes.has(nit)) continue;
+      const o = {}; CAMPOS_FE.forEach((c) => { o[c] = r[c]; }); m.push(o); cambios.set(nit, ["tercero completo"]);
+    }
+    for (const [nit, hechos] of cambios) hallazgos.push(["INFO", "Completado con factura electrónica", nit, `${hechos.join(", ")} tomados de ${mejor.get(nit)[1].fuente}`]);
+    return m;
+  }
+
   // ------------------------------------------------------------------ terceros
   const PARTICULAS = new Set(["DE", "DEL", "LA", "LAS", "LOS", "SAN", "SANTA", "VAN", "VON", "Y"]);
   const DIRECCIONES_VACIAS = new Set(["no aplica", "na", "n a", "sin direccion", "ninguna", "0", "x", ""]);
@@ -1058,7 +1165,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if (errores.length) throw new Error("Parametrización inválida:\n" + errores.join("\n"));
     const hallazgos = [];
     const bal = cargarBalance(entrada.balance, entrada.fuente, cfg, hallazgos);
-    const maestro = cargarTerceros(entrada.terceros, entrada.fuente, cfg);
+    const maestro = completarMaestro(cargarTerceros(entrada.terceros, entrada.fuente, cfg), bal, entrada.facturas, cfg, hallazgos);
     const ter = depurar(bal, maestro, cfg, hallazgos);
     inconsistencias(bal, cfg, hallazgos);
     const partidas = generarPartidas(bal, cfg, hallazgos);
@@ -1117,7 +1224,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, estadoColumnas, leerPrevalidador, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);
 </script>
@@ -1270,6 +1377,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     ["terceros", "Listado de terceros", true, "Con dirección, ciudad y tipo de documento"],
     ["accionistas", "Libro de accionistas", false, "Para el 1010: nit, nombre, ciudad, porcentaje o acciones"],
     ["nomina", "Consolidado de nómina", false, "Para el 2276: use la plantilla de nómina (botón abajo)"],
+    ["facturas", "Facturas electrónicas (XML o ZIP)", false, "Todas las del año, en bloque: completan direcciones, municipios, DV y tipo de documento"],
   ];
   function renderProcesar(v, emp) {
     const fuentes = Object.entries(DEF.fuentes);
@@ -1278,9 +1386,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       <div class="barra"><label>Software contable&nbsp;<select id="sel-fuente">${fuentes.map(([k, f]) => `<option value="${k}" ${emp.fuente === k ? "selected" : ""}>${esc(k)} — ${esc(f.descripcion)}</option>`).join("")}</select></label></div>
       <div class="drops">${INSUMOS.map(([k, t, req, ay]) => {
         const a = E.archivos[k];
-        return `<label class="drop ${a ? "cargado" : ""}" data-k="${k}"><input type="file" accept=".xlsx,.xls,.csv,.txt">
+        const multi = k === "facturas";
+        return `<label class="drop ${a ? "cargado" : ""}" data-k="${k}"><input type="file" ${multi ? 'multiple accept=".xml,.zip"' : 'accept=".xlsx,.xls,.csv,.txt"'}>
           <b>${t} ${req ? '<span class="req">*</span>' : ""}</b>
-          <small>${a ? "✓ " + esc(a.nombre) + ` (${a.filas.length} filas)` : ay}</small></label>`;
+          <small>${a ? "✓ " + esc(a.nombre) + (a.detalle ? ` (${esc(a.detalle)})` : ` (${a.filas.length} filas)`) : ay}</small></label>`;
       }).join("")}</div>
       <div class="barra" style="margin-top:14px"><button class="prim" id="btn-generar" ${E.archivos.balance ? "" : "disabled"}>Generar exógena</button>
       ${Object.keys(E.archivos).length ? '<button id="btn-limpiar">Quitar archivos</button>' : ""}
@@ -1290,10 +1399,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     $("#sel-fuente").onchange = (e) => { emp.fuente = e.target.value; guardar(); renderLateral(); };
     $$(".drop", v).forEach((d) => {
       const inp = $("input", d);
-      inp.onchange = () => inp.files[0] && cargarArchivo(d.dataset.k, inp.files[0]);
+      inp.onchange = () => { if (d.dataset.k === "facturas") { if (inp.files.length) cargarFacturas([...inp.files]); } else if (inp.files[0]) cargarArchivo(d.dataset.k, inp.files[0]); };
       d.ondragover = (e) => { e.preventDefault(); d.classList.add("sobre"); };
       d.ondragleave = () => d.classList.remove("sobre");
-      d.ondrop = (e) => { e.preventDefault(); d.classList.remove("sobre"); if (e.dataTransfer.files[0]) cargarArchivo(d.dataset.k, e.dataTransfer.files[0]); };
+      d.ondrop = (e) => {
+        e.preventDefault(); d.classList.remove("sobre");
+        if (d.dataset.k === "facturas") { if (e.dataTransfer.files.length) cargarFacturas([...e.dataTransfer.files]); }
+        else if (e.dataTransfer.files[0]) cargarArchivo(d.dataset.k, e.dataTransfer.files[0]);
+      };
     });
     $("#btn-generar").onclick = () => generar(emp);
     $("#btn-plantilla-nom").onclick = descargarPlantillaNomina;
@@ -1317,6 +1430,22 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     XLSX.writeFile(wb, "Plantilla_nomina_2276.xlsx");
   }
 
+  // Facturas electrónicas: muchos .xml/.zip a la vez; se leen en el navegador y se quedan en memoria
+  async function cargarFacturas(files) {
+    let registros = [], leidos = 0, sinTerceros = 0;
+    for (const f of files) {
+      try {
+        const r = Exogena.leerFacturasArchivo(XLSX, new Uint8Array(await f.arrayBuffer()), f.name, window.DOMParser);
+        leidos++; if (!r.length) sinTerceros++;
+        registros = registros.concat(r);
+      } catch (e) { sinTerceros++; }
+    }
+    const nits = new Set(registros.map((r) => r.nit));
+    E.archivos.facturas = { nombre: `${leidos} archivos`, filas: registros, detalle: `${nits.size} terceros` };
+    E.resultado = null; render();
+    toast(`${leidos} archivos leídos: ${nits.size} terceros distintos${sinTerceros ? `; ${sinTerceros} sin factura reconocible (se ignoran)` : ""}.`);
+  }
+
   function cargarArchivo(k, file) {
     const fr = new FileReader();
     fr.onload = () => {
@@ -1338,6 +1467,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         const correr = () => {
           const cfg = construirCfg(emp);
           const x = Exogena.ejecutar({ fuente: emp.fuente, balance: E.archivos.balance.filas, terceros: E.archivos.terceros && E.archivos.terceros.filas,
+            facturas: E.archivos.facturas && E.archivos.facturas.filas,
             accionistas: E.archivos.accionistas && E.archivos.accionistas.filas, nomina: E.archivos.nomina && E.archivos.nomina.filas }, cfg);
           x.cfg = cfg; return x;
         };

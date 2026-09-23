@@ -121,7 +121,55 @@ def main() -> None:
          "departamento": "Antioquia", "pagos_salarios": 30_000_000, "pagos_prestaciones": 5_000_000,
          "cesantias_fondo": 2_500_000, "aporte_salud": 1_200_000, "aporte_pension": 1_200_000, "retencion": 0},
     ]).to_csv(AQUI / "nomina.csv", index=False)
+    facturas_demo()
     print("Ejemplos generados en", AQUI)
+
+
+UBL = ('xmlns="urn:oasis:names:specification:ubl:schema:xsd:{raiz}-2" '
+       'xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" '
+       'xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"')
+
+
+def _parte(rol, tipo_persona, nit, dv, tipo_doc, nombre, fisica, rut, persona=""):
+    def dir_(etq, d):
+        return (f"<cac:{etq}><cbc:ID>{d[0]}</cbc:ID><cbc:CityName>{d[1]}</cbc:CityName>"
+                f"<cbc:CountrySubentityCode>{d[0][:2]}</cbc:CountrySubentityCode>"
+                f"<cac:AddressLine><cbc:Line>{d[2]}</cbc:Line></cac:AddressLine>"
+                f"<cac:Country><cbc:IdentificationCode>CO</cbc:IdentificationCode></cac:Country></cac:{etq}>")
+    return (f"<cac:{rol}><cbc:AdditionalAccountID>{tipo_persona}</cbc:AdditionalAccountID><cac:Party>"
+            f"<cac:PartyName><cbc:Name>{nombre}</cbc:Name></cac:PartyName>"
+            f"<cac:PhysicalLocation>{dir_('Address', fisica)}</cac:PhysicalLocation>"
+            f"<cac:PartyTaxScheme><cbc:RegistrationName>{nombre}</cbc:RegistrationName>"
+            f'<cbc:CompanyID schemeAgencyID="195" schemeID="{dv}" schemeName="{tipo_doc}">{nit}</cbc:CompanyID>'
+            f"{dir_('RegistrationAddress', rut) if rut else ''}</cac:PartyTaxScheme>{persona}</cac:Party></cac:{rol}>")
+
+
+def facturas_demo():
+    """Facturas electrónicas ficticias (UBL 2.1) para probar el completado del maestro de terceros:
+    - 79555111 (sin dirección en el maestro) factura honorarios: aporta dirección y municipio.
+    - 830045123 en un ZIP con AttachedDocument, con la razón social en la línea de dirección física."""
+    import zipfile
+    carpeta = AQUI / "facturas"
+    carpeta.mkdir(exist_ok=True)
+    empresa = _parte("AccountingCustomerParty", 1, "900123456", 8, 31, "EMPRESA DEMO SAS",
+                     ("05001", "MEDELLIN", "CL 10 20 30"), ("05001", "MEDELLIN", "CL 10 20 30"))
+    pedro = _parte("AccountingSupplierParty", 2, "79555111", "", 13, "PEDRO ANTONIO RAMIREZ",
+                   ("05001", "MEDELLIN", "CR 43A 1 50 OF 301"), None,
+                   "<cac:Person><cbc:FirstName>PEDRO</cbc:FirstName><cbc:FamilyName>RAMIREZ</cbc:FamilyName>"
+                   "<cbc:MiddleName>ANTONIO</cbc:MiddleName></cac:Person>")
+    (carpeta / "FE_DEMO_0001.xml").write_text(
+        f'<?xml version="1.0" encoding="UTF-8"?><Invoice {UBL.format(raiz="Invoice")}><cbc:ID>PR1</cbc:ID>'
+        f"{pedro}{empresa}</Invoice>", encoding="utf-8")
+    distri = _parte("AccountingSupplierParty", 1, "830045123", 2, 31, "DISTRIBUIDORA CENTRAL LTDA",
+                    ("11001", "BOGOTA", "DISTRIBUIDORA CENTRAL LTDA"), ("11001", "BOGOTA", "CL 13 65 20"))
+    factura = (f'<Invoice {UBL.format(raiz="Invoice")}><cbc:ID>DC77</cbc:ID>{distri}{empresa}</Invoice>')
+    adjunto = (f'<?xml version="1.0" encoding="UTF-8"?><AttachedDocument {UBL.format(raiz="AttachedDocument")}>'
+               f"<cbc:ID>77</cbc:ID><cac:Attachment><cac:ExternalReference><cbc:MimeCode>text/xml</cbc:MimeCode>"
+               f"<cbc:Description><![CDATA[{factura}]]></cbc:Description></cac:ExternalReference></cac:Attachment>"
+               f"</AttachedDocument>")
+    with zipfile.ZipFile(carpeta / "FE_DEMO_0002.zip", "w") as z:
+        z.writestr("ad0830045123.xml", adjunto)
+        z.writestr("ad0830045123.pdf", b"%PDF-1.4 demo")
 
 
 if __name__ == "__main__":

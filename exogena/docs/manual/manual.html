@@ -105,6 +105,7 @@
     <tr><td><b>Listado de terceros</b><br><small>Siigo: "Búsqueda de terceros" · Alegra: "Contactos"</small></td><td>Muy recomendado</td><td>Con tipo de documento, dirección, ciudad y departamento. Sin él, el aplicativo genera los formatos pero sin direcciones ni municipios.</td><td>Todos los formatos con ubicación</td></tr>
     <tr><td><b>Libro de accionistas</b></td><td>Solo si hay socios</td><td>Columnas: NIT, nombre, ciudad, y <b>porcentaje</b> (o número de acciones). Opcionales: valor nominal y prima en colocación por accionista.</td><td>1010</td></tr>
     <tr><td><b>Consolidado de nómina</b></td><td>Solo si hay empleados</td><td>En la <b>plantilla de nómina</b> que se descarga desde el aplicativo (Paso 6). Una fila por empleado con los acumulados del año, tomados del reporte de nómina electrónica.</td><td>2276</td></tr>
+    <tr><td><b>Facturas electrónicas</b> (XML o ZIP)</td><td>Muy recomendado</td><td><b>Todas</b> las del año, recibidas y emitidas, en bloque: no hay que escoger. Salen del buzón de recepción de facturas (cada correo trae un ZIP) o del módulo de documentos recibidos del software. Traen la dirección, el municipio, el NIT y el DV que validó la DIAN.</td><td>Completan el maestro de terceros</td></tr>
   </table>
   <div class="caja ojo"><b>Dataico</b>La lectura de Siigo y Alegra está probada con archivos reales. La de Dataico todavía no: si la usa, revise con cuidado el Paso 8 y reporte cualquier encabezado que el aplicativo no reconozca.</div>
   <h3>Tenga a mano además</h3>
@@ -208,6 +209,14 @@
     <li>Arrastre cada archivo a su recuadro, o haga clic en el recuadro y selecciónelo. Cuando se lee bien, el recuadro se pone verde y muestra cuántas filas leyó.</li>
   </ol>
   <figure><img src="img/06_procesar.png"><figcaption>Los cuatro insumos cargados. Los marcados con * son necesarios para una exógena completa.</figcaption></figure>
+  <h3>Facturas electrónicas: completar direcciones y municipios</h3>
+  <p>Seleccione o arrastre <b>todos</b> los .xml y .zip del año al recuadro <b>Facturas electrónicas</b> (puede seleccionar cientos a la vez). El aplicativo cruza por NIT y, para los terceros del balance:</p>
+  <ul>
+    <li>llena solo lo que el maestro trae vacío (DV, tipo de documento, nombres, municipio, país);</li>
+    <li>reemplaza la dirección solo si la del maestro no sirve (menos de 8 caracteres o el nombre de una ciudad);</li>
+    <li>agrega los terceros del balance que no estaban en el maestro.</li>
+  </ul>
+  <p>Cada dato tomado de una factura queda como <span class="chip i">INFO</span> "Completado con factura electrónica", con el número de la factura. Los proveedores que no facturan electrónicamente (documento soporte) no quedan cubiertos: esos hay que pedirlos.</p>
   <h3>Plantilla de nómina (2276)</h3>
   <ol>
     <li>Pulse <span class="boton">Descargar plantilla de nómina (2276)</span>.</li>
@@ -364,7 +373,7 @@
   <h3>Me llegó una versión nueva del archivo HTML.</h3>
   <p>Reemplace el archivo anterior <b>con el mismo nombre y en la misma carpeta</b>, y ábralo en el mismo navegador: la configuración se conserva y, si hay cambios normativos, el aplicativo la actualiza y lo avisa con un mensaje. Por seguridad, exporte la configuración antes de reemplazarlo.</p>
   <h3>¿Puedo inventar la dirección de un tercero que no la tiene?</h3>
-  <p><b>No.</b> Reportar datos falsos es información errónea y se sanciona (art. 651 E.T.). Pídale el RUT al tercero o tómela de sus facturas electrónicas. Para terceros de Colombia, el prevalidador <b>exige</b> dirección (mínimo 8 caracteres), departamento y municipio en el 1001, 1003, 1008, 1009, 1010 y 2276: sin ellos, el formato no pasa. Para terceros del exterior es al revés: esos tres campos deben ir vacíos.</p>
+  <p><b>No.</b> Reportar datos falsos es información errónea y se sanciona (art. 651 E.T.). Cargue las facturas electrónicas del año (Paso 6), pídale el RUT al tercero o corrija el maestro del software. Para terceros de Colombia, el prevalidador <b>exige</b> dirección (mínimo 8 caracteres), departamento y municipio en el 1001, 1003, 1008, 1009, 1010 y 2276: sin ellos, el formato no pasa. Para terceros del exterior es al revés: esos tres campos deben ir vacíos.</p>
   <h3>¿Por qué el aplicativo cambió solo el tipo de documento de un tercero?</h3>
   <p>Porque tenía nombre de sociedad (SAS, LTDA, S.A.…) con tipo 13 y un NIT de 9 dígitos que empieza por 8 o 9: solo puede ser NIT (tipo 31). Queda registrado en <b>Correcciones de terceros</b>, donde puede quitarlo si no está de acuerdo. Puede desactivar la autocorrección en <b>Datos y diagnóstico</b>.</p>
   <h3>¿Por qué un formato dice "sin prevalidador DIAN de esa versión" y no me deja el "Listo"?</h3>
