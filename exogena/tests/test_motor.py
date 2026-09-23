@@ -194,3 +194,12 @@ def test_plantilla_nomina_cubre_el_2276():
     dian = [c["dian"] for c in plantilla]
     assert sorted(dian) == sorted(enc)            # todas las columnas del prevalidador, sin sobrantes
     assert dian[10:] == enc[10:]                  # valores en el mismo orden del prevalidador
+
+
+def test_direccion_exigida_para_colombia_segun_macros_del_prevalidador(resultado):
+    cfg = _cfg(2026)
+    for fmt in ("1001", "1003", "1008", "1009", "1010", "2276"):
+        assert {"direccion", "codigo_departamento", "codigo_municipio"} <= set(cfg.formatos[fmt]["obligatorios"]), fmt
+        assert cfg.formatos[fmt]["direccion_minima"] == 8, fmt
+    # el tercero sembrado sin dirección ni ciudad queda como ERROR en el 1001
+    assert any(h[0] == "ERROR" and h[1] == "Falta direccion" and h[2] == "79555111" for h in resultado["hallazgos"])

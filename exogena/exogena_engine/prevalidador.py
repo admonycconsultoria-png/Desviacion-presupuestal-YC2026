@@ -2,7 +2,10 @@
 
 Cada hoja F#### del prevalidador trae, en filas fijas, la definición de cada columna:
     fila 2 encabezado · fila 3 tipo (N/A) · fila 4 longitud · fila 5 obligatorio (S/N)
-    fila 6 tabla de valores válidos · fila 10 etiqueta XML
+    fila 6 tabla de valores válidos · fila 9 validación especial (macro) · fila 10 etiqueta XML
+Ojo: la fila 5 no dice todo. La dirección, el departamento y el municipio figuran como "N" pero la macro
+E0074/E0075/E0076 los exige cuando el país es Colombia (169) y los prohíbe si es otro país; E0074(8) y E0100
+exigen además una dirección de mínimo 8 caracteres.
 La hoja DefinicionFormatos trae la versión ("1001(V-10) - ...") y la hoja Tablas los catálogos
 (conceptos por formato, países, tipos de documento).
 
@@ -58,7 +61,7 @@ def leer(ruta: str | Path) -> dict:
         while j < len(r[1]) and _txt(r[1][j]) and not _txt(r[1][j]).startswith("|"):
             cols.append({"encabezado": _txt(r[1][j]), "tipo": _txt(r[2][j]),
                          "longitud": int(float(_txt(r[3][j]) or 0)), "obligatorio": _txt(r[4][j]).upper() == "S",
-                         "tabla": _txt(r[5][j]), "xml": _txt(r[9][j])})
+                         "tabla": _txt(r[5][j]), "validacion": _txt(r[8][j]), "xml": _txt(r[9][j])})
             j += 1
         conceptos = []
         if cols and cols[0]["xml"] == "cpt" and cols[0]["tabla"] in tablas:
@@ -96,15 +99,36 @@ def estado_columnas(fmt: str, spec: dict, prevalidadores: list[dict]) -> dict:
     return {"verificado": False, "fuente": "", "diferencias": [], "omitidas": []}
 
 
-def campos_obligatorios(fmt: str, spec: dict, prevalidadores: list[dict]) -> list[str]:
-    """Campos que el prevalidador exige (fila 5 = S). Se toma el layout de la misma versión y, si no hay,
-    el de cualquier versión del formato, emparejando por encabezado."""
+# Macros que exigen la columna cuando el país es Colombia (y la dirección con longitud mínima)
+EXIGE_SI_COLOMBIA = re.compile(r"^(E0074|E0075|E0076|E0100)")
+LONGITUD_MINIMA = re.compile(r"^E0074\((\d+)\)|^E0100")
+
+
+def _layout(fmt: str, spec: dict, prevalidadores: list[dict]) -> dict | None:
+    """Layout de la misma versión y, si no hay, el de cualquier versión del formato."""
     lays = [p["formatos"][fmt] for p in prevalidadores if fmt in (p.get("formatos") or {})]
     lays.sort(key=lambda l: int(l["version"]) != int(spec["version"]))
-    for lay in lays:
-        oblig = {clave(c["encabezado"]): c["obligatorio"] for c in lay["columnas"]}
-        return [campo for campo, enc in spec["columnas"] if oblig.get(clave(enc))]
-    return []
+    return lays[0] if lays else None
+
+
+def campos_obligatorios(fmt: str, spec: dict, prevalidadores: list[dict]) -> list[str]:
+    """Campos que el prevalidador exige: fila 5 = S, o macro que los exige para terceros de Colombia
+    (dirección, departamento y municipio). Se empareja por encabezado."""
+    lay = _layout(fmt, spec, prevalidadores)
+    if not lay:
+        return []
+    oblig = {clave(c["encabezado"]): c["obligatorio"] or bool(EXIGE_SI_COLOMBIA.match(c.get("validacion", "")))
+             for c in lay["columnas"]}
+    return [campo for campo, enc in spec["columnas"] if oblig.get(clave(enc))]
+
+
+def longitud_minima_direccion(fmt: str, spec: dict, prevalidadores: list[dict]) -> int:
+    lay = _layout(fmt, spec, prevalidadores)
+    for c in (lay or {}).get("columnas", []):
+        m = LONGITUD_MINIMA.match(c.get("validacion", ""))
+        if m:
+            return int(m.group(1) or 8)
+    return 0
 
 
 def main() -> None:

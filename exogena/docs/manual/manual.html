@@ -250,8 +250,8 @@
   <h3>Los tres niveles de hallazgo</h3>
   <table>
     <tr><th style="width:15%">Nivel</th><th>Qué significa</th><th style="width:30%">Qué hacer</th></tr>
-    <tr><td><span class="chip e">ERROR</span></td><td>El prevalidador lo rechazaría o el dato sería falso ante la DIAN (movimiento sin tercero, NIT genérico usado en la contabilidad, NIT inválido…).</td><td><b>Obligatorio corregir</b> antes de presentar.</td></tr>
-    <tr><td><span class="chip a">ALERTA</span></td><td>Algo que el prevalidador acepta pero que puede estar mal o incompleto (falta la dirección de un tercero en el 1001, cuenta por cobrar con saldo crédito, banco deducido…).</td><td>Revisar y decidir. Corregir lo que se pueda.</td></tr>
+    <tr><td><span class="chip e">ERROR</span></td><td>El prevalidador lo rechazaría o el dato sería falso ante la DIAN (movimiento sin tercero, NIT genérico usado en la contabilidad, NIT inválido, tercero de Colombia sin dirección o municipio, dirección de menos de 8 caracteres…).</td><td><b>Obligatorio corregir</b> antes de presentar.</td></tr>
+    <tr><td><span class="chip a">ALERTA</span></td><td>Algo que el prevalidador acepta pero que puede estar mal o incompleto (cuenta por cobrar con saldo crédito, banco deducido, nombre partido por heurística…).</td><td>Revisar y decidir. Corregir lo que se pueda.</td></tr>
     <tr><td><span class="chip i">INFO</span></td><td>Decisiones que tomó el aplicativo (tipo de documento deducido, columnas opcionales no generadas).</td><td>Leer. Normalmente no requiere acción.</td></tr>
   </table>
   <p>Use los filtros de la pestaña <b>Hallazgos</b> para ver primero los errores: elija "ERROR" en la primera lista.</p>
@@ -364,7 +364,7 @@
   <h3>Me llegó una versión nueva del archivo HTML.</h3>
   <p>Reemplace el archivo anterior <b>con el mismo nombre y en la misma carpeta</b>, y ábralo en el mismo navegador: la configuración se conserva y, si hay cambios normativos, el aplicativo la actualiza y lo avisa con un mensaje. Por seguridad, exporte la configuración antes de reemplazarlo.</p>
   <h3>¿Puedo inventar la dirección de un tercero que no la tiene?</h3>
-  <p><b>No.</b> Reportar datos falsos es información errónea y se sanciona (art. 651 E.T.). Pídale el RUT al tercero, búsquela en sus facturas electrónicas o déjela vacía: en el 1001, 1008 y 1009 el prevalidador acepta la dirección vacía (queda como alerta). En el 1003 sí es obligatoria.</p>
+  <p><b>No.</b> Reportar datos falsos es información errónea y se sanciona (art. 651 E.T.). Pídale el RUT al tercero o tómela de sus facturas electrónicas. Para terceros de Colombia, el prevalidador <b>exige</b> dirección (mínimo 8 caracteres), departamento y municipio en el 1001, 1003, 1008, 1009, 1010 y 2276: sin ellos, el formato no pasa. Para terceros del exterior es al revés: esos tres campos deben ir vacíos.</p>
   <h3>¿Por qué el aplicativo cambió solo el tipo de documento de un tercero?</h3>
   <p>Porque tenía nombre de sociedad (SAS, LTDA, S.A.…) con tipo 13 y un NIT de 9 dígitos que empieza por 8 o 9: solo puede ser NIT (tipo 31). Queda registrado en <b>Correcciones de terceros</b>, donde puede quitarlo si no está de acuerdo. Puede desactivar la autocorrección en <b>Datos y diagnóstico</b>.</p>
   <h3>¿Por qué un formato dice "sin prevalidador DIAN de esa versión" y no me deja el "Listo"?</h3>

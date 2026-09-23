@@ -8,7 +8,7 @@ import pandas as pd
 
 from .config import Config
 from .dv import calcular_dv
-from .utils import texto_dian
+from .utils import clave, texto_dian
 
 RETENCIONES = ("ret_renta", "ret_asumida", "ret_iva_comun", "ret_iva_no_dom", "retencion")
 
@@ -225,6 +225,13 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
                         hallazgos.append(("ALERTA", f"Falta {req}", r["nit"],
                                           f"Formato {fmt}: el tercero no tiene {req}. El prevalidador acepta la "
                                           f"columna vacía, pero repórtela si la conoce"))
+            minimo = spec.get("direccion_minima", 0)
+            if not exterior and t.get("direccion") and len(str(t["direccion"])) < minimo:
+                es_ciudad = clave(t["direccion"]) in set(cfg.divipola["k_mpio"])
+                hallazgos.append(("ERROR", "Dirección muy corta", r["nit"],
+                                  f"Formato {fmt}: '{t['direccion']}' tiene menos de {minimo} caracteres; "
+                                  f"el prevalidador la rechaza"
+                                  + (" (es el nombre de un municipio, no una dirección)" if es_ciudad else "")))
         filas.append({**{c: t.get(c, "") for c in campos if c in _CAMPOS_TERCERO}, **r})
     out = pd.DataFrame(filas)
     if not spec.get("concepto"):

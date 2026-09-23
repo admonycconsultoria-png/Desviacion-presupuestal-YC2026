@@ -9,7 +9,7 @@ import json
 import pandas as pd
 import yaml
 
-from .prevalidador import campos_obligatorios, estado_columnas
+from .prevalidador import campos_obligatorios, estado_columnas, longitud_minima_direccion
 from .utils import clave
 
 RAIZ = Path(__file__).resolve().parent.parent
@@ -110,6 +110,7 @@ def cargar(config_dir: Path | str = CONFIG_DIR) -> Config:
         f["verificacion_columnas"] = estado_columnas(k, f, prevalidadores)
         f["columnas_verificadas"] = f["verificacion_columnas"]["verificado"]
         f["obligatorios"] = campos_obligatorios(k, f, prevalidadores)
+        f["direccion_minima"] = longitud_minima_direccion(k, f, prevalidadores)
 
     mapeo = pd.read_csv(d / "mapeo_cuentas.csv", dtype=str, comment="#").fillna("")
     if "tercero" not in mapeo.columns:

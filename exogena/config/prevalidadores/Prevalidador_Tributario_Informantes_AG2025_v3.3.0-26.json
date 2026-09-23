@@ -10,6 +10,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto3",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -18,6 +19,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -26,6 +28,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0064",
      "xml": "nid"
     },
     {
@@ -34,6 +37,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "apl1"
     },
     {
@@ -42,6 +46,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -50,6 +55,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "nom1"
     },
     {
@@ -58,6 +64,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -66,6 +73,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(27|29)",
      "xml": "raz"
     },
     {
@@ -74,6 +82,7 @@
      "longitud": 200,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0074(8)",
      "xml": "dir"
     },
     {
@@ -82,6 +91,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "D_2_108",
+     "validacion": "E0075",
      "xml": "dpto"
     },
     {
@@ -90,6 +100,7 @@
      "longitud": 3,
      "obligatorio": false,
      "tabla": "D_2_109",
+     "validacion": "E0076",
      "xml": "mun"
     },
     {
@@ -98,6 +109,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0087",
      "xml": "pais"
     },
     {
@@ -106,6 +118,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0130(37|38|39|40|41|42|43)",
      "xml": "pago"
     },
     {
@@ -114,6 +127,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "pnded"
     },
     {
@@ -122,6 +136,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "ided"
     },
     {
@@ -130,6 +145,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "inded"
     },
     {
@@ -138,6 +154,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "retp"
     },
     {
@@ -146,6 +163,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "reta"
     },
     {
@@ -154,6 +172,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "comun"
     },
     {
@@ -162,6 +181,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "ndom"
     }
    ],
@@ -501,6 +521,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto5",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -509,6 +530,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDoctoBB",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -517,6 +539,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0050",
      "xml": "nid"
     },
     {
@@ -525,6 +548,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -533,6 +557,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0003",
      "xml": "apl1"
     },
     {
@@ -541,6 +566,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0054",
      "xml": "apl2"
     },
     {
@@ -549,6 +575,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0003",
      "xml": "nom1"
     },
     {
@@ -557,6 +584,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0054",
      "xml": "nom2"
     },
     {
@@ -565,6 +593,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0004",
      "xml": "raz"
     },
     {
@@ -573,6 +602,7 @@
      "longitud": 200,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0100",
      "xml": "dir"
     },
     {
@@ -581,6 +611,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "D_2_108",
+     "validacion": "",
      "xml": "dpto"
     },
     {
@@ -589,6 +620,7 @@
      "longitud": 3,
      "obligatorio": true,
      "tabla": "D_2_109",
+     "validacion": "",
      "xml": "mcpo"
     },
     {
@@ -597,6 +629,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0066",
      "xml": "valor"
     },
     {
@@ -605,6 +638,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "ret"
     }
    ],
@@ -680,6 +714,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -688,6 +723,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0151",
      "xml": "nid"
     },
     {
@@ -696,6 +732,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -704,6 +741,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "apl1"
     },
     {
@@ -712,6 +750,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -720,6 +759,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "nom1"
     },
     {
@@ -728,6 +768,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -736,6 +777,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(27|29)",
      "xml": "raz"
     },
     {
@@ -744,6 +786,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "vimp"
     },
     {
@@ -752,6 +795,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0155(32|34)",
      "xml": "ivade"
     },
     {
@@ -760,6 +804,7 @@
      "longitud": 18,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0103",
      "xml": "ivavcg"
     }
    ],
@@ -774,6 +819,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTIPOSDOCTO",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -782,6 +828,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0064",
      "xml": "nid"
     },
     {
@@ -790,6 +837,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -798,6 +846,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "apl1"
     },
     {
@@ -806,6 +855,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -814,6 +864,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "nom1"
     },
     {
@@ -822,6 +873,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -830,6 +882,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(27|29)",
      "xml": "raz"
     },
     {
@@ -838,6 +891,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "imp"
     },
     {
@@ -846,6 +900,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0130(32|34)",
      "xml": "iva"
     },
     {
@@ -854,6 +909,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "icon"
     }
    ],
@@ -868,6 +924,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto_F1007_V9",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -876,6 +933,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -884,6 +942,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0064",
      "xml": "nid"
     },
     {
@@ -892,6 +951,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "apl1"
     },
     {
@@ -900,6 +960,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -908,6 +969,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "nom1"
     },
     {
@@ -916,6 +978,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -924,6 +987,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(27|29)",
      "xml": "raz"
     },
     {
@@ -932,6 +996,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0087",
      "xml": "pais"
     },
     {
@@ -940,6 +1005,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0130(34)",
      "xml": "ibru"
     },
     {
@@ -948,6 +1014,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "dred"
     }
    ],
@@ -1043,6 +1110,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto7_2",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -1051,6 +1119,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -1059,6 +1128,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0136",
      "xml": "nid"
     },
     {
@@ -1067,6 +1137,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -1075,6 +1146,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "apl1"
     },
     {
@@ -1083,6 +1155,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -1091,6 +1164,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "nom1"
     },
     {
@@ -1099,6 +1173,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -1107,6 +1182,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(28|30)",
      "xml": "raz"
     },
     {
@@ -1115,6 +1191,7 @@
      "longitud": 200,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0074(8)",
      "xml": "dir"
     },
     {
@@ -1123,6 +1200,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "D_2_108",
+     "validacion": "E0075",
      "xml": "dpto"
     },
     {
@@ -1131,6 +1209,7 @@
      "longitud": 3,
      "obligatorio": false,
      "tabla": "D_2_109",
+     "validacion": "E0076",
      "xml": "mun"
     },
     {
@@ -1139,6 +1218,7 @@
      "longitud": 3,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0127",
      "xml": "pais"
     },
     {
@@ -1147,6 +1227,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "sal"
     }
    ],
@@ -1178,6 +1259,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto8",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -1186,6 +1268,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -1194,6 +1277,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0136",
      "xml": "nid"
     },
     {
@@ -1202,6 +1286,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -1210,6 +1295,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "apl1"
     },
     {
@@ -1218,6 +1304,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -1226,6 +1313,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "nom1"
     },
     {
@@ -1234,6 +1322,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -1242,6 +1331,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(28|30)",
      "xml": "raz"
     },
     {
@@ -1250,6 +1340,7 @@
      "longitud": 200,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0074(8)",
      "xml": "dir"
     },
     {
@@ -1258,6 +1349,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "D_2_108",
+     "validacion": "E0075",
      "xml": "dpto"
     },
     {
@@ -1266,6 +1358,7 @@
      "longitud": 3,
      "obligatorio": false,
      "tabla": "D_2_109",
+     "validacion": "E0076",
      "xml": "mun"
     },
     {
@@ -1274,6 +1367,7 @@
      "longitud": 3,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0127",
      "xml": "pais"
     },
     {
@@ -1282,6 +1376,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "sal"
     }
    ],
@@ -1357,6 +1452,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "",
      "xml": "tdoc"
     },
     {
@@ -1365,6 +1461,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0152",
      "xml": "nid"
     },
     {
@@ -1373,6 +1470,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -1381,6 +1479,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "apl1"
     },
     {
@@ -1389,6 +1488,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -1397,6 +1497,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(31)",
      "xml": "nom1"
     },
     {
@@ -1405,6 +1506,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -1413,6 +1515,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(27|29)",
      "xml": "raz"
     },
     {
@@ -1421,6 +1524,7 @@
      "longitud": 200,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0074(8)",
      "xml": "dir"
     },
     {
@@ -1429,6 +1533,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "D_2_108",
+     "validacion": "E0075",
      "xml": "dpto"
     },
     {
@@ -1437,6 +1542,7 @@
      "longitud": 3,
      "obligatorio": false,
      "tabla": "D_2_109",
+     "validacion": "E0076",
      "xml": "mun"
     },
     {
@@ -1445,6 +1551,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0087",
      "xml": "pais"
     },
     {
@@ -1453,6 +1560,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "valnom"
     },
     {
@@ -1461,6 +1569,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "valprm"
     },
     {
@@ -1469,6 +1578,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0150",
      "xml": "por"
     },
     {
@@ -1477,6 +1587,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0304(16)",
      "xml": "dec"
     }
    ],
@@ -1491,6 +1602,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConceptos_F1011_V6_2013",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -1499,6 +1611,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "sal"
     }
    ],
@@ -2406,6 +2519,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "DConcepto16",
+     "validacion": "",
      "xml": "cpt"
     },
     {
@@ -2414,6 +2528,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDocto",
+     "validacion": "E0049",
      "xml": "tdoc"
     },
     {
@@ -2422,6 +2537,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0048",
      "xml": "nid"
     },
     {
@@ -2430,6 +2546,7 @@
      "longitud": 1,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0012",
      "xml": "dv"
     },
     {
@@ -2438,6 +2555,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "apl1"
     },
     {
@@ -2446,6 +2564,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "apl2"
     },
     {
@@ -2454,6 +2573,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0141(32)",
      "xml": "nom1"
     },
     {
@@ -2462,6 +2582,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0143",
      "xml": "nom2"
     },
     {
@@ -2470,6 +2591,7 @@
      "longitud": 450,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0142(28|30)",
      "xml": "raz"
     },
     {
@@ -2478,6 +2600,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "E0127",
      "xml": "pais"
     },
     {
@@ -2486,6 +2609,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0027",
      "xml": "val"
     }
    ],
@@ -2537,6 +2661,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DEntidadInfor",
+     "validacion": "",
      "xml": "entinfo"
     },
     {
@@ -2545,6 +2670,7 @@
      "longitud": 2,
      "obligatorio": true,
      "tabla": "DTiposDoctoBB",
+     "validacion": "",
      "xml": "tdocb"
     },
     {
@@ -2553,6 +2679,7 @@
      "longitud": 20,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0133",
      "xml": "nitb"
     },
     {
@@ -2561,6 +2688,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0311",
      "xml": "pap"
     },
     {
@@ -2569,6 +2697,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "",
      "xml": "sap"
     },
     {
@@ -2577,6 +2706,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0311",
      "xml": "pno"
     },
     {
@@ -2585,6 +2715,7 @@
      "longitud": 60,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "",
      "xml": "ono"
     },
     {
@@ -2593,6 +2724,7 @@
      "longitud": 200,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0074(8)",
      "xml": "dir"
     },
     {
@@ -2601,6 +2733,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "D_2_108",
+     "validacion": "E0075",
      "xml": "dpto"
     },
     {
@@ -2609,6 +2742,7 @@
      "longitud": 3,
      "obligatorio": false,
      "tabla": "D_2_109",
+     "validacion": "E0076",
      "xml": "mun"
     },
     {
@@ -2617,6 +2751,7 @@
      "longitud": 4,
      "obligatorio": true,
      "tabla": "D_2_107",
+     "validacion": "",
      "xml": "pais"
     },
     {
@@ -2625,6 +2760,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0130(35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58)",
      "xml": "pasa"
     },
     {
@@ -2633,6 +2769,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "paec"
     },
     {
@@ -2641,6 +2778,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "pabop"
     },
     {
@@ -2649,6 +2787,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "vaex"
     },
     {
@@ -2657,6 +2796,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "paho"
     },
     {
@@ -2665,6 +2805,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "pase"
     },
     {
@@ -2673,6 +2814,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "paco"
     },
     {
@@ -2681,6 +2823,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "papre"
     },
     {
@@ -2689,6 +2832,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "pavia"
     },
     {
@@ -2697,6 +2841,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "paga"
     },
     {
@@ -2705,6 +2850,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "patra"
     },
     {
@@ -2713,6 +2859,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "vapo"
     },
     {
@@ -2721,6 +2868,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "potro"
     },
     {
@@ -2729,6 +2877,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "cein"
     },
     {
@@ -2737,6 +2886,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "ceco"
     },
     {
@@ -2745,6 +2895,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "auce"
     },
     {
@@ -2753,6 +2904,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "peju"
     },
     {
@@ -2761,6 +2913,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "tingbtp"
     },
     {
@@ -2769,6 +2922,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "apos"
     },
     {
@@ -2777,6 +2931,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "apof"
     },
     {
@@ -2785,6 +2940,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "aprais"
     },
     {
@@ -2793,6 +2949,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "apov"
     },
     {
@@ -2801,6 +2958,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "apafc"
     },
     {
@@ -2809,6 +2967,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "apavc"
     },
     {
@@ -2817,6 +2976,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "vare"
     },
     {
@@ -2825,6 +2985,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "ivav"
     },
     {
@@ -2833,6 +2994,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "rfiva"
     },
     {
@@ -2841,6 +3003,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "pagahuvt"
     },
     {
@@ -2849,6 +3012,7 @@
      "longitud": 18,
      "obligatorio": true,
      "tabla": "",
+     "validacion": "E0118",
      "xml": "vilap"
     },
     {
@@ -2857,6 +3021,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "DTiposDoctoBB",
+     "validacion": "",
      "xml": "tdocde"
     },
     {
@@ -2865,6 +3030,7 @@
      "longitud": 20,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0133",
      "xml": "nitde"
     },
     {
@@ -2873,6 +3039,7 @@
      "longitud": 14,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0148",
      "xml": "identfc"
     },
     {
@@ -2881,6 +3048,7 @@
      "longitud": 2,
      "obligatorio": false,
      "tabla": "DTiposDoctoBB",
+     "validacion": "E0145",
      "xml": "tdocpcc"
     },
     {
@@ -2889,6 +3057,7 @@
      "longitud": 20,
      "obligatorio": false,
      "tabla": "",
+     "validacion": "E0144",
      "xml": "nitpcc"
     }
    ],

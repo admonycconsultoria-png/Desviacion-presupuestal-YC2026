@@ -664,6 +664,11 @@
           if ((spec.obligatorios || [req]).includes(req)) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
           else hallazgos.push(["ALERTA", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req}. El prevalidador acepta la columna vacía, pero repórtela si la conoce`]);
         }
+        const minimo = spec.direccion_minima || 0;
+        if (!exterior && t.direccion && String(t.direccion).length < minimo) {
+          const esCiudad = cfg.divipola.some((d) => d.k_mpio === clave(t.direccion));
+          hallazgos.push(["ERROR", "Dirección muy corta", r.nit, `Formato ${fmt}: '${t.direccion}' tiene menos de ${minimo} caracteres; el prevalidador la rechaza${esCiudad ? " (es el nombre de un municipio, no una dirección)" : ""}`]);
+        }
       }
       const o = {};
       for (const c of campos) {
@@ -842,13 +847,24 @@
     return { verificado: false, fuente: "", diferencias: [], omitidas: [] };
   }
 
-  // Campos que el prevalidador exige (misma versión o, si no hay, cualquier versión emparejando por encabezado)
-  function camposObligatorios(fmt, spec, prevalidadores) {
+  // Campos que el prevalidador exige: fila 5 = S, o macro E0074/E0075/E0076/E0100 que los exige para terceros de
+  // Colombia (dirección, departamento, municipio). Misma versión o, si no hay, cualquier versión, por encabezado.
+  const EXIGE_SI_COLOMBIA = /^(E0074|E0075|E0076|E0100)/, LONGITUD_MINIMA = /^E0074\((\d+)\)|^E0100/;
+  function layoutPrevalidador(fmt, spec, prevalidadores) {
     const lays = (prevalidadores || []).map((p) => (p.formatos || {})[fmt]).filter(Boolean)
       .sort((a, b) => (Number(a.version) !== Number(spec.version)) - (Number(b.version) !== Number(spec.version)));
-    if (!lays.length) return [];
-    const oblig = new Map(lays[0].columnas.map((c) => [clave(c.encabezado), c.obligatorio]));
+    return lays[0] || null;
+  }
+  function camposObligatorios(fmt, spec, prevalidadores) {
+    const lay = layoutPrevalidador(fmt, spec, prevalidadores);
+    if (!lay) return [];
+    const oblig = new Map(lay.columnas.map((c) => [clave(c.encabezado), c.obligatorio || EXIGE_SI_COLOMBIA.test(c.validacion || "")]));
     return spec.columnas.filter(([, e]) => oblig.get(clave(e))).map(([c]) => c);
+  }
+  function longitudMinimaDireccion(fmt, spec, prevalidadores) {
+    const lay = layoutPrevalidador(fmt, spec, prevalidadores);
+    for (const c of (lay || {}).columnas || []) { const m = LONGITUD_MINIMA.exec(c.validacion || ""); if (m) return Number(m[1] || 8); }
+    return 0;
   }
 
   const FORMATOS_PREVALIDADOR = ["1001", "1003", "1005", "1006", "1007", "1008", "1009", "1010", "1011", "1012", "2276"];
@@ -873,7 +889,7 @@
       const cols = [];
       for (let j = 1; j < r[1].length && txt(r[1][j]) && !txt(r[1][j]).startsWith("|"); j++) {
         cols.push({ encabezado: txt(r[1][j]), tipo: txt(r[2][j]), longitud: Math.trunc(Number(txt(r[3][j]) || 0)),
-          obligatorio: txt(r[4][j]).toUpperCase() === "S", tabla: txt(r[5][j]), xml: txt(r[9][j]) });
+          obligatorio: txt(r[4][j]).toUpperCase() === "S", tabla: txt(r[5][j]), validacion: txt(r[8][j]), xml: txt(r[9][j]) });
       }
       const conceptos = cols.length && cols[0].xml === "cpt" && tablas[cols[0].tabla] ? tablas[cols[0].tabla] : [];
       formatos[fmt] = { version: versiones[fmt], columnas: cols, conceptos };
@@ -891,6 +907,7 @@
     Object.entries(cfg.formatos).forEach(([k, f]) => {
       f.verificacion_columnas = estadoColumnas(k, f, cfg.prevalidadores); f.columnas_verificadas = f.verificacion_columnas.verificado;
       f.obligatorios = camposObligatorios(k, f, cfg.prevalidadores);
+      f.direccion_minima = longitudMinimaDireccion(k, f, cfg.prevalidadores);
     });
     cfg.divipola.forEach((d) => { d.k_mpio = clave(d.municipio); d.k_dpto = clave(d.departamento); });
     cfg._sinVerificar = new Set();
