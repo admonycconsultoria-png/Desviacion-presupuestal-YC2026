@@ -28,7 +28,7 @@
   function guardarLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast("No se pudo guardar en este navegador. Exporte la configuración como respaldo."); return false; } }
   let tToast;
   function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("ver"); clearTimeout(tToast); tToast = setTimeout(() => t.classList.remove("ver"), 3500); }
-  function camposValor(fmt) { return DEF.formatos[fmt].columnas.map(([c]) => c).filter((c) => !CAMPOS_TERCERO.has(c) && c !== "concepto"); }
+  function camposValor(fmt) { return DEF.formatos[fmt].columnas.map(([c]) => c).filter((c) => !CAMPOS_TEXTO.has(c)); }
   function formatosConReglas() { return Object.keys(DEF.formatos).filter((f) => ["por_tercero", "sin_tercero"].includes(DEF.formatos[f].modo)); }
 
   // ------------------------------------------------------------------ estado

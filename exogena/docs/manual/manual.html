@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual de uso · Exógena YC</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  :root { --azul: #0f4c81; --azul-2: #e8f0f8; --rojo: #b42318; --rojo-f: #fdecea; --ambar: #9a6700; --ambar-f: #fff6dd; --verde: #1a7f37; --verde-f: #e9f6ec; --gris: #5b6270; --linea: #d8dee6; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", "DejaVu Sans", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; color: #1d232b; margin: 0; }
+  h1, h2, h3 { color: var(--azul); line-height: 1.2; }
+  h2 { font-size: 17pt; margin: 0 0 6px; padding-bottom: 6px; border-bottom: 2px solid var(--azul); break-after: avoid; }
+  h3 { font-size: 12pt; margin: 14px 0 4px; break-after: avoid; }
+  p { margin: 5px 0; }
+  ul, ol { margin: 5px 0 5px 20px; padding: 0; }
+  li { margin: 2px 0; }
+  .paso { break-before: page; }
+  .num { display: inline-block; background: var(--azul); color: #fff; border-radius: 6px; padding: 1px 9px; margin-right: 8px; font-size: 14pt; }
+  .cuando { color: var(--gris); font-size: 9.5pt; margin-bottom: 8px; }
+  figure { margin: 10px 0; break-inside: avoid; }
+  figure img { display: block; margin: 0 auto; max-width: 100%; max-height: 92mm; width: auto; border: 1px solid var(--linea); border-radius: 6px; }
+  figure.alta img { max-height: 120mm; }
+  figcaption { font-size: 8.5pt; color: var(--gris); margin-top: 3px; }
+  .caja { border-radius: 6px; padding: 8px 11px; margin: 9px 0; break-inside: avoid; }
+  .ojo { background: var(--ambar-f); border-left: 4px solid var(--ambar); }
+  .no { background: var(--rojo-f); border-left: 4px solid var(--rojo); }
+  .ok { background: var(--verde-f); border-left: 4px solid var(--verde); }
+  .info { background: var(--azul-2); border-left: 4px solid var(--azul); }
+  .caja b:first-child { display: block; margin-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; break-inside: auto; }
+  th { background: var(--azul-2); color: var(--azul); text-align: left; }
+  th, td { border: 1px solid var(--linea); padding: 4px 6px; vertical-align: top; }
+  tr { break-inside: avoid; }
+  .boton { display: inline-block; border: 1px solid #9fb3c8; border-radius: 4px; padding: 0 5px; background: #f3f6fa; font-size: 9.5pt; white-space: nowrap; }
+  .boton.p { background: var(--azul); color: #fff; border-color: var(--azul); }
+  .chip { display: inline-block; border-radius: 10px; padding: 0 7px; font-size: 8.5pt; font-weight: 600; }
+  .chip.e { background: var(--rojo-f); color: var(--rojo); } .chip.a { background: var(--ambar-f); color: var(--ambar); } .chip.i { background: var(--azul-2); color: var(--azul); } .chip.v { background: var(--verde-f); color: var(--verde); }
+  /* portada */
+  .portada { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .portada .banda { background: var(--azul); color: #fff; border-radius: 10px; padding: 34px 30px; }
+  .portada h1 { color: #fff; font-size: 30pt; margin: 0 0 8px; }
+  .portada .sub { font-size: 14pt; opacity: .92; }
+  .portada .meta { color: var(--gris); font-size: 10pt; }
+  /* mapa */
+  .mapa { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+  .mapa div { border: 1px solid var(--linea); border-radius: 8px; padding: 7px 9px; background: #fafcfe; break-inside: avoid; }
+  .mapa b { color: var(--azul); }
+  .mapa small { display: block; color: var(--gris); font-size: 8.5pt; }
+  .mapa .una { background: var(--azul-2); }
+  .check td:first-child { width: 22px; text-align: center; font-size: 12pt; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PORTADA -->
+<section class="portada">
+  <div class="banda">
+    <h1>Exógena YC</h1>
+    <div class="sub">Manual de uso paso a paso<br>Del balance de prueba a los archivos para el prevalidador de la DIAN</div>
+  </div>
+  <div>
+    <p style="font-size:12pt"><b>Para quién:</b> el contador o auxiliar que prepara la información exógena de una o varias empresas a partir de los balances de Siigo, Alegra o Dataico.</p>
+    <p style="font-size:12pt"><b>Qué va a lograr:</b> abrir el aplicativo por primera vez y, siguiendo los pasos en orden, terminar con los formatos 1001, 1003, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012 y 2276 listos para cargar en el prevalidador.</p>
+    <p style="font-size:12pt"><b>Cuánto toma:</b> la primera empresa, entre 1 y 3 horas (la mayor parte es revisar cuentas en el Asistente). Las siguientes, bastante menos, porque la parametrización se copia.</p>
+  </div>
+  <div class="meta">Base normativa: Resolución DIAN 000227 de 2025, modificada por la 000233 de 2025 · Prevalidador DIAN AG 2025 v3.3.0-26<br>
+    Las pantallas de este manual usan una empresa de demostración ficticia (EMPRESA DEMO SAS, NIT 900123456).<br>
+    Versión del manual: septiembre de 2026</div>
+</section>
+
+<!-- ============================ MAPA -->
+<section class="paso">
+  <h2>El recorrido completo en una página</h2>
+  <p>Siga los pasos en este orden. Los pasos en azul claro se hacen <b>una sola vez</b> (o una vez al año); el resto, <b>por cada empresa</b>.</p>
+  <div class="mapa">
+    <div class="una"><b>Paso 0 · Preparar archivos</b><small>Exportar del software el balance por tercero y el listado de terceros</small></div>
+    <div class="una"><b>Paso 1 · Abrir el aplicativo</b><small>Doble clic al archivo Exogena_YC.html</small></div>
+    <div class="una"><b>Paso 2 · Parámetros normativos</b><small>Revisar y cargar el prevalidador DIAN del año</small></div>
+    <div><b>Paso 3 · Crear la empresa</b><small>+ Nueva empresa: razón social y NIT</small></div>
+    <div><b>Paso 4 · Datos y diagnóstico</b><small>Año, dirección, software y ¿está obligada?</small></div>
+    <div><b>Paso 5 · Cuentas con tercero fijo</b><small>Bancos, CDT, ICA por pagar</small></div>
+    <div><b>Paso 6 · Cargar archivos</b><small>Balance, terceros, accionistas, nómina</small></div>
+    <div><b>Paso 7 · Asistente por formato</b><small>Revisar cuenta por cuenta cómo se reporta</small></div>
+    <div><b>Paso 8 · Generar y leer el dictamen</b><small>Errores, alertas y datos informativos</small></div>
+    <div><b>Paso 9 · Corregir</b><small>Terceros, movimientos sin NIT, cuentas sin regla</small></div>
+    <div><b>Paso 10 · Cuadres y conciliación</b><small>Contra la contabilidad y las declaraciones</small></div>
+    <div><b>Paso 11 · Descargar y prevalidar</b><small>Archivos → prevalidador DIAN → XML → MUISCA</small></div>
+  </div>
+  <div class="mapa" style="grid-template-columns:1fr">
+    <div class="una"><b>Paso 12 · Respaldo</b><small>Exportar configuración y llevar las correcciones al software contable. Hágalo al terminar cada sesión de trabajo.</small></div>
+  </div>
+  <div class="caja info"><b>La regla de oro</b>El aplicativo solo muestra <span class="chip v">✓ Listo para prevalidador</span> cuando no quedan errores, todas las cuentas están revisadas en el Asistente y todos los parámetros normativos usados están verificados. Si no dice "Listo", <b>no presente</b>: el mensaje rojo del dictamen le dice exactamente qué falta.</div>
+  <div class="caja ojo"><b>Privacidad</b>El aplicativo funciona sin internet. Los balances se leen en la memoria del navegador y <b>nunca se guardan ni se envían a ningún servidor</b>. Lo único que se guarda (en el mismo navegador) es la parametrización de cada empresa. Por eso, al cerrar el navegador, hay que volver a cargar los archivos, pero la configuración sigue ahí.</div>
+</section>
+
+<!-- ============================ PASO 0 -->
+<section class="paso">
+  <h2><span class="num">0</span>Preparar los archivos</h2>
+  <p class="cuando">Antes de abrir el aplicativo · por cada empresa · 15 minutos</p>
+  <p>Descargue del software contable estos archivos, en Excel (.xlsx) o CSV, <b>tal como salen</b>: no los edite, no borre filas ni columnas y no les cambie los encabezados.</p>
+  <table>
+    <tr><th style="width:30%">Archivo</th><th style="width:15%">¿Obligatorio?</th><th>Cómo debe salir</th><th style="width:18%">Alimenta</th></tr>
+    <tr><td><b>Balance de prueba por tercero</b></td><td>Sí</td><td>Del 1 de enero al 31 de diciembre del año gravable · nivel auxiliar (el más detallado) · con tercero · <b>sin el comprobante de cierre</b>. Si incluye el cierre, las cuentas de resultado quedan en cero y el aplicativo lo marca como error.</td><td>1001, 1003, 1005 a 1009, 1011, 1012</td></tr>
+    <tr><td><b>Listado de terceros</b><br><small>Siigo: "Búsqueda de terceros" · Alegra: "Contactos"</small></td><td>Muy recomendado</td><td>Con tipo de documento, dirección, ciudad y departamento. Sin él, el aplicativo genera los formatos pero sin direcciones ni municipios.</td><td>Todos los formatos con ubicación</td></tr>
+    <tr><td><b>Libro de accionistas</b></td><td>Solo si hay socios</td><td>Columnas: NIT, nombre, ciudad, y <b>porcentaje</b> (o número de acciones). Opcionales: valor nominal y prima en colocación por accionista.</td><td>1010</td></tr>
+    <tr><td><b>Consolidado de nómina</b></td><td>Solo si hay empleados</td><td>En la <b>plantilla de nómina</b> que se descarga desde el aplicativo (Paso 6). Una fila por empleado con los acumulados del año, tomados del reporte de nómina electrónica.</td><td>2276</td></tr>
+  </table>
+  <div class="caja ojo"><b>Dataico</b>La lectura de Siigo y Alegra está probada con archivos reales. La de Dataico todavía no: si la usa, revise con cuidado el Paso 8 y reporte cualquier encabezado que el aplicativo no reconozca.</div>
+  <h3>Tenga a mano además</h3>
+  <ul>
+    <li>Las <b>declaraciones del año</b>: renta, IVA (todos los periodos) y retención en la fuente (formularios 350). Se usan en el Paso 10.</li>
+    <li>El <b>prevalidador de la DIAN</b> del año que va a reportar (archivo Excel .xlsm que se descarga de la página de la DIAN). Se usa en los pasos 2 y 11.</li>
+    <li>Los ingresos brutos del año y del año anterior, para el diagnóstico de obligatoriedad (Paso 4).</li>
+  </ul>
+</section>
+
+<!-- ============================ PASO 1 -->
+<section class="paso">
+  <h2><span class="num">1</span>Abrir el aplicativo</h2>
+  <p class="cuando">Una vez por sesión de trabajo</p>
+  <ol>
+    <li>Guarde el archivo <b>Exogena_YC.html</b> en una carpeta fija de su computador (por ejemplo, <i>Documentos\Exogena</i>). <b>Use siempre el mismo archivo y el mismo navegador</b>: la configuración queda guardada en ese navegador.</li>
+    <li>Ábralo con doble clic. Use <b>Google Chrome o Microsoft Edge</b>. No necesita internet ni instalar nada.</li>
+    <li>La primera vez verá la pantalla de bienvenida, con el panel de <b>Empresas</b> vacío a la izquierda.</li>
+  </ol>
+  <figure><img src="img/01_inicio.png"><figcaption>Pantalla inicial. A la izquierda: empresas, Parámetros normativos y respaldo.</figcaption></figure>
+  <table>
+    <tr><th style="width:30%">Zona de la pantalla</th><th>Para qué sirve</th></tr>
+    <tr><td><b>Empresas</b></td><td>Lista de empresas creadas. Un clic abre la empresa. <span class="boton p">+ Nueva empresa</span> crea otra.</td></tr>
+    <tr><td><b>Parámetros normativos</b></td><td>Configuración común a todas las empresas: versiones de formato, conceptos, cuantías menores, UVT, países y prevalidadores.</td></tr>
+    <tr><td><b>Respaldo</b></td><td><span class="boton">Exportar configuración</span> descarga un archivo con toda la parametrización; <span class="boton">Importar configuración</span> la restaura en otro computador o navegador.</td></tr>
+  </table>
+  <div class="caja no"><b>No borre los datos del navegador</b>Si limpia el historial "con cookies y datos de sitios", o abre el archivo en una ventana de incógnito, la configuración no aparecerá. Por eso el Paso 12 (respaldo) es obligatorio.</div>
+</section>
+
+<!-- ============================ PASO 2 -->
+<section class="paso">
+  <h2><span class="num">2</span>Parámetros normativos</h2>
+  <p class="cuando">La primera vez y una vez al año, cuando la DIAN publique el prevalidador del año gravable</p>
+  <p>Haga clic en <b>Parámetros normativos</b> (panel izquierdo). Aquí vive lo que es igual para todas las empresas. Viene configurado según la Res. 000227 de 2025 y el prevalidador AG 2025; su trabajo aquí es <b>revisar y mantenerlo al día</b>, no llenarlo desde cero.</p>
+  <figure><img src="img/02_normativo.png"><figcaption>La columna "Orden de columnas vs. prevalidador DIAN" muestra ✓ cuando el formato coincide encabezado por encabezado con el prevalidador oficial de la misma versión.</figcaption></figure>
+  <h3>Qué hacer</h3>
+  <ol>
+    <li><b>Formatos:</b> revise que la versión de cada formato sea la de la resolución vigente. Si un formato dice <i>"falta el prevalidador de esa versión"</i> (hoy: 1001 v11 y 1005 v9 del AG 2026), no está mal configurado: la DIAN aún no ha publicado ese prevalidador.</li>
+    <li><b>Cargar el prevalidador del año:</b> cuando la DIAN lo publique, pulse <span class="boton p">Cargar prevalidador DIAN (.xlsm)</span> y seleccione el archivo. El aplicativo verifica el orden de columnas y agrega los conceptos y países nuevos. Aparece un mensaje con el resumen.</li>
+    <li><b>Cuantías menores y UVT:</b> confirme el valor de la UVT del año (2025: $49.799; 2026: $52.374) y los topes (1001: 3 UVT por beneficiario; 1008 y 1009: 12 UVT).</li>
+    <li><b>Catálogo de conceptos:</b> no necesita tocarlo salvo que la DIAN cree un concepto nuevo que el prevalidador aún no traiga.</li>
+  </ol>
+  <div class="caja ojo"><b>Cuidado con "Restaurar valores de fábrica"</b>Deshace cualquier cambio que haya hecho en esta pantalla (conserva los prevalidadores cargados). Úselo solo si algo quedó mal y quiere volver al punto de partida.</div>
+</section>
+
+<!-- ============================ PASO 3 y 4 -->
+<section class="paso">
+  <h2><span class="num">3</span>Crear la empresa</h2>
+  <p class="cuando">Una vez por empresa</p>
+  <ol>
+    <li>Pulse <span class="boton p">+ Nueva empresa</span>.</li>
+    <li>Escriba la <b>razón social</b> y acepte.</li>
+    <li>Escriba el <b>NIT sin dígito de verificación</b> (solo números) y acepte. El aplicativo calcula el DV y lo muestra debajo, para que lo compare con el RUT.</li>
+  </ol>
+  <p>La empresa aparece en el panel izquierdo y se abre la pestaña <b>Datos y diagnóstico</b>.</p>
+  <div class="caja info"><b>¿Otra empresa con la misma parametrización?</b>En <b>Datos y diagnóstico → Zona de riesgo</b>, <span class="boton">Duplicar empresa</span> crea una copia con las mismas reglas de cuentas. Luego cambie razón social, NIT y datos. Ahorra mucho trabajo con empresas del mismo sector o del mismo software.</div>
+
+  <h2 style="margin-top:22px"><span class="num">4</span>Datos de la empresa y diagnóstico</h2>
+  <p class="cuando">Una vez por empresa y año</p>
+  <figure><img src="img/03_datos.png"><figcaption>Datos de la empresa informante.</figcaption></figure>
+  <table>
+    <tr><th style="width:32%">Campo</th><th>Qué poner</th></tr>
+    <tr><td>Año gravable</td><td>El año que va a reportar (no el año en que se presenta). Ejemplo: la exógena que se presenta en 2026 es del <b>año gravable 2025</b>.</td></tr>
+    <tr><td>Dirección, código de departamento y de municipio</td><td>Los de la empresa según el RUT (DIVIPOLA: Medellín = 05 y 001). Se usan en la fila de cuantías menores y cuando la norma pide el NIT del informante.</td></tr>
+    <tr><td>Software contable</td><td>Siigo, Alegra, Dataico o genérico. Define cómo se leen los archivos.</td></tr>
+    <tr><td>Nombres de personas naturales</td><td>Cómo trae el software el nombre completo: "APELLIDOS NOMBRES" (Siigo, normalmente) o "NOMBRES APELLIDOS". Sirve para separar primer apellido, segundo apellido y nombres.</td></tr>
+    <tr><td>Autocorregir terceros</td><td>Déjelo en <b>Sí</b>. Corrige solo lo que tiene una única respuesta: tipo 13 → 31 en sociedades, DV errado y NIT con el DV pegado. Todo queda registrado.</td></tr>
+    <tr><td>NIT adicionales a excluir</td><td>Terceros que no se deben reportar nunca (por ejemplo, la misma empresa con otro NIT). Normalmente vacío.</td></tr>
+  </table>
+</section>
+
+<section class="paso">
+  <h3 style="font-size:14pt">4b. Diagnóstico de obligatoriedad: ¿la empresa está obligada?</h3>
+  <p>Conteste las preguntas. El aplicativo aplica el art. 1.3.1.1 de la Res. 000227 de 2025 y le dice si la empresa está <b>obligada</b>, <b>no obligada</b>, o si <b>faltan datos</b>, con el numeral que lo sustenta.</p>
+  <figure><img src="img/04_diagnostico.png" style="max-height:60mm"><figcaption>Persona jurídica que practicó retención: obligada por el numeral 6, sin importar los ingresos.</figcaption></figure>
+  <table>
+    <tr><th>Situación</th><th>Regla (art. 1.3.1.1)</th></tr>
+    <tr><td>Persona jurídica o entidad</td><td>Obligada si los ingresos brutos del año <b>o del año anterior</b> superan 2.400 UVT (num. 5).</td></tr>
+    <tr><td>Practicó retención o autorretención (renta, IVA o timbre)</td><td>Obligada, sin importar los ingresos (num. 6).</td></tr>
+    <tr><td>Persona natural (régimen ordinario)</td><td>Obligada si los ingresos superan 11.800 UVT <b>y</b> las rentas de capital y no laborales superan 2.400 UVT (num. 4). Reporta solo esas rentas (par. 3).</td></tr>
+    <tr><td>Persona natural del Régimen Simple</td><td>Obligada si los ingresos superan 11.800 UVT (num. 4 inc. 2). Si solo es agente de retención, no queda obligada (Concepto DIAN 3863 de 2025).</td></tr>
+  </table>
+  <div class="caja no"><b>Si el resultado es "No obligada"</b>Lea la lista de numerales que el aplicativo le pide revisar (consorcios y uniones temporales, entidades financieras, establecimientos permanentes, etc.). Si ninguno aplica, <b>no siga</b>: esa empresa no presenta exógena por ese año. Documente el diagnóstico.</div>
+  <div class="caja ojo"><b>El régimen importa</b>Si marca <b>Régimen Simple</b> o <b>No contribuyente</b>, el aplicativo lleva automáticamente todos los pagos del 1001 a la columna "no deducible", como exige la resolución (par. 9 y 14 del art. 1.3.5.2.1).</div>
+
+</section>
+
+<!-- ============================ PASO 6 -->
+<section class="paso">
+  <h2><span class="num">5</span>Cuentas con tercero fijo</h2>
+  <p class="cuando">Una vez por empresa · en la misma pestaña, más abajo</p>
+  <p>En la mayoría de los software, el tercero de un movimiento bancario es el cliente o el proveedor, no el banco. Pero en el 1012 el saldo de cada cuenta bancaria va a nombre del <b>banco</b>. Registre aquí cada cuenta auxiliar de bancos, CDT o inversiones con el <b>NIT de la entidad</b> (sin DV).</p>
+  <p>Pulse <span class="boton">+ Cuenta</span> y registre una fila por cuenta auxiliar: por ejemplo, 11100501 → NIT del banco.</p>
+  <p>Si no lo hace, el aplicativo intenta deducir el banco entre los terceros de la cuenta y deja una <span class="chip a">ALERTA</span> para que lo confirme. Si no puede deducirlo, deja un <span class="chip e">ERROR</span>.</p>
+
+  <h2 style="margin-top:18px"><span class="num">6</span>Cargar los archivos</h2>
+  <p class="cuando">Cada vez que abre el aplicativo (los balances no se guardan)</p>
+  <ol>
+    <li>Vaya a la pestaña <b>Procesar exógena</b>.</li>
+    <li>Confirme el <b>software contable</b> en la lista.</li>
+    <li>Arrastre cada archivo a su recuadro, o haga clic en el recuadro y selecciónelo. Cuando se lee bien, el recuadro se pone verde y muestra cuántas filas leyó.</li>
+  </ol>
+  <figure><img src="img/06_procesar.png"><figcaption>Los cuatro insumos cargados. Los marcados con * son necesarios para una exógena completa.</figcaption></figure>
+  <h3>Plantilla de nómina (2276)</h3>
+  <ol>
+    <li>Pulse <span class="boton">Descargar plantilla de nómina (2276)</span>.</li>
+    <li>Llénela con una fila por empleado y los acumulados del año. La hoja <b>Instrucciones</b> dice qué va en cada columna. No cambie los encabezados.</li>
+    <li>Cárguela en el recuadro <b>Consolidado de nómina</b>.</li>
+  </ol>
+  <div class="caja ojo"><b>Si un archivo no carga</b>El mensaje dice qué columna no encontró (por ejemplo, "no trae columnas cuenta, débito, crédito"). Casi siempre es porque el reporte se exportó con otro formato o con otro nivel de detalle. Vuelva a exportarlo como se indica en el Paso 0.</div>
+  <div class="caja info"><b>Todavía no pulse "Generar exógena"</b>Primero haga el Paso 7. Puede generar en cualquier momento para ver cómo va, pero el dictamen no dirá "Listo" hasta que revise todas las cuentas.</div>
+</section>
+
+<!-- ============================ PASO 7 -->
+<section class="paso">
+  <h2><span class="num">7</span>Asistente por formato: revisar cuenta por cuenta</h2>
+  <p class="cuando">La primera vez por empresa (es el paso más largo) · cada año, solo las cuentas nuevas</p>
+  <p>El Asistente toma <b>las cuentas del balance de esta empresa</b> y le pregunta, formato por formato, cómo se reporta cada una. Ya viene con una propuesta según la resolución; su trabajo es <b>confirmarla o corregirla</b>.</p>
+  <figure><img src="img/07_asistente.png" style="max-height:78mm"><figcaption>Arriba, un botón por formato con el avance (0/14 = 0 de 14 cuentas revisadas). En la tabla, cada cuenta con sus saldos, el tratamiento propuesto y el valor que resultaría.</figcaption></figure>
+  <h3>Cómo se revisa una cuenta</h3>
+  <table>
+    <tr><th style="width:22%">Columna</th><th>Qué decide</th></tr>
+    <tr><td><b>Tratamiento</b></td><td>Qué cifra se toma: <b>Débitos − créditos</b> (gastos, costos), <b>Créditos − débitos</b> (ingresos), <b>Compras netas</b> (inventarios y activos: compras menos devoluciones al proveedor), <b>Solo débitos</b>, <b>Solo créditos</b> (retenciones, IVA generado), <b>Saldo final</b> (cuentas por cobrar y por pagar), o <b>No se reporta</b>.</td></tr>
+    <tr><td><b>Concepto</b></td><td>El código DIAN del formato (5002 honorarios, 5004 servicios, 5007 compras…).</td></tr>
+    <tr><td><b>Columna</b></td><td>En qué columna del formato cae (pago deducible, no deducible, retención practicada…).</td></tr>
+    <tr><td><b>Valor resultante</b></td><td>Lo que quedaría reportado. Compárelo con el balance: si no tiene sentido, el tratamiento está mal.</td></tr>
+    <tr><td><b>✓</b></td><td>Marca la cuenta como revisada. Al cambiar el tratamiento se marca sola.</td></tr>
+  </table>
+  <ul>
+    <li>📌 <b>Criterio</b>: abra el criterio de cada cuenta. Trae la regla de la resolución (con el artículo) o de la práctica profesional.</li>
+    <li>Cuando esté de acuerdo con toda la propuesta de un formato, <span class="boton">Confirmar todas las pendientes con su tratamiento actual</span> las marca de una vez. <b>Úselo solo después de leerlas.</b></li>
+    <li>Recorra todos los formatos hasta que cada botón quede en verde (por ejemplo, 14/14).</li>
+    <li><b>NotebookLM</b>: <span class="boton">Pregunta para NotebookLM</span> arma la pregunta de la cuenta para su cuaderno con la resolución; <span class="boton">Descargar paquete NotebookLM</span> descarga la ficha completa de la empresa.</li>
+  </ul>
+</section>
+
+<!-- ============================ PASO 8 -->
+<section class="paso">
+  <h2><span class="num">8</span>Generar y leer el dictamen</h2>
+  <p class="cuando">Cada vez que cambia algo</p>
+  <p>En <b>Procesar exógena</b>, pulse <span class="boton p">Generar exógena</span>. En segundos aparece el resultado.</p>
+  <figure><img src="img/08_resultado.png"><figcaption>Arriba el dictamen (rojo = no listo, verde = listo), luego las correcciones automáticas y los indicadores.</figcaption></figure>
+  <h3>Los tres niveles de hallazgo</h3>
+  <table>
+    <tr><th style="width:15%">Nivel</th><th>Qué significa</th><th style="width:30%">Qué hacer</th></tr>
+    <tr><td><span class="chip e">ERROR</span></td><td>El prevalidador lo rechazaría o el dato sería falso ante la DIAN (movimiento sin tercero, NIT genérico usado en la contabilidad, NIT inválido…).</td><td><b>Obligatorio corregir</b> antes de presentar.</td></tr>
+    <tr><td><span class="chip a">ALERTA</span></td><td>Algo que el prevalidador acepta pero que puede estar mal o incompleto (falta la dirección de un tercero en el 1001, cuenta por cobrar con saldo crédito, banco deducido…).</td><td>Revisar y decidir. Corregir lo que se pueda.</td></tr>
+    <tr><td><span class="chip i">INFO</span></td><td>Decisiones que tomó el aplicativo (tipo de documento deducido, columnas opcionales no generadas).</td><td>Leer. Normalmente no requiere acción.</td></tr>
+  </table>
+  <p>Use los filtros de la pestaña <b>Hallazgos</b> para ver primero los errores: elija "ERROR" en la primera lista.</p>
+  <div class="caja ok"><b>Correcciones automáticas</b>Si aparece "Se corrigieron automáticamente N terceros", el aplicativo ya arregló esos casos (tipo 31, DV, NIT con DV pegado) y volvió a generar. Quedan guardados en la pestaña <b>Correcciones de terceros</b>.</div>
+</section>
+
+<!-- ============================ PASO 9 -->
+<section class="paso">
+  <h2><span class="num">9</span>Corregir</h2>
+  <p class="cuando">Hasta que no queden errores</p>
+  <h3>9a. Terceros (pestaña "Corregir terceros")</h3>
+  <p>Muestra cada tercero con problemas y le deja corregir en la misma fila: tipo de documento, persona natural o jurídica, DV, nombres, dirección, municipio (escriba el nombre y elija de la lista) y país. Pulse <span class="boton p">Guardar</span> en cada fila y al final <span class="boton">Volver a generar con las correcciones</span>.</p>
+  <figure><img src="img/09_corregir.png" style="max-height:72mm"><figcaption>Corrección de terceros: cada fila muestra los problemas en amarillo.</figcaption></figure>
+  <h3>9b. Lo que se corrige en el software contable, no aquí</h3>
+  <table>
+    <tr><th style="width:32%">Hallazgo</th><th>Solución</th></tr>
+    <tr><td><span class="chip e">ERROR</span> Movimiento sin tercero</td><td>Hay valores en una cuenta sin NIT. Asígnele el tercero en el software, vuelva a exportar el balance y cárguelo de nuevo.</td></tr>
+    <tr><td><span class="chip e">ERROR</span> NIT genérico (222222222)</td><td>Se contabilizó con el NIT de cuantías menores. Reclasifique al tercero real en el software: la agrupación de cuantías menores la hace el aplicativo.</td></tr>
+    <tr><td><span class="chip e">ERROR</span> Cuenta sin código contable</td><td>(Alegra) Hay una cuenta sin código PUC. Asígnele código en el software y vuelva a exportar.</td></tr>
+    <tr><td><span class="chip e">ERROR</span> Cierre incluido</td><td>Exporte el balance sin el comprobante de cierre.</td></tr>
+  </table>
+  <h3>9c. Cuentas sin parametrizar</h3>
+  <p>Si la pestaña <b>Cuentas sin parametrizar</b> muestra cuentas, son gastos, costos o ingresos con movimiento que ninguna regla reporta. Vaya al <b>Asistente</b> (Paso 7) y decida su tratamiento, aunque sea "No se reporta".</p>
+  <div class="caja ojo"><b>Lleve las correcciones al software</b>Las correcciones hechas aquí se guardan por empresa y se aplican cada vez que genera. Pero lo correcto es arreglarlas también en el software para que el próximo año no se repitan: en <b>Correcciones de terceros</b>, <span class="boton p">Descargar listado para corregir en el software</span>.</div>
+</section>
+
+<!-- ============================ PASO 10 -->
+<section class="paso">
+  <h2><span class="num">10</span>Cuadres y conciliación con las declaraciones</h2>
+  <p class="cuando">Antes de descargar los formatos</p>
+  <h3>10a. Cuadres</h3>
+  <p>La pestaña <b>Cuadres</b> compara, por formato y columna, lo que dice la contabilidad con lo que quedó en los formatos. La columna "diferencia no explicada" debe estar en cero y el estado en <span class="chip v">OK</span>. Una diferencia significa que un valor se perdió o se duplicó.</p>
+  <figure><img src="img/11_cuadres.png"><figcaption>Cuadre contable de cada formato.</figcaption></figure>
+  <h3>10b. Conciliación con declaraciones</h3>
+  <p>La DIAN cruza la exógena con sus declaraciones. Digite los valores declarados (IVA, retenciones 350, ingresos, cuentas por cobrar, pasivos, efectivo). <b>La diferencia no tiene que ser cero</b> (la renta es fiscal y la exógena contable), pero <b>toda diferencia debe quedar explicada</b> en la última columna.</p>
+  <figure><img src="img/12_conciliacion.png"><figcaption>Conciliación: declarado, exógena, diferencia y explicación.</figcaption></figure>
+  <p>La pestaña <b>Sanciones (art. 651)</b> calcula la sanción posible sobre una diferencia y la reducción si se corrige antes de que la DIAN lo detecte.</p>
+</section>
+
+<!-- ============================ PASO 11 -->
+<section class="paso">
+  <h2><span class="num">11</span>Descargar y pasar por el prevalidador</h2>
+  <p class="cuando">Cuando el dictamen dice "✓ Listo para prevalidador"</p>
+  <ol>
+    <li>Pestaña <b>Formatos y descargas</b>: <span class="boton p">Descargar todos los formatos</span> baja un Excel por formato, con las columnas en el orden del prevalidador. Si un formato pasa de 5.000 registros, se parte en varios archivos (_parte1, _parte2…), que es el límite del prevalidador. Con <span class="boton">Ver</span> puede revisar cada formato en pantalla.</li>
+    <li>Descargue también el <span class="boton">informe de validación</span>: es el soporte del trabajo (hallazgos, cuadres, trazabilidad cuenta → tercero → formato y terceros depurados). Guárdelo con los papeles de trabajo.</li>
+    <li>Abra el <b>prevalidador de la DIAN</b> del año y habilite las macros. En la hoja de inicio registre los datos del envío (año, NIT del informante, concepto y número de envío).</li>
+    <li>En la hoja de cada formato, pegue los datos del archivo descargado <b>debajo de los encabezados</b>, con <b>Pegado especial → Valores</b> (sin copiar la fila de encabezados).</li>
+    <li>Use las opciones del prevalidador para validar y generar el XML. Si el prevalidador marca un error, anótelo, corríjalo en el aplicativo (Paso 9) y vuelva a descargar: no corrija a mano en el Excel, porque la corrección se pierde el próximo año.</li>
+    <li>Presente los XML en el portal de la DIAN (MUISCA) con la firma electrónica del informante, dentro del plazo que corresponde a los últimos dígitos del NIT.</li>
+  </ol>
+  <figure><img src="img/10_formatos.png"><figcaption>Formatos y descargas: registros y totales de cada formato, con su versión.</figcaption></figure>
+</section>
+
+<!-- ============================ PASO 12 -->
+<section class="paso">
+  <h2><span class="num">12</span>Respaldo</h2>
+  <p class="cuando">Al terminar cada sesión de trabajo</p>
+  <ol>
+    <li>Pulse <span class="boton">Exportar configuración</span> (panel izquierdo). Descarga un archivo .json con todas las empresas, sus reglas, correcciones, revisiones del Asistente y los parámetros normativos. <b>No contiene los balances.</b></li>
+    <li>Guárdelo en una carpeta con copia de seguridad (OneDrive, Google Drive, servidor de la oficina), con la fecha en el nombre.</li>
+    <li>Para trabajar en otro computador, o si se borró el navegador: abra el aplicativo y pulse <span class="boton">Importar configuración</span>.</li>
+  </ol>
+  <h3>El año siguiente</h3>
+  <ol>
+    <li>Abra la empresa y cambie el <b>año gravable</b> en <b>Datos y diagnóstico</b>. Rehaga el diagnóstico con los ingresos nuevos.</li>
+    <li>Cargue en <b>Parámetros normativos</b> el prevalidador del nuevo año (Paso 2).</li>
+    <li>Cargue los archivos del nuevo año. En el Asistente solo quedarán pendientes las cuentas nuevas; las ya revisadas conservan su tratamiento.</li>
+  </ol>
+  <h3>Reglas de cuentas (usuarios avanzados)</h3>
+  <p>La pestaña <b>Reglas de cuentas</b> muestra la parametrización completa de la empresa como tabla: formato, prefijo de cuenta, concepto, columna, base y tercero fijo. Gana la regla de prefijo más largo. Puede exportarla a Excel, editarla e importarla, o copiarla desde otra empresa. El Asistente escribe aquí por usted.</p>
+  <figure><img src="img/13_reglas.png"><figcaption>Reglas de cuentas de la empresa.</figcaption></figure>
+</section>
+
+<!-- ============================ CHECKLIST -->
+<section class="paso">
+  <h2>Lista de chequeo por empresa</h2>
+  <p>Imprima esta página y úsela con cada empresa.</p>
+  <p>Empresa: ______________________________________ &nbsp; NIT: ________________ &nbsp; Año gravable: ________</p>
+  <table class="check">
+    <tr><th></th><th>Paso</th><th style="width:28%">Evidencia</th></tr>
+    <tr><td>☐</td><td>Balance de prueba por tercero exportado: enero a diciembre, nivel auxiliar, sin cierre</td><td>Archivo guardado</td></tr>
+    <tr><td>☐</td><td>Listado de terceros exportado</td><td>Archivo guardado</td></tr>
+    <tr><td>☐</td><td>Libro de accionistas (si aplica) y plantilla de nómina llena (si aplica)</td><td>Archivos</td></tr>
+    <tr><td>☐</td><td>Prevalidador del año cargado en Parámetros normativos</td><td>✓ en la columna de orden de columnas</td></tr>
+    <tr><td>☐</td><td>Datos de la empresa: año, dirección, municipio, software, régimen</td><td>Pestaña Datos</td></tr>
+    <tr><td>☐</td><td>Diagnóstico: obligada (numeral: ____ )</td><td>Pantalla del diagnóstico</td></tr>
+    <tr><td>☐</td><td>Cuentas bancarias y de inversión con NIT de la entidad</td><td>Sin alertas de entidad financiera</td></tr>
+    <tr><td>☐</td><td>Asistente: todos los formatos en verde (cuentas revisadas)</td><td>Botones de formato</td></tr>
+    <tr><td>☐</td><td>Cero errores</td><td>Indicador "Errores = 0"</td></tr>
+    <tr><td>☐</td><td>Alertas revisadas y decididas</td><td>Informe de validación</td></tr>
+    <tr><td>☐</td><td>Cuadres sin diferencia no explicada</td><td>Pestaña Cuadres</td></tr>
+    <tr><td>☐</td><td>Conciliación con declaraciones: toda diferencia explicada</td><td>Pestaña Conciliación</td></tr>
+    <tr><td>☐</td><td>Dictamen "✓ Listo para prevalidador"</td><td>Pantalla</td></tr>
+    <tr><td>☐</td><td>Formatos e informe de validación descargados y archivados</td><td>Carpeta de la empresa</td></tr>
+    <tr><td>☐</td><td>Prevalidador DIAN sin errores y XML generados</td><td>XML</td></tr>
+    <tr><td>☐</td><td>Presentado en MUISCA dentro del plazo</td><td>Acuse de recibo</td></tr>
+    <tr><td>☐</td><td>Correcciones de terceros llevadas al software contable</td><td>Listado descargado</td></tr>
+    <tr><td>☐</td><td>Configuración exportada (respaldo)</td><td>Archivo .json con fecha</td></tr>
+  </table>
+</section>
+
+<!-- ============================ PREGUNTAS -->
+<section class="paso">
+  <h2>Preguntas frecuentes</h2>
+  <h3>Cerré el navegador y desaparecieron los archivos cargados.</h3>
+  <p>Es normal: por privacidad, los balances no se guardan. Vuelva a cargarlos (Paso 6). Las empresas, reglas, correcciones y revisiones siguen guardadas.</p>
+  <h3>Abrí el aplicativo y no aparecen mis empresas.</h3>
+  <p>Está en otro navegador, en otro computador, en una ventana de incógnito, o se borraron los datos del navegador. Use <span class="boton">Importar configuración</span> con su último respaldo (Paso 12).</p>
+  <h3>Me llegó una versión nueva del archivo HTML.</h3>
+  <p>Reemplace el archivo anterior <b>con el mismo nombre y en la misma carpeta</b>, y ábralo en el mismo navegador: la configuración se conserva y, si hay cambios normativos, el aplicativo la actualiza y lo avisa con un mensaje. Por seguridad, exporte la configuración antes de reemplazarlo.</p>
+  <h3>¿Puedo inventar la dirección de un tercero que no la tiene?</h3>
+  <p><b>No.</b> Reportar datos falsos es información errónea y se sanciona (art. 651 E.T.). Pídale el RUT al tercero, búsquela en sus facturas electrónicas o déjela vacía: en el 1001, 1008 y 1009 el prevalidador acepta la dirección vacía (queda como alerta). En el 1003 sí es obligatoria.</p>
+  <h3>¿Por qué el aplicativo cambió solo el tipo de documento de un tercero?</h3>
+  <p>Porque tenía nombre de sociedad (SAS, LTDA, S.A.…) con tipo 13 y un NIT de 9 dígitos que empieza por 8 o 9: solo puede ser NIT (tipo 31). Queda registrado en <b>Correcciones de terceros</b>, donde puede quitarlo si no está de acuerdo. Puede desactivar la autocorrección en <b>Datos y diagnóstico</b>.</p>
+  <h3>¿Por qué un formato dice "sin prevalidador DIAN de esa versión" y no me deja el "Listo"?</h3>
+  <p>Porque la DIAN cambió la versión del formato para ese año y aún no ha publicado el prevalidador correspondiente. Cuando lo publique, cárguelo en <b>Parámetros normativos</b> (Paso 2).</p>
+  <h3>El valor de un formato no me cuadra con el balance.</h3>
+  <p>Descargue el <b>informe de validación</b> y abra la hoja <b>Trazabilidad</b>: muestra, partida por partida, qué cuenta y qué tercero fueron a qué formato, concepto y columna, con qué base, o por qué se descartaron.</p>
+  <h3>¿Dónde encuentro la norma de cada decisión?</h3>
+  <p>En el 📌 <b>Criterio</b> de cada cuenta del Asistente y en el diagnóstico. Para preguntas nuevas, use el paquete de NotebookLM con la Resolución 000227 de 2025 cargada como fuente, y tome como cierto solo lo que venga con cita.</p>
+</section>
+
+</body>
+</html>
