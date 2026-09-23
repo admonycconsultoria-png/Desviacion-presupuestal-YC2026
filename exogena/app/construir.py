@@ -52,6 +52,7 @@ def config_por_defecto(config_dir: Path | str | None = None) -> dict:
         "divipola": divipola,
         "prevalidadores": cfg.prevalidadores,
         "doctrina": _doctrina(Path(config_dir or config_mod.CONFIG_DIR)),
+        "plantillaNomina": _yaml_opcional(Path(config_dir or config_mod.CONFIG_DIR), "plantilla_nomina.yaml", {"columnas": []})["columnas"],
         "criterios": _yaml_opcional(Path(config_dir or config_mod.CONFIG_DIR), "criterios.yaml", {"criterios": []})["criterios"],
     }
 

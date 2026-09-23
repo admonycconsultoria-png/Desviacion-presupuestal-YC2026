@@ -136,7 +136,7 @@
     ["balance", "Balance de prueba por tercero", true, "Enero a diciembre · nivel auxiliar · sin cierre"],
     ["terceros", "Listado de terceros", true, "Con dirección, ciudad y tipo de documento"],
     ["accionistas", "Libro de accionistas", false, "Para el 1010: nit, nombre, ciudad, porcentaje o acciones"],
-    ["nomina", "Consolidado de nómina", false, "Para el 2276: columnas con los nombres de campo del formato"],
+    ["nomina", "Consolidado de nómina", false, "Para el 2276: use la plantilla de nómina (botón abajo)"],
   ];
   function renderProcesar(v, emp) {
     const fuentes = Object.entries(DEF.fuentes);
@@ -151,6 +151,7 @@
       }).join("")}</div>
       <div class="barra" style="margin-top:14px"><button class="prim" id="btn-generar" ${E.archivos.balance ? "" : "disabled"}>Generar exógena</button>
       ${Object.keys(E.archivos).length ? '<button id="btn-limpiar">Quitar archivos</button>' : ""}
+      <button id="btn-plantilla-nom">Descargar plantilla de nómina (2276)</button>
       <span class="esp"></span><small style="color:var(--texto-2)">El listado de terceros no es obligatorio para correr, pero sin él faltarán direcciones y municipios.</small></div>
       </div><div id="res"></div>`;
     $("#sel-fuente").onchange = (e) => { emp.fuente = e.target.value; guardar(); renderLateral(); };
@@ -162,8 +163,25 @@
       d.ondrop = (e) => { e.preventDefault(); d.classList.remove("sobre"); if (e.dataTransfer.files[0]) cargarArchivo(d.dataset.k, e.dataTransfer.files[0]); };
     });
     $("#btn-generar").onclick = () => generar(emp);
+    $("#btn-plantilla-nom").onclick = descargarPlantillaNomina;
     if ($("#btn-limpiar")) $("#btn-limpiar").onclick = () => { E.archivos = {}; E.resultado = null; render(); };
     if (E.resultado) renderResultado($("#res"), emp);
+  }
+
+  // Plantilla del 2276: encabezados que lee el motor + hoja de instrucciones (config/plantilla_nomina.yaml)
+  function descargarPlantillaNomina() {
+    const cols = DEF.plantillaNomina || [];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([cols.map((c) => c.columna)]);
+    ws["!cols"] = cols.map(() => ({ wch: 18 }));
+    XLSX.utils.book_append_sheet(wb, ws, "Nomina");
+    const ins = XLSX.utils.aoa_to_sheet([["Plantilla de nómina para el formato 2276 v4"],
+      ["Una fila por empleado con los acumulados del año. No cambie los encabezados. Valores en pesos, sin decimales. Deje vacío lo que no aplique."],
+      [], ["Columna de la plantilla", "Columna del prevalidador 2276", "Qué va", "Obligatoria"]]
+      .concat(cols.map((c) => [c.columna, c.dian, c.ayuda || "", c.obligatorio ? "Sí" : ""])));
+    ins["!cols"] = [{ wch: 28 }, { wch: 60 }, { wch: 90 }, { wch: 12 }];
+    XLSX.utils.book_append_sheet(wb, ins, "Instrucciones");
+    XLSX.writeFile(wb, "Plantilla_nomina_2276.xlsx");
   }
 
   function cargarArchivo(k, file) {

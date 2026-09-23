@@ -183,3 +183,14 @@ def test_2276_layout_prevalidador(resultado):
     assert (f["entidad_informante"] == "1").all()
     fila = f.iloc[0]
     assert fila["total_ingresos"] == fila["pagos_salarios"] + fila["pagos_prestaciones"] + fila["cesantias_fondo"]
+
+
+def test_plantilla_nomina_cubre_el_2276():
+    import yaml
+    from exogena_engine import config as config_mod
+    cfg = config_mod.cargar()
+    plantilla = yaml.safe_load((config_mod.CONFIG_DIR / "plantilla_nomina.yaml").read_text(encoding="utf-8"))["columnas"]
+    enc = [e for c, e in cfg.formatos["2276"]["columnas"] if c != "entidad_informante"]
+    dian = [c["dian"] for c in plantilla]
+    assert sorted(dian) == sorted(enc)            # todas las columnas del prevalidador, sin sobrantes
+    assert dian[10:] == enc[10:]                  # valores en el mismo orden del prevalidador

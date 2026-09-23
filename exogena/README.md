@@ -12,7 +12,7 @@ editar sin programar. El código no tiene cuentas ni conceptos fijos.
 > | Balance de prueba **por tercero**, nivel auxiliar, ene-dic, **sin comprobante de cierre** | 1001, 1003, 1005, 1006, 1007, 1008, 1009, 1012 |
 > | Maestro de terceros (dirección, ciudad, tipo de documento) | Todos los que piden ubicación |
 > | Libro de accionistas (`accionistas.csv`) | 1010 |
-> | Consolidado anual de nómina electrónica (`nomina.csv`) | 2276 |
+> | Consolidado anual de nómina en la plantilla `ejemplos/plantilla_nomina_2276.xlsx` (también se descarga desde el aplicativo) | 2276 |
 > | Tabla de renglones de las declaraciones (pendiente de parametrizar) | 1011 |
 
 ## Aplicativo (uso diario)

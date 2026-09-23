@@ -1,0 +1,77 @@
+# =====================================================================
+# Plantilla de nómina para el formato 2276 (rentas de trabajo y pensiones).
+# Una fila por empleado o beneficiario con los ACUMULADOS del año gravable
+# (reporte de nómina electrónica o acumulados por concepto del software de nómina).
+#
+# columna: encabezado que lee el motor (fila 1 de la plantilla; no se debe cambiar)
+# dian:    columna del prevalidador 2276 v4 que alimenta
+# ayuda:   qué va ahí. "Práctica" = criterio profesional que se debe confirmar con el contador
+# La "Entidad informante" no va en la plantilla: sale de parametros.entidad_informante_2276.
+# =====================================================================
+columnas:
+  # ---------------- identificación y ubicación
+  - { columna: nit, dian: "Número de Identificación del beneficiario", obligatorio: true,
+      ayuda: "Número de documento, sin puntos, sin DV y sin espacios" }
+  - { columna: tipo documento, dian: "Tipo de documento del beneficiario", obligatorio: true,
+      ayuda: "CC, CE, TI, PPT, PEP, PA, NIT o el código DIAN (13, 22, 12, 48, 47, 41, 31). El 2276 no admite el 43" }
+  - { columna: primer apellido, dian: "Primer Apellido del beneficiario", obligatorio: true, ayuda: "" }
+  - { columna: segundo apellido, dian: "Segundo Apellido del beneficiario", ayuda: "" }
+  - { columna: primer nombre, dian: "Primer Nombre del beneficiario", obligatorio: true, ayuda: "" }
+  - { columna: otros nombres, dian: "Otros Nombres del beneficiario", ayuda: "" }
+  - { columna: direccion, dian: "Dirección del beneficiario",
+      ayuda: "Dirección de residencia. Déjela vacía si reside en el exterior" }
+  - { columna: ciudad, dian: "Municipio del beneficiario", ayuda: "Nombre del municipio (el aplicativo lo convierte al código DIVIPOLA)" }
+  - { columna: departamento, dian: "Departamento del beneficiario", ayuda: "Nombre del departamento; ayuda cuando hay municipios homónimos" }
+  - { columna: pais, dian: "País del beneficiario", ayuda: "Vacío = Colombia. Si reside en el exterior, nombre o código DIAN del país" }
+  # ---------------- pagos (ingresos del trabajador)
+  - { columna: pagos_salarios, dian: "Pagos por Salarios",
+      ayuda: "Sueldo básico, salario integral, horas extra, recargos, dominicales y festivos. Debe cuadrar con las cuentas 5105/5205/7205 de sueldos" }
+  - { columna: pagos_emolumentos, dian: "Pagos por emolumentos eclesiásticos", ayuda: "Solo para ministros de culto" }
+  - { columna: pagos_bonos, dian: "Pagos realizados con bonos electrónicos o de papel de servicio, cheques, tarjetas, vales, etc.",
+      ayuda: "Pagos con bonos, vales o tarjetas (art. 387-1 E.T.)" }
+  - { columna: pagos_exceso_alimentacion, dian: "Valor del exceso de los pagos por alimentación mayores a 41 UVT, art. 387-1 E.T.",
+      ayuda: "Solo la parte de los pagos de alimentación que supera 41 UVT al mes" }
+  - { columna: pagos_honorarios, dian: "Pagos por honorarios",
+      ayuda: "Solo independientes a los que se les aplicó la tabla del art. 383. Si se les aplicó la tarifa normal van en el 1001" }
+  - { columna: pagos_servicios, dian: "Pagos por servicios", ayuda: "Igual que honorarios: solo con retención por el art. 383" }
+  - { columna: pagos_comisiones, dian: "Pagos por comisiones", ayuda: "Comisiones laborales o de independientes con retención por el art. 383" }
+  - { columna: pagos_prestaciones, dian: "Pagos por prestaciones sociales",
+      ayuda: "Prima de servicios y vacaciones (disfrutadas y compensadas). Práctica: confirme con el contador el tratamiento de las vacaciones" }
+  - { columna: pagos_viaticos, dian: "Pagos por viáticos", ayuda: "Solo los viáticos que constituyen ingreso para el trabajador. Los que no lo son van en el 1001 (5055)" }
+  - { columna: pagos_gastos_repr, dian: "Pagos por gastos de representación", ayuda: "Solo los que constituyen ingreso para el trabajador" }
+  - { columna: pagos_cooperativo, dian: "Pagos por compensaciones trabajo asociado cooperativo", ayuda: "Solo cooperativas de trabajo asociado" }
+  - { columna: pagos_apoyos_educativos, dian: "Valor apoyos económicos no reembolsables o condonados, entregados por el Estado o financiados con recursos públicos, para financiar programas educativos.",
+      ayuda: "Solo entidades que entregan apoyos educativos con recursos públicos (art. 46 E.T.)" }
+  - { columna: otros_pagos, dian: "Otros pagos",
+      ayuda: "Auxilio de transporte o de conectividad, bonificaciones, incapacidades, licencias, indemnizaciones y demás pagos laborales. Práctica" }
+  - { columna: cesantias_pagadas, dian: "Cesantías e intereses de cesantías efectivamente pagadas al empleado",
+      ayuda: "Intereses de cesantías y cesantías pagadas directamente al trabajador (p. ej. en la liquidación)" }
+  - { columna: cesantias_fondo, dian: "Cesantías consignadas al fondo de cesantías",
+      ayuda: "Cesantías consignadas al fondo. Práctica: confirme con el contador si reporta lo consignado en el año o la cesantía causada del año" }
+  - { columna: cesantias_regimen_tradicional, dian: "Auxilio de cesantías reconocido a trabajadores del régimen tradicional del Código Sustantivo del Trabajo, Capítulo VII, Título VIII Parte Primera",
+      ayuda: "Solo trabajadores con cesantías retroactivas (régimen tradicional)" }
+  - { columna: pensiones, dian: "Pensiones de Jubilación, vejez o invalidez", ayuda: "Solo si la empresa paga pensiones" }
+  - { columna: total_ingresos, dian: "Total ingresos brutos por rentas de trabajo y pensión",
+      ayuda: "Déjelo vacío: el aplicativo suma los pagos, cesantías y pensiones. Si lo diligencia, se respeta su valor" }
+  # ---------------- aportes y retenciones
+  - { columna: aporte_salud, dian: "Aportes obligatorios por salud a cargo del trabajador", ayuda: "Solo la parte descontada al trabajador (4%), no la del empleador" }
+  - { columna: aporte_pension, dian: "Aportes obligatorios a fondos de pensiones y solidaridad pensional a cargo del trabajador",
+      ayuda: "Pensión a cargo del trabajador (4%) más el fondo de solidaridad pensional" }
+  - { columna: aporte_vol_rais, dian: "Aportes voluntarios al régimen de ahorro individual con solidaridad - RAIS", ayuda: "Descontados por nómina" }
+  - { columna: aporte_vol_pension, dian: "Aportes voluntarios a fondos de pensiones voluntarias", ayuda: "Descontados por nómina" }
+  - { columna: aporte_afc, dian: "Aportes a cuentas AFC", ayuda: "Descontados por nómina" }
+  - { columna: aporte_avc, dian: "Aportes a cuentas AVC", ayuda: "Descontados por nómina" }
+  - { columna: retencion, dian: "Valor de las retenciones en la fuente por pagos de rentas de trabajo o pensiones",
+      ayuda: "Retención practicada en el año (art. 383). Debe cuadrar con los formularios 350" }
+  - { columna: iva_mayor_valor, dian: "Impuesto sobre las ventas – IVA, mayor valor del costo o gasto", ayuda: "Solo independientes que facturan IVA" }
+  - { columna: retencion_iva, dian: "Retención en la fuente a título de impuesto sobre las ventas – IVA.", ayuda: "Solo independientes a los que se les retuvo IVA" }
+  - { columna: alimentacion_hasta_41uvt, dian: "Pagos por alimentación hasta 41 UVT",
+      ayuda: "Pagos de alimentación hasta 41 UVT al mes (no son ingreso del trabajador; no suman al total)" }
+  - { columna: ingreso_promedio_6m, dian: "Valor ingreso laboral promedio de los últimos seis meses.",
+      ayuda: "Solo si aplica (p. ej. trabajadores retirados con indemnización). No suma al total" }
+  # ---------------- otros datos
+  - { columna: tipo_doc_dependiente, dian: "Tipo de documento del dependiente económico", ayuda: "Solo si el trabajador certificó dependiente económico (código DIAN, p. ej. 13)" }
+  - { columna: nit_dependiente, dian: "Número de Identificación del dependiente económico", ayuda: "" }
+  - { columna: id_fideicomiso, dian: "Identificación del fideicomiso", ayuda: "Solo si los pagos se hicieron a través de un fideicomiso" }
+  - { columna: tipo_doc_colaboracion, dian: "Tipo documento participante en contrato de colaboración", ayuda: "Solo pagos a través de contratos de colaboración" }
+  - { columna: nit_colaboracion, dian: "Identificación participante en contrato colaboración", ayuda: "" }
