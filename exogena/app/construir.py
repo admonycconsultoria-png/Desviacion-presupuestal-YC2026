@@ -20,6 +20,13 @@ sys.path.insert(0, str(AQUI.parent))
 from exogena_engine import config as config_mod  # noqa: E402
 
 
+def _yaml_opcional(d: Path, nombre: str, defecto):
+    ruta = d / nombre
+    if not ruta.exists():
+        ruta = config_mod.CONFIG_DIR / nombre
+    return yaml.safe_load(ruta.read_text(encoding="utf-8")) if ruta.exists() else defecto
+
+
 def _doctrina(d: Path) -> dict:
     ruta = d / "doctrina.yaml"
     if not ruta.exists():
@@ -44,6 +51,7 @@ def config_por_defecto(config_dir: Path | str | None = None) -> dict:
         "paises": cfg.paises.to_dict("records"),
         "divipola": divipola,
         "doctrina": _doctrina(Path(config_dir or config_mod.CONFIG_DIR)),
+        "criterios": _yaml_opcional(Path(config_dir or config_mod.CONFIG_DIR), "criterios.yaml", {"criterios": []})["criterios"],
     }
 
 

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .config import Config
+from .dv import calcular_dv
 from .utils import texto_dian
 
 RETENCIONES = ("ret_renta", "ret_asumida", "ret_iva_comun", "ret_iva_no_dom", "retencion")
@@ -38,14 +39,17 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
                 continue
             modo = cfg.formatos[fmt]["modo"]
             motivo = ""
-            if modo == "por_tercero":
+            nit = fila.nit
+            if modo == "por_tercero" and regla.tercero:
+                nit = cfg.tercero_fijo(regla.tercero)   # la norma fija el NIT (p. ej. diferencia en cambio)
+            elif modo == "por_tercero":
                 if not fila.nit:
                     motivo = "sin_tercero"
                 elif fila.nit in cfg.nits_excluidos(fmt):
                     motivo = "nit_excluido"
             salida.append({
                 "formato": fmt, "cuenta": fila.cuenta, "nombre_cuenta": fila.nombre_cuenta,
-                "nit": fila.nit if modo == "por_tercero" else "", "concepto": regla.concepto,
+                "nit": nit if modo == "por_tercero" else "", "concepto": regla.concepto,
                 "columna": regla.columna, "base": regla.base, "prefijo_regla": regla.prefijo,
                 "valor": valor, "descartado": motivo,
             })
@@ -80,11 +84,15 @@ def _partidas_por_cuenta(balance: pd.DataFrame, formatos: list[str], cfg: Config
             regla = cfg.regla_para(fmt, cuenta)
             if regla is None or regla.concepto == "EXCLUIR" or not regla.base.endswith("_cuenta"):
                 continue
-            valor = g["saldo_final"].sum()
+            valor = g["saldo_final"].sum() * (-1 if regla.base == "saldo_cred_cuenta" else 1)
             if abs(valor) < 0.5:
                 continue
-            nit = fijos.get(cuenta, "")
-            if not nit:
+            nit = cfg.tercero_fijo(regla.tercero) if regla.tercero else fijos.get(cuenta, "")
+            if not nit and regla.base == "saldo_cred_cuenta":
+                hallazgos.append(("ERROR", "Tercero de la cuenta sin definir", cuenta,
+                                  f"Formato {fmt}: el saldo de la cuenta {cuenta} (${valor:,.0f}) se reporta a un solo "
+                                  f"acreedor; configúrelo en Cuentas con tercero fijo"))
+            elif not nit:
                 nombres = g.loc[g["nit"] != "", ["nit", "nombre_tercero"]].drop_duplicates("nit")
                 cand = nombres[nombres["nombre_tercero"].map(lambda n: bool(PATRON_ENTIDAD.search(texto_dian(n))))]
                 if len(cand) > 1:
@@ -143,9 +151,15 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
 
     if spec["modo"] == "sin_tercero":
         t = p.groupby(["concepto", "columna"])["valor"].sum().unstack(fill_value=0).reset_index()
+        t.columns.name = None
         for c in valores:
             if c not in t.columns:
                 t[c] = 0
+            for r in t[t[c] < -0.5].itertuples():
+                hallazgos.append(("ALERTA", "Valor negativo", r.concepto,
+                                  f"Formato {fmt} concepto {r.concepto}: {getattr(r, c):,.0f}; se reporta en cero"))
+            t[c] = t[c].clip(lower=0)
+        t = t[(t[valores].abs() > 0.5).any(axis=1)]
         return _redondear(t[campos], valores)
 
     tabla = (p.groupby(["concepto", "nit", "columna"])["valor"].sum()
@@ -156,6 +170,13 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
 
     if fmt == "1003":
         tabla = _base_1003(tabla, balance, hallazgos)
+
+    # Régimen Simple / no contribuyentes: todo en "no deducible" (art. 1.3.5.2.1 par. 9 y 14)
+    if fmt == "1001" and cfg.parametros.get("forzar_no_deducible"):
+        for d, nd in (("pago_deducible", "pago_no_deducible"), ("iva_deducible", "iva_no_deducible")):
+            if d in tabla and nd in tabla:
+                tabla[nd] = tabla[nd] + tabla[d]
+                tabla[d] = 0.0
 
     # Negativos: la DIAN no los acepta -> alerta y se llevan a cero
     for c in valores:
@@ -182,10 +203,15 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
                  "codigo_departamento": emp.get("codigo_departamento", ""),
                  "codigo_municipio": emp.get("codigo_municipio", ""), "pais": "169"}
         else:
-            t = terceros.loc[r["nit"]].to_dict()
-            exterior = t.get("pais") not in ("", "169")
+            t = terceros.loc[r["nit"]].to_dict() if r["nit"] in terceros.index else {"numero_identificacion": r["nit"]}
+            if r["nit"] == cfg.nit_empresa:
+                t = {**t, **_datos_informante(cfg)}
+            exterior = t.get("pais") not in ("", "169", None)
+            if exterior:
+                # exterior: no se registran dirección, departamento ni municipio (p. ej. art. 1.3.5.2.1 par. 6)
+                t = {**t, "direccion": "", "codigo_departamento": "", "codigo_municipio": ""}
             for req in spec.get("requiere", []):
-                if exterior and req in ("codigo_departamento", "codigo_municipio"):
+                if exterior and req in ("direccion", "codigo_departamento", "codigo_municipio"):
                     continue  # el prevalidador solo exige dpto/municipio para Colombia
                 if not t.get(req):
                     hallazgos.append(("ERROR", f"Falta {req}", r["nit"],
@@ -196,6 +222,22 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
         out["concepto"] = ""
     out = out.sort_values(["concepto", "numero_identificacion"]) if "concepto" in out else out
     return _redondear(out[campos], valores)
+
+
+def _datos_informante(cfg: Config) -> dict:
+    emp = cfg.parametros["empresa"]
+    return {"tipo_documento": "31", "numero_identificacion": cfg.nit_empresa, "dv": _dv_seguro(cfg.nit_empresa),
+            "primer_apellido": "", "segundo_apellido": "", "primer_nombre": "", "otros_nombres": "",
+            "razon_social": texto_dian(emp.get("razon_social", "")), "direccion": texto_dian(emp.get("direccion", "")),
+            "codigo_departamento": emp.get("codigo_departamento", ""), "codigo_municipio": emp.get("codigo_municipio", ""),
+            "pais": "169"}
+
+
+def _dv_seguro(nit: str) -> str:
+    try:
+        return str(calcular_dv(nit))
+    except ValueError:
+        return ""
 
 
 _CAMPOS_TERCERO = {"tipo_documento", "numero_identificacion", "dv", "primer_apellido", "segundo_apellido",
@@ -218,7 +260,14 @@ def _base_1003(tabla: pd.DataFrame, balance: pd.DataFrame, hallazgos: list) -> p
     ing = balance[balance["cuenta"].str.startswith("4")]
     ing = (ing["credito"] - ing["debito"]).groupby(ing["nit"]).sum()
     tabla["base_retencion"] = 0.0
-    for nit, g in tabla.groupby("nit"):
+    iva = tabla["concepto"] == "1309"
+    if iva.any():
+        # Res. 233/2025: en el 1309 la base es el valor del IVA; se estima con la tarifa general de reteIVA (15%)
+        tabla.loc[iva, "base_retencion"] = tabla.loc[iva, "retencion"] / 0.15
+        for nit in tabla.loc[iva, "nit"]:
+            hallazgos.append(("INFO", "Base 1309 estimada", nit,
+                              "Base del 1309 = valor del IVA, estimada como retención / 15%; validar contra certificados"))
+    for nit, g in tabla[~iva].groupby("nit"):
         base = float(ing.get(nit, 0.0))
         total_ret = g["retencion"].sum()
         if base <= 0:
@@ -261,17 +310,24 @@ def _retenciones_huerfanas(fmt: str, tabla: pd.DataFrame, valores: list[str], ha
 
 
 def _cuantias_menores(fmt: str, tabla: pd.DataFrame, valores: list[str], cfg: Config) -> pd.DataFrame:
-    tope = (cfg.parametros.get("topes") or {}).get(fmt) or {}
-    if not tope.get("valor"):
+    """El tope se evalúa POR TERCERO SUMANDO TODO EL FORMATO (art. 1.3.5.2.1 par. 1: "acumulados por
+    beneficiario por todo concepto"; 1008/1009: "saldo acumulado por deudor/acreedor"). Si el total del
+    tercero es menor, todas sus filas pasan a 222222222 en su concepto. Un tercero con retención nunca
+    se agrupa (todas las retenciones se reportan identificando al tercero)."""
+    t = (cfg.parametros.get("topes") or {}).get(fmt) or {}
+    tope = cfg.tope(fmt)
+    if not tope:
         return tabla
-    cfg.marcar_uso(f"Tope cuantías menores formato {fmt}") if not tope.get("verificado") else None
-    cols = tope["columna"].split("+")
-    metrica = tabla[cols].sum(axis=1)
-    menores = metrica < tope["valor"]
-    if cfg.parametros.get("no_agrupar_si_retencion", True):
-        rets = [c for c in valores if c in RETENCIONES]
-        if rets:
-            menores &= ~(tabla[rets].abs().sum(axis=1) > 0.5)
+    if not t.get("verificado"):
+        cfg.marcar_uso(f"Tope cuantías menores formato {fmt}")
+    cols = t["columna"].split("+")
+    por_tercero = tabla[cols].sum(axis=1).groupby(tabla["nit"]).sum()
+    menores_nit = set(por_tercero[por_tercero < tope].index)
+    rets = [c for c in valores if c in RETENCIONES]
+    if cfg.parametros.get("no_agrupar_si_retencion", True) and rets:
+        menores_nit -= set(tabla.loc[tabla[rets].abs().sum(axis=1) > 0.5, "nit"])
+    menores_nit.discard(cfg.nit_empresa)
+    menores = tabla["nit"].isin(menores_nit)
     if not menores.any():
         return tabla
     nit_cm = cfg.parametros["cuantias_menores"]["nit"]

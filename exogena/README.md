@@ -49,6 +49,11 @@ Flujo por empresa:
 - **Corregir terceros**: tipo 13 en empresas pasa a 31, DV errado, NIT con el DV pegado, municipio (DIVIPOLA
   completa con buscador), dirección, país y nombres. Las correcciones se guardan por empresa, se aplican cada vez
   que se genera y se descargan en Excel para corregirlas también en el software.
+- **Conciliación con declaraciones**: IVA descontable y generado, retenciones (350), ingresos, CxC, pasivos
+  y efectivo contra los formatos, con un campo para explicar cada diferencia.
+- **Sanciones (art. 651 E.T.)**: calculadora con 1%, 0,5% y 0,7%, 0,5 UVT por dato sin cuantía, tope de 7.500 UVT,
+  reducciones del 10%, 50% y 70% y art. 640.
+- **Descargas de hasta 5.000 registros por archivo**, que es el límite del prevalidador.
 - **Diagnóstico de obligatoriedad**: criterios de doctrina con su fuente (`config/doctrina.yaml`), por ejemplo el
   Concepto DIAN 3863 de 2025 para personas naturales del Régimen Simple.
 - **NotebookLM**: el aplicativo no se conecta a NotebookLM (no hay API disponible), así que se trabaja con él de
@@ -181,6 +186,24 @@ formato,prefijo,concepto,columna,base,notas
 | Si hay retención, no se agrupa en cuantías menores | Criterio conservador (parametrizable) |
 | Los negativos se reportan en 0 con alerta | El prevalidador no los acepta y casi siempre son errores de causación |
 | La base del 1003 se estima con los ingresos del tercero | Tomar la base real del certificado cuando exista |
+
+## Base normativa
+
+La parametrización por defecto sigue la **Res. DIAN 227 de 2025** (Resolución Única, título 3: información
+exógena). Incluye sus modificaciones, la **Res. 233 de 2025**, corregida por la 237 de 2025, y la **Res. 238
+de 2025** (UVT 2026 = $52.374). Se contrastó con el texto oficial:
+
+| Tema | Fuente | Estado |
+|---|---|---|
+| Obligados (2.400 UVT PJ; 11.800 + 2.400 UVT PN; RST solo 11.800; agentes de retención) | art. 1.3.1.1 | Verificado |
+| Conceptos 1001 (v11 desde AG 2026; v10 para AG 2025), 1003, 1007, 1008, 1009, 1011 (PPE), 1012 | arts. 1.3.5.x | Verificado (`config/conceptos.csv`, columna `fuente`) |
+| Cuantías menores: 1001 3 UVT por beneficiario sumando todos los conceptos; 1008/1009 12 UVT por tercero; 1006/1007 solo no identificables | arts. 1.3.5.2.1, 1.3.5.6.1, 1.3.5.7.1 | Verificado |
+| Aportes a seguridad social (empleador deducible / trabajador no deducible); RST y no contribuyentes todo no deducible; exterior sin dirección | art. 1.3.5.2.1 par. 6, 9, 10, 14 | Verificado |
+| 1010 v9: valor nominal + prima en colocación; 1005 v9 sin columna de prorrateo | arts. 1.3.5.1.1 y 1.3.5.5.1 (Res. 233) | Verificado |
+| **Orden exacto de columnas** de cada formato | Anexos técnicos (PDF aparte) | **Pendiente**: marcar en *Parámetros normativos* después de compararlo |
+
+`config/criterios.yaml` reúne las reglas que el asistente muestra junto a cada cuenta, cada una con su fuente:
+el artículo de la resolución o "Práctica" cuando se trata de un criterio profesional.
 
 ## Riesgos
 

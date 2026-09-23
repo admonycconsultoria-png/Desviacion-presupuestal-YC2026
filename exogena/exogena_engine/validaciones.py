@@ -11,6 +11,12 @@ def cuadres(partidas: pd.DataFrame, generados: dict[str, pd.DataFrame], cfg: Con
     explicando la diferencia (NIT excluidos, sin tercero, negativos llevados a cero)."""
     tol = cfg.parametros["validacion"]["tolerancia_cuadre"]
     filas = []
+    if cfg.parametros.get("forzar_no_deducible") and not partidas.empty:
+        # Régimen Simple / no contribuyentes: el formato lleva todo a "no deducible"
+        partidas = partidas.copy()
+        m = partidas["formato"] == "1001"
+        partidas.loc[m, "columna"] = partidas.loc[m, "columna"].replace(
+            {"pago_deducible": "pago_no_deducible", "iva_deducible": "iva_no_deducible"})
     for (fmt, col), g in partidas.groupby(["formato", "columna"]):
         if fmt not in generados:
             continue

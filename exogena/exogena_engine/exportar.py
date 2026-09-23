@@ -36,15 +36,24 @@ def _formatear(ruta: Path, hojas_texto: dict[str, set[str]] | None = None) -> No
     wb.save(ruta)
 
 
+MAX_FILAS_PREVALIDADOR = 5000   # el prevalidador acepta hasta 5.000 registros por archivo
+
+
 def escribir_formato(fmt: str, df: pd.DataFrame, cfg: Config, salida: Path) -> Path:
+    """Un archivo por formato; si supera 5.000 registros se parte en archivos _parte1, _parte2..."""
     spec = cfg.formatos[fmt]
     anio = cfg.parametros["anio_gravable"]
-    ruta = salida / f"Formato_{fmt}_v{spec['version']}_AG{anio}.xlsx"
     encabezados = dict(spec["columnas"])
     out = df.rename(columns=encabezados)
-    with pd.ExcelWriter(ruta, engine="openpyxl") as w:
-        out.to_excel(w, sheet_name=fmt, index=False)
-    _formatear(ruta)
+    partes = [out.iloc[i:i + MAX_FILAS_PREVALIDADOR] for i in range(0, max(len(out), 1), MAX_FILAS_PREVALIDADOR)]
+    ruta = None
+    for n, parte in enumerate(partes, 1):
+        sufijo = f"_parte{n}" if len(partes) > 1 else ""
+        r = salida / f"Formato_{fmt}_v{spec['version']}_AG{anio}{sufijo}.xlsx"
+        with pd.ExcelWriter(r, engine="openpyxl") as w:
+            parte.to_excel(w, sheet_name=fmt, index=False)
+        _formatear(r)
+        ruta = ruta or r
     return ruta
 
 

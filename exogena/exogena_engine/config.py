@@ -13,7 +13,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 CONFIG_DIR = RAIZ / "config"
 
 BASES_VALIDAS = {"neto_deb", "neto_cred", "debito", "credito", "saldo_deb", "saldo_cred",
-                 "saldo_deb_cuenta"}  # saldo de toda la cuenta, asignado a un tercero fijo (bancos)
+                 # saldo de toda la cuenta asignado a un solo tercero (bancos, DIAN, fondos)
+                 "saldo_deb_cuenta", "saldo_cred_cuenta"}
 
 
 @dataclass
@@ -24,6 +25,7 @@ class Regla:
     columna: str
     base: str
     notas: str
+    tercero: str = ""   # "" = el del movimiento | "informante" | NIT fijo
 
 
 @dataclass
@@ -47,6 +49,22 @@ class Config:
         ex = self.parametros.get("nits_excluidos", {}) or {}
         nits = list(ex.get("global", [])) + list(ex.get(formato, []) or [])
         return {self.nit_empresa if n == "{empresa}" else str(n) for n in nits}
+
+    def tope(self, formato: str) -> float | None:
+        """Tope de cuantías menores en pesos: uvt x UVT del año gravable (o `valor` fijo si se da)."""
+        t = (self.parametros.get("topes") or {}).get(formato) or {}
+        if t.get("valor"):
+            return float(t["valor"])
+        if not t.get("uvt"):
+            return None
+        uvt = (self.parametros.get("uvt") or {}).get(int(self.parametros["anio_gravable"]))
+        if not uvt:
+            raise ValueError(f"No hay valor de UVT para el año {self.parametros['anio_gravable']} en parametros.uvt")
+        return float(t["uvt"]) * float(uvt)
+
+    def tercero_fijo(self, valor: str) -> str:
+        v = str(valor or "").strip()
+        return self.nit_empresa if v == "informante" else "".join(c for c in v if c.isdigit())
 
     def columnas(self, formato: str) -> list[tuple[str, str]]:
         return self.formatos[formato]["columnas"]
@@ -78,14 +96,18 @@ def cargar(config_dir: Path | str = CONFIG_DIR) -> Config:
     parametros = yaml.safe_load((d / "parametros.yaml").read_text(encoding="utf-8"))
     formatos_raw = yaml.safe_load((d / "formatos.yaml").read_text(encoding="utf-8"))
     formatos = {k: v for k, v in formatos_raw.items() if not k.startswith("_")}
+    anio = int(parametros.get("anio_gravable", 0))
     for f in formatos.values():
         f["columnas"] = _aplanar(f["columnas"])
+        f["version"] = (f.get("version_por_anio") or {}).get(anio, f["version"])
 
     mapeo = pd.read_csv(d / "mapeo_cuentas.csv", dtype=str, comment="#").fillna("")
+    if "tercero" not in mapeo.columns:
+        mapeo["tercero"] = ""
     reglas: dict[str, list[Regla]] = {}
     for _, r in mapeo.iterrows():
         regla = Regla(r.formato.strip(), r.prefijo.strip(), r.concepto.strip(),
-                      r.columna.strip(), r.base.strip(), r.notas.strip())
+                      r.columna.strip(), r.base.strip(), r.notas.strip(), r.tercero.strip())
         if regla.concepto != "EXCLUIR" and regla.base not in BASES_VALIDAS:
             raise ValueError(f"Base inválida en mapeo_cuentas.csv: {regla}")
         if regla.formato not in formatos:

@@ -88,10 +88,16 @@ def test_1005_1006_sin_dian(resultado):
     assert resultado["generados"]["1006"]["iva_generado"].sum() == 38_120_000
 
 
-def test_1010_valor_patrimonial(resultado):
+def test_1010_valor_nominal_y_porcentaje(resultado):
     f = resultado["generados"]["1010"].set_index("numero_identificacion")
-    assert f.loc["71234567", "valor_patrimonial"] == 60_000_000
-    assert f.loc["43111222", "porcentaje_entero"] == 40
+    assert f.loc["71234567", "valor_nominal"] == 60_000_000          # capital 100M x 60%
+    assert f.loc["43111222", "porcentaje"] == 40 and f.loc["43111222", "posicion_decimal"] == 0
+
+
+@pytest.mark.parametrize("p,esperado", [(49.5, (495, 1)), (50, (50, 0)), (0.5, (5, 1)), (33.3333, (333333, 4))])
+def test_porcentaje_dian(p, esperado):
+    from exogena_engine.externos import porcentaje_dian
+    assert porcentaje_dian(p) == esperado
 
 
 def test_departamento_con_cero_a_la_izquierda(resultado):

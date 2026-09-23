@@ -8,7 +8,8 @@
     ["neto_deb", "Débito − crédito (gastos, costos)"], ["neto_cred", "Crédito − débito (ingresos)"],
     ["debito", "Solo débitos (compras a inventario/activos, IVA descontable)"], ["credito", "Solo créditos (retenciones, IVA generado)"],
     ["saldo_deb", "Saldo final deudor (CxC)"], ["saldo_cred", "Saldo final acreedor (CxP)"],
-    ["saldo_deb_cuenta", "Saldo de toda la cuenta a un tercero fijo (bancos)"],
+    ["saldo_deb_cuenta", "Saldo deudor de toda la cuenta a un tercero fijo (bancos, DIAN)"],
+    ["saldo_cred_cuenta", "Saldo acreedor de toda la cuenta a un tercero fijo (DIAN, municipio)"],
   ];
   const CAMPOS_TERCERO = new Set(["tipo_documento", "numero_identificacion", "dv", "primer_apellido", "segundo_apellido",
     "primer_nombre", "otros_nombres", "razon_social", "direccion", "codigo_departamento", "codigo_municipio", "pais"]);
@@ -32,18 +33,22 @@
   function normativoDefecto() {
     const p = DEF.parametros;
     const formatos = {};
-    Object.entries(DEF.formatos).forEach(([k, f]) => { formatos[k] = { version: f.version, verificado: !!f.verificado }; });
-    return { formatos, topes: copia(p.topes), cuantias_menores: copia(p.cuantias_menores), conceptos: copia(DEF.conceptos),
-      no_agrupar_si_retencion: p.no_agrupar_si_retencion !== false };
+    Object.entries(DEF.formatos).forEach(([k, f]) => { formatos[k] = { version: f.version, verificado: !!f.verificado, columnas_verificadas: f.columnas_verificadas !== false }; });
+    return { version: NORMATIVO_VERSION, formatos, topes: copia(p.topes), uvt: copia(p.uvt), cuantias_menores: copia(p.cuantias_menores),
+      conceptos: copia(DEF.conceptos), paises: copia(DEF.paises), no_agrupar_si_retencion: p.no_agrupar_si_retencion !== false };
   }
   function empresaNueva(nombre, nit) {
     return { id: uid(), razon_social: nombre || "Nueva empresa", nit: nit || "", anio: new Date().getFullYear() - 1,
       direccion: "", codigo_departamento: "", codigo_municipio: "", fuente: "siigo", orden_nombre: "apellidos_nombres",
-      cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas), correcciones: {}, revisiones: {}, diagnostico: {} };
+      cuentas_bancarias: [], nits_excluidos: [], reglas: copia(DEF.reglas), reglasVersion: REGLAS_VERSION, correcciones: {}, revisiones: {}, diagnostico: {} };
   }
+  const NORMATIVO_VERSION = 2, REGLAS_VERSION = 2;   // 2 = Res. 227/2025 (mod. 233/2025)
+  let normGuardado = leerLS(LS_NORMATIVO, null);
+  const migrado = normGuardado && (normGuardado.version || 1) < NORMATIVO_VERSION;
+  if (!normGuardado || migrado) normGuardado = normativoDefecto();
   const E = {
     empresas: leerLS(LS_EMPRESAS, []),
-    normativo: leerLS(LS_NORMATIVO, null) || normativoDefecto(),
+    normativo: normGuardado,
     activa: leerLS(LS_ACTIVA, null),
     vista: "procesar", subvista: "hallazgos",
     archivos: {}, resultado: null, filtroNivel: "", filtroTexto: "", filtroFmt: "", filtroRegla: "", verFormato: null,
@@ -65,7 +70,14 @@
     (emp.cuentas_bancarias || []).forEach((c) => { if (c.cuenta && c.nit) p.cuentas_bancarias[String(c.cuenta).replace(/\D/g, "")] = String(c.nit).replace(/\D/g, ""); });
     p.nits_excluidos.global = ["{empresa}"].concat((emp.nits_excluidos || []).map((x) => String(x).replace(/\D/g, "")).filter(Boolean));
     p.topes = copia(n.topes); p.cuantias_menores = copia(n.cuantias_menores); p.no_agrupar_si_retencion = n.no_agrupar_si_retencion;
-    Object.entries(n.formatos).forEach(([k, f]) => { if (cfg.formatos[k]) { cfg.formatos[k].version = f.version; cfg.formatos[k].verificado = f.verificado; } });
+    if (n.uvt) p.uvt = copia(n.uvt);
+    const reg = (emp.diagnostico || {}).regimen;
+    p.forzar_no_deducible = reg === "simple" || reg === "no_contribuyente";
+    Object.entries(n.formatos).forEach(([k, f]) => {
+      if (!cfg.formatos[k]) return;
+      cfg.formatos[k].version = f.version; cfg.formatos[k].verificado = f.verificado;
+      if (f.columnas_verificadas !== undefined) cfg.formatos[k].columnas_verificadas = f.columnas_verificadas;
+    });
     cfg.conceptos = copia(n.conceptos);
     if (n.paises) cfg.paises = copia(n.paises);
     cfg.reglas = copia(emp.reglas);
@@ -203,12 +215,13 @@
         <div class="kpi ${revisar ? "e" : "o"}"><span>Cuadres con diferencia</span><b>${revisar}</b></div>
       </div>
       <div class="tabs">${[["hallazgos", `Hallazgos (${r.hallazgos.length})`], ["corregir", `Corregir terceros (${tercerosACorregir(r).length})`], ["formatos", "Formatos y descargas"], ["cuadres", "Cuadres"],
-        ["sinregla", `Cuentas sin parametrizar (${sinRegla.length})`], ["verificar", `Parámetros sin verificar (${r.sinVerificar.length})`]]
+        ["sinregla", `Cuentas sin parametrizar (${sinRegla.length})`], ["verificar", `Parámetros sin verificar (${r.sinVerificar.length})`],
+        ["conciliacion", "Conciliación con declaraciones"], ["sanciones", "Sanciones (art. 651)"]]
         .map(([k, t]) => `<button class="tab ${E.subvista === k ? "activa" : ""}" data-s="${k}">${t}</button>`).join("")}</div>
       <div id="sub"></div>`;
     $$(".tab[data-s]", el).forEach((b) => b.onclick = () => { E.subvista = b.dataset.s; renderResultado(el, emp); });
     const s = $("#sub", el);
-    ({ hallazgos: subHallazgos, corregir: subCorregir, formatos: subFormatos, cuadres: subCuadres, sinregla: subSinRegla, verificar: subVerificar })[E.subvista](s, r, emp);
+    ({ conciliacion: subConciliacion, sanciones: subSanciones, hallazgos: subHallazgos, corregir: subCorregir, formatos: subFormatos, cuadres: subCuadres, sinregla: subSinRegla, verificar: subVerificar })[E.subvista](s, r, emp);
   }
 
   function subHallazgos(s, r) {
@@ -316,9 +329,15 @@
   }
   const sufijo = (emp) => `AG${emp.anio}_${String(emp.nit).replace(/\D/g, "")}`;
   function descargarFormato(r, emp, f) {
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, hoja(aoaFormato(r, f)), f);
-    XLSX.writeFile(wb, `Formato_${f}_v${r.cfg.formatos[f].version}_${sufijo(emp)}.xlsx`);
+    // el prevalidador acepta hasta 5.000 registros por archivo: se parte en _parte1, _parte2...
+    const aoa = aoaFormato(r, f), enc = aoa[0], datos = aoa.slice(1), MAX = 5000;
+    const partes = Math.max(1, Math.ceil(datos.length / MAX));
+    for (let i = 0; i < partes; i++) {
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, hoja([enc].concat(datos.slice(i * MAX, (i + 1) * MAX))), f);
+      setTimeout(() => XLSX.writeFile(wb, `Formato_${f}_v${r.cfg.formatos[f].version}_${sufijo(emp)}${partes > 1 ? "_parte" + (i + 1) : ""}.xlsx`), i * 300);
+    }
+    if (partes > 1) toast(`${f}: ${datos.length} registros en ${partes} archivos de máximo 5.000 (límite del prevalidador).`);
   }
   function descargarInforme(r, emp) {
     const wb = XLSX.utils.book_new();
@@ -358,8 +377,8 @@
         <label>NIT adicionales a excluir (separados por coma)<input data-k="nits_excluidos" value="${esc((emp.nits_excluidos || []).join(", "))}"></label>
       </div><p class="ayuda" id="dv-info" style="margin-top:12px"></p></div>
       ${panelDiagnostico(emp)}
-      <div class="panel"><h2>Cuentas bancarias → entidad (formato 1012)</h2>
-      <p class="ayuda">En la mayoría de software el tercero del movimiento bancario es el cliente o proveedor, no el banco. Indique a qué entidad corresponde cada cuenta auxiliar de bancos, ahorros o CDT.</p>
+      <div class="panel"><h2>Cuentas con tercero fijo (bancos, CDT, retenciones por pagar, ICA)</h2>
+      <p class="ayuda">Para cuentas cuyo saldo se reporta completo a un solo tercero: la entidad financiera de cada cuenta bancaria o CDT (1012), el municipio de la retención de ICA por pagar (1009), etc. En la mayoría de software el tercero del movimiento bancario es el cliente o proveedor, no el banco.</p>
       <div class="tabla-wrap"><table><thead><tr><th>Cuenta auxiliar</th><th>NIT de la entidad</th><th></th></tr></thead><tbody id="tb-bancos"></tbody></table></div>
       <div class="barra" style="margin-top:10px"><button id="add-banco">+ Cuenta</button></div></div>
       <div class="panel"><h2>Zona de riesgo</h2><div class="barra">
@@ -398,7 +417,9 @@
 
   // ---------------- Parametrización de cuentas
   function renderReglas(v, emp) {
-    v.innerHTML = `<div class="panel"><h2>Parametrización de cuentas de ${esc(emp.razon_social)}</h2>
+    const vieja = (emp.reglasVersion || 1) < REGLAS_VERSION;
+    v.innerHTML = `${vieja ? `<div class="aviso">Esta empresa usa una parametrización anterior a la actualización según la Res. 227/2025 (conceptos del 1008/1009, 1011, retenciones y tercero fijo). <button class="prim" id="r-migrar">Actualizar a la parametrización 2026</button> (se reemplazan las reglas; las cuentas del asistente quedarán pendientes de revisar).</div>` : ""}
+      <div class="panel"><h2>Parametrización de cuentas de ${esc(emp.razon_social)}</h2>
       <p class="ayuda">Cada regla envía las cuentas que empiezan por el <b>prefijo</b> a un formato, concepto y columna. Dentro de un formato gana la regla con el prefijo <b>más largo</b>: con 5105 → 5001 y 510569 → 5011, la EPS va a 5011 y el resto del gasto de personal a 5001. Concepto <b>EXCLUIR</b> saca una rama completa; <b>PRORRATA</b> reparte entre los conceptos del mismo tercero.</p>
       <div class="barra"><select id="rf-fmt"><option value="">Todos los formatos</option>${formatosConReglas().map((f) => `<option ${E.filtroFmt === f ? "selected" : ""}>${f}</option>`).join("")}</select>
         <input id="rf-txt" placeholder="Buscar prefijo o nota…" value="${esc(E.filtroRegla)}">
@@ -407,7 +428,7 @@
         ${E.empresas.length > 1 ? `<select id="r-copiar"><option value="">Copiar reglas de…</option>${E.empresas.filter((x) => x.id !== emp.id).map((x) => `<option value="${x.id}">${esc(x.razon_social)}</option>`).join("")}</select>` : ""}
         <button class="peligro" id="r-reset">Restaurar predeterminada</button></div>
       <div id="r-err"></div>
-      <div class="tabla-wrap" style="max-height:600px"><table><thead><tr><th>Formato</th><th>Prefijo cuenta</th><th>Concepto</th><th>Columna</th><th>Base</th><th>Notas</th><th></th></tr></thead><tbody id="tb-r"></tbody></table></div></div>`;
+      <div class="tabla-wrap" style="max-height:600px"><table><thead><tr><th>Formato</th><th>Prefijo cuenta</th><th>Concepto</th><th>Columna</th><th>Base</th><th>Notas</th><th>Tercero</th><th></th></tr></thead><tbody id="tb-r"></tbody></table></div></div>`;
     const errores = () => {
       const errs = Exogena.validarReglas({ reglas: emp.reglas, formatos: DEF.formatos });
       $("#r-err").innerHTML = errs.length ? `<div class="aviso">${errs.slice(0, 8).map(esc).join("<br>")}${errs.length > 8 ? `<br>… y ${errs.length - 8} más` : ""}</div>` : "";
@@ -429,6 +450,7 @@
           <td><select data-c="columna" ${r.concepto === "EXCLUIR" ? "disabled" : ""}><option></option>${cols.map((c) => `<option ${c === r.columna ? "selected" : ""}>${c}</option>`).join("")}</select></td>
           <td><select data-c="base" ${r.concepto === "EXCLUIR" ? "disabled" : ""}><option></option>${BASES.map(([k, d]) => `<option value="${k}" title="${esc(d)}" ${k === r.base ? "selected" : ""}>${k}</option>`).join("")}</select></td>
           <td><input data-c="notas" value="${esc(r.notas)}"></td>
+          <td><input data-c="tercero" value="${esc(r.tercero || "")}" placeholder="del movimiento" title="vacío = tercero del movimiento; 'informante' = NIT de la empresa; o un NIT fijo" style="width:110px"></td>
           <td><button class="mini peligro" data-del="${i}" title="Eliminar regla">✕</button></td></tr>`;
       }).join("") || `<tr><td colspan="7" class="vacio">Sin reglas con ese filtro.</td></tr>`;
       $$("#tb-r [data-c]").forEach((el) => el.onchange = el.oninput = (e) => {
@@ -481,6 +503,7 @@
       if (o && confirm(`¿Reemplazar las reglas de esta empresa por las de "${o.razon_social}"?`)) { emp.reglas = copia(o.reglas); guardar(); render(); }
       else e.target.value = "";
     };
+    if ($("#r-migrar")) $("#r-migrar").onclick = () => { emp.reglas = copia(DEF.reglas); emp.reglasVersion = REGLAS_VERSION; E.resultado = null; guardar(); render(); toast("Parametrización actualizada. Revise el Asistente por formato."); };
     pintar(); errores();
   }
 
@@ -490,18 +513,24 @@
     m.innerHTML = `<div class="panel"><h2>Parámetros normativos</h2>
       <div class="aviso">Aplican a todas las empresas. Contraste cada valor con la resolución de exógena vigente para el año gravable y su anexo técnico, y márquelo como verificado. Mientras haya parámetros usados sin verificar, el aplicativo no da el dictamen "Listo para prevalidador".</div>
       <div class="barra"><button class="peligro" id="n-reset">Restaurar valores de fábrica</button></div></div>
-      <div class="panel"><h2>Formatos</h2><div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Nombre</th><th>Versión</th><th>Verificado</th></tr></thead><tbody>
+      <div class="panel"><h2>Formatos</h2><div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Nombre</th><th>Versión</th><th>Versión verificada</th><th>Columnas verificadas (anexo)</th></tr></thead><tbody>
       ${Object.entries(DEF.formatos).map(([k, f]) => `<tr><td>${k}</td><td>${esc(f.nombre)}</td><td><input type="number" data-fv="${k}" value="${esc(n.formatos[k].version)}" style="width:80px"></td>
-        <td><input type="checkbox" data-fchk="${k}" ${n.formatos[k].verificado ? "checked" : ""}></td></tr>`).join("")}</tbody></table></div></div>
+        <td><input type="checkbox" data-fchk="${k}" ${n.formatos[k].verificado ? "checked" : ""}></td>
+        <td><input type="checkbox" data-fcol="${k}" ${n.formatos[k].columnas_verificadas ? "checked" : ""}></td></tr>`).join("")}</tbody></table></div>
+      <p class="ayuda" style="margin-top:8px">Versión verificada contra la Res. 227/2025 art. 1.3.10.1 y sus modificaciones. El orden de columnas sale del anexo técnico de cada formato (PDF de la DIAN): márquelo solo después de compararlo.</p></div>
       <div class="panel"><h2>Cuantías menores</h2><p class="ayuda">Por debajo del tope (por tercero y concepto) los valores se agrupan en el NIT de cuantías menores.</p>
       <div class="grid-form"><label>NIT cuantías menores<input data-cm="nit" value="${esc(n.cuantias_menores.nit)}"></label>
         <label>Tipo de documento<input data-cm="tipo_documento" value="${esc(n.cuantias_menores.tipo_documento)}"></label>
         <label>Razón social<input data-cm="razon_social" value="${esc(n.cuantias_menores.razon_social)}"></label>
         <label>Verificado<input type="checkbox" data-cmchk ${n.cuantias_menores.verificado ? "checked" : ""}></label>
         <label>No agrupar terceros con retención<input type="checkbox" id="n-noag" ${n.no_agrupar_si_retencion ? "checked" : ""}></label></div>
-      <div class="tabla-wrap" style="margin-top:12px"><table><thead><tr><th>Formato</th><th>Tope ($)</th><th>Columna(s) que se comparan</th><th>Verificado</th></tr></thead><tbody>
-      ${Object.entries(n.topes).map(([k, t]) => `<tr><td>${k}</td><td><input type="number" data-tv="${k}" value="${t.valor === null ? "" : t.valor}" placeholder="sin agrupación"></td>
-        <td><input data-tc="${k}" value="${esc(t.columna || "")}"></td><td><input type="checkbox" data-tchk="${k}" ${t.verificado ? "checked" : ""}></td></tr>`).join("")}</tbody></table></div></div>
+      <p class="ayuda" style="margin-top:12px">Topes en UVT, evaluados por tercero sumando todo el formato. Valor UVT por año:
+        ${Object.entries(n.uvt || {}).map(([a, v]) => `${a}: <input type="number" data-uvt="${a}" value="${v}" style="width:90px">`).join(" ")}</p>
+      <div class="tabla-wrap"><table><thead><tr><th>Formato</th><th>Tope (UVT)</th><th>Equivale AG ${Math.max(...Object.keys(n.uvt || { 0: 0 }).map(Number))}</th><th>Columna(s) que se suman</th><th>Verificado</th></tr></thead><tbody>
+      ${Object.entries(n.topes).map(([k, t]) => { const u = (n.uvt || {})[Math.max(...Object.keys(n.uvt || { 0: 0 }).map(Number))] || 0;
+        return `<tr><td>${k}</td><td><input type="number" data-tv="${k}" value="${t.uvt === null || t.uvt === undefined ? "" : t.uvt}" placeholder="sin cuantía menor" style="width:110px"></td>
+        <td class="num">${t.uvt ? "$" + pesos(t.uvt * u) : "—"}</td>
+        <td><input data-tc="${k}" value="${esc(t.columna || "")}"></td><td><input type="checkbox" data-tchk="${k}" ${t.verificado ? "checked" : ""}></td></tr>`; }).join("")}</tbody></table></div></div>
       <div class="panel"><h2>Tabla de países</h2><p class="ayuda">Códigos de país DIAN (tabla propia de la DIAN, no ISO: Colombia = 169). Complete la tabla con el anexo técnico; un tercero del exterior con país no identificado genera ERROR.</p>
       <div class="barra"><button id="p-add">+ País</button></div>
       <div class="tabla-wrap" style="max-height:300px"><table><thead><tr><th>Código</th><th>Nombre</th><th>Otros nombres (separados por |)</th><th></th></tr></thead><tbody id="tb-p"></tbody></table></div></div>
@@ -511,10 +540,12 @@
     const cambio = () => { guardar(); E.resultado = null; };
     $$("[data-fv]", m).forEach((i) => i.oninput = () => { n.formatos[i.dataset.fv].version = Number(i.value); cambio(); });
     $$("[data-fchk]", m).forEach((i) => i.onchange = () => { n.formatos[i.dataset.fchk].verificado = i.checked; cambio(); });
+    $$("[data-fcol]", m).forEach((i) => i.onchange = () => { n.formatos[i.dataset.fcol].columnas_verificadas = i.checked; cambio(); });
     $$("[data-cm]", m).forEach((i) => i.oninput = () => { n.cuantias_menores[i.dataset.cm] = i.value.trim(); cambio(); });
     $("[data-cmchk]", m).onchange = (e) => { n.cuantias_menores.verificado = e.target.checked; cambio(); };
     $("#n-noag").onchange = (e) => { n.no_agrupar_si_retencion = e.target.checked; cambio(); };
-    $$("[data-tv]", m).forEach((i) => i.oninput = () => { n.topes[i.dataset.tv].valor = i.value === "" ? null : Number(i.value); cambio(); });
+    $$("[data-tv]", m).forEach((i) => i.onchange = () => { const t = n.topes[i.dataset.tv]; t.uvt = i.value === "" ? null : Number(i.value); delete t.valor; cambio(); renderNormativo(m); });
+    $$("[data-uvt]", m).forEach((i) => i.onchange = () => { n.uvt[i.dataset.uvt] = Number(i.value); cambio(); renderNormativo(m); });
     $$("[data-tc]", m).forEach((i) => i.oninput = () => { n.topes[i.dataset.tc].columna = i.value.trim(); cambio(); });
     $$("[data-tchk]", m).forEach((i) => i.onchange = () => { n.topes[i.dataset.tchk].verificado = i.checked; cambio(); });
     const pintarC = () => {
@@ -542,13 +573,73 @@
     $("#n-reset").onclick = () => { if (confirm("¿Restaurar todos los parámetros normativos a los valores de fábrica?")) { E.normativo = normativoDefecto(); guardar(); render(); } };
   }
 
+
+  // ================================================================== CONCILIACIÓN CON DECLARACIONES
+  const CONCILIA = [
+    ["iva_descontable", "IVA descontable declarado (suma de las declaraciones de IVA del año)", (r) => tot(r, "1005", "iva_descontable")],
+    ["iva_generado", "IVA generado declarado (suma de las declaraciones de IVA)", (r) => tot(r, "1006", "iva_generado")],
+    ["ret_renta", "Retenciones a título de renta declaradas (formularios 350 del año)", (r) => tot(r, "1001", "ret_renta") + tot(r, "2276", "retencion")],
+    ["ret_iva", "Retenciones a título de IVA declaradas (formularios 350)", (r) => tot(r, "1001", "ret_iva_comun") + tot(r, "1001", "ret_iva_no_dom")],
+    ["ingresos", "Ingresos brutos de la declaración de renta", (r) => tot(r, "1007", "ingreso_bruto")],
+    ["devoluciones", "Devoluciones, rebajas y descuentos de la renta", (r) => tot(r, "1007", "devoluciones")],
+    ["cxc", "Cuentas por cobrar de la renta (patrimonio)", (r) => tot(r, "1008", "saldo_cxc", (x) => x.concepto !== "1318")],
+    ["pasivos", "Pasivos de la declaración de renta", (r) => tot(r, "1009", "saldo_cxp")],
+    ["efectivo", "Efectivo, equivalentes e inversiones de la renta", (r) => tot(r, "1012", "valor_31dic") + tot(r, "1011", "valor", (x) => x.concepto === "1105")],
+    ["otras_ret", "Retenciones que le practicaron, tomadas en renta e IVA", (r) => tot(r, "1003", "retencion")],
+  ];
+  function tot(r, f, col, filtro) { return (r.generados[f] || []).filter(filtro || (() => true)).reduce((a, x) => a + (Number(x[col]) || 0), 0); }
+  function subConciliacion(s, r, emp) {
+    emp.conciliacion = emp.conciliacion || {};
+    const c = emp.conciliacion[emp.anio] = emp.conciliacion[emp.anio] || {};
+    s.innerHTML = `<p class="ayuda">La DIAN cruza la exógena con sus declaraciones. Digite los valores declarados: la diferencia no tiene que ser cero (la renta es fiscal y la exógena pide el devengo), pero toda diferencia debe estar explicada y documentada.</p>
+      <div class="tabla-wrap"><table><thead><tr><th>Partida</th><th>Declarado</th><th>Exógena</th><th>Diferencia</th><th>Explicación</th></tr></thead><tbody>
+      ${CONCILIA.map(([k, t, f]) => { const ex = f(r), dec = Number(c[k] || 0), dif = ex - dec;
+        return `<tr><td>${esc(t)}</td><td><input type="number" data-cc="${k}" value="${c[k] ?? ""}" style="width:150px"></td><td class="num">${pesos(ex)}</td>
+        <td class="num" style="color:${c[k] === undefined || c[k] === "" ? "var(--texto-2)" : Math.abs(dif) > 1000 ? "var(--error)" : "var(--ok)"}">${c[k] === undefined || c[k] === "" ? "—" : pesos(dif)}</td>
+        <td><input data-ce="${k}" value="${esc(c[k + "_nota"] || "")}" placeholder="Por qué difiere"></td></tr>`; }).join("")}</tbody></table></div>`;
+    $$("[data-cc]", s).forEach((i) => i.onchange = () => { c[i.dataset.cc] = i.value === "" ? "" : Number(i.value); guardar(); subConciliacion(s, r, emp); });
+    $$("[data-ce]", s).forEach((i) => i.oninput = () => { c[i.dataset.ce + "_nota"] = i.value; guardar(); });
+  }
+
+  // ================================================================== SANCIONES (E.T. art. 651)
+  function subSanciones(s, r, emp) {
+    const uvts = E.normativo.uvt || {}, anioMax = Math.max(...Object.keys(uvts).map(Number));
+    const st = E.sancion = E.sancion || { tipo: "0.007", base: 0, datos: 0, uvt: uvts[anioMax] || 0, momento: "0.1", l640: "1" };
+    s.innerHTML = `<p class="ayuda">Estimación de la sanción por información exógena (E.T. art. 651, al que remite la Res. 227/2025 art. 1.3.11.1). Los errores se suman en valor absoluto (no se netean). La UVT es la del año en que se liquida la sanción.</p>
+      <div class="grid-form">
+        <label>Conducta<select id="sa-tipo"><option value="0.01">No suministró la información (1%)</option><option value="0.005">Suministró extemporáneamente (0,5%)</option><option value="0.007">Información con errores (0,7%)</option></select></label>
+        <label>Suma de las partidas con error o no suministradas ($)<input id="sa-base" type="number" value="${st.base}"></label>
+        <label>Datos sin cuantía errados o faltantes (0,5 UVT c/u)<input id="sa-datos" type="number" value="${st.datos}"></label>
+        <label>Valor UVT<input id="sa-uvt" type="number" value="${st.uvt}"></label>
+        <label>Momento de la corrección<select id="sa-mom"><option value="0.1">Voluntaria, antes del pliego de cargos (10%)</option><option value="0.5">Dentro del mes siguiente al pliego (50%)</option><option value="0.7">Dentro de los 2 meses siguientes a la resolución sanción (70%)</option><option value="1">Sin reducción (100%)</option></select></label>
+        <label>Reducción art. 640 (lesividad, proporcionalidad)<select id="sa-640"><option value="1">No aplica</option><option value="0.5">50%</option><option value="0.25">75%</option></select></label>
+      </div><div id="sa-res" style="margin-top:14px"></div>`;
+    $("#sa-tipo").value = st.tipo; $("#sa-mom").value = st.momento; $("#sa-640").value = st.l640;
+    const calc = () => {
+      Object.assign(st, { tipo: $("#sa-tipo").value, base: Number($("#sa-base").value) || 0, datos: Number($("#sa-datos").value) || 0,
+        uvt: Number($("#sa-uvt").value) || 0, momento: $("#sa-mom").value, l640: $("#sa-640").value });
+      const bruta = st.base * Number(st.tipo) + st.datos * 0.5 * st.uvt;
+      const tope = 7500 * st.uvt, minima = 10 * st.uvt;
+      const topada = Math.min(bruta, tope);
+      let final = topada * Number(st.momento) * Number(st.l640);
+      const aplicaMin = bruta > 0 && final < minima;
+      if (aplicaMin) final = minima;
+      $("#sa-res").innerHTML = `<div class="kpis"><div class="kpi"><span>Sanción calculada</span><b>$${pesos(bruta)}</b></div>
+        <div class="kpi"><span>Tope 7.500 UVT</span><b>$${pesos(tope)}</b></div>
+        <div class="kpi e"><span>Sanción a pagar (estimada)</span><b>$${pesos(final)}</b></div></div>
+        <small style="color:var(--texto-2)">${aplicaMin ? "Se aplicó la sanción mínima de 10 UVT (art. 639 E.T.). " : ""}Corregir antes del vencimiento no genera sanción. Verifique siempre el texto vigente de los arts. 651, 639 y 640 del E.T.</small>`;
+    };
+    $$("#sa-tipo,#sa-base,#sa-datos,#sa-uvt,#sa-mom,#sa-640", s).forEach((i) => i.oninput = i.onchange = calc);
+    calc();
+  }
   // ================================================================== ASISTENTE POR FORMATO
   const TRATAMIENTOS = [
     ["EXCLUIR", "No se reporta en este formato"],
     ["neto_deb", "Débitos − créditos"], ["neto_cred", "Créditos − débitos"],
     ["debito", "Solo débitos"], ["credito", "Solo créditos"],
     ["saldo_deb", "Saldo final deudor (por tercero)"], ["saldo_cred", "Saldo final acreedor (por tercero)"],
-    ["saldo_deb_cuenta", "Saldo final de la cuenta a una entidad (bancos)"],
+    ["saldo_deb_cuenta", "Saldo deudor de la cuenta a un tercero fijo"],
+    ["saldo_cred_cuenta", "Saldo acreedor de la cuenta a un tercero fijo"],
   ];
   const nat = (x) => (Math.abs(x) < 0.5 ? "0" : `${pesos(Math.abs(x))} ${x > 0 ? "D" : "C"}`);
   function formatosAsistente() { return formatosConReglas().filter((f) => (DEF.formatos[f].universo || []).length); }
@@ -578,6 +669,12 @@
       m.set(r.cuenta, x);
     }
     return [...m.values()].sort((a, b) => a.cuenta.localeCompare(b.cuenta));
+  }
+  function criteriosCuenta(fmt, cuenta) {
+    const cs = (DEF.criterios || []).filter((c) => c.formato === fmt && (c.prefijos || []).some((p) => cuenta.startsWith(String(p))));
+    if (!cs.length) return "";
+    return `<details style="margin-top:4px;font-size:11px;max-width:360px"><summary style="cursor:pointer;color:var(--azul)">📌 Criterio${cs.length > 1 ? "s (" + cs.length + ")" : ""}</summary>
+      ${cs.map((c) => `<div style="margin-top:4px">${esc(c.texto)} <span style="color:var(--texto-2)">(${esc(c.fuente)})</span></div>`).join("")}</details>`;
   }
   function reglaEfectiva(emp, fmt, cuenta) { return Exogena.reglaPara({ reglas: emp.reglas }, fmt, cuenta); }
   function firma(regla) { return regla ? [regla.concepto, regla.columna, regla.base, regla.prefijo].join("|") : "SIN_REGLA"; }
@@ -618,7 +715,9 @@
     }
     const fmts = formatosAsistente();
     if (!fmts.includes(E.fmtAsis)) E.fmtAsis = fmts[0];
-    const fmt = E.fmtAsis, spec = DEF.formatos[fmt], vers = E.normativo.formatos[fmt];
+    const fmt = E.fmtAsis, spec = DEF.formatos[fmt];
+    const vers = { ...E.normativo.formatos[fmt] };
+    if (spec.version_por_anio && spec.version_por_anio[String(emp.anio)]) vers.version = spec.version_por_anio[String(emp.anio)];
     const cands = candidatos(fmt, bal);
     const chips = fmts.map((f) => {
       const cs = candidatos(f, bal), ok = cs.filter((c) => revisada(emp, f, c.cuenta)).length;
@@ -629,6 +728,7 @@
     v.innerHTML = `<div class="tabs">${chips}</div>
       <div class="panel"><h2>${fmt} · ${esc(spec.nombre)} <small style="color:var(--texto-2);font-weight:400">versión ${esc(vers.version)} ${vers.verificado ? "✓ verificada" : "· sin verificar"}</small></h2>
         <p class="ayuda">${esc(spec.que_reporta || "")}. Cuentas del balance que se preguntan: ${(spec.universo || []).map((u) => `<b>${u}</b>`).join(", ")}.</p>
+        ${(DEF.criterios || []).filter((c) => c.formato === fmt && !(c.prefijos || []).length).map((c) => `<div class="aviso" style="background:var(--info-f);color:var(--texto);margin-bottom:8px">📌 ${esc(c.texto)} <small style="color:var(--texto-2)">(${esc(c.fuente)})</small></div>`).join("")}
         <details><summary style="cursor:pointer;font-weight:600">Estructura del formato en el orden del prevalidador (${spec.columnas.length} columnas)</summary>
         <div class="tabla-wrap" style="margin-top:8px"><table><thead><tr><th>#</th><th>Columna</th><th>De dónde sale</th></tr></thead><tbody>
         ${spec.columnas.map(([c, h], i) => {
@@ -656,7 +756,7 @@
           const concOpts = spec.concepto ? `<option value=""></option>${conc.map((x) => `<option value="${esc(x.concepto)}" ${r && r.concepto === x.concepto ? "selected" : ""}>${esc(x.concepto)} ${esc(x.descripcion.slice(0, 34))}</option>`).join("")}${fmt === "1001" ? `<option value="PRORRATA" ${r && r.concepto === "PRORRATA" ? "selected" : ""}>PRORRATA (reparte entre conceptos del tercero)</option>` : ""}` : `<option value="">(sin concepto)</option>`;
           return `<tr data-c="${c.cuenta}" class="${ok ? "" : "ALERTA"}">
             <td><input type="checkbox" class="as-ok" ${ok ? "checked" : ""} title="Revisada"></td>
-            <td><b>${c.cuenta}</b><br><small>${esc(c.nombre)}</small>${hered}</td>
+            <td><b>${c.cuenta}</b><br><small>${esc(c.nombre)}</small>${hered}${criteriosCuenta(fmt, c.cuenta)}</td>
             <td class="num">${c.nits.size}${c.sinT ? `<br><small style="color:var(--error)">+ sin tercero</small>` : ""}</td>
             <td class="num">${nat(c.si)}</td><td class="num">${pesos(c.d)}</td><td class="num">${pesos(c.c)}</td><td class="num">${nat(c.sf)}</td>
             <td><select class="as-base">${!r ? `<option value="">— elegir —</option>` : ""}${TRATAMIENTOS.map(([k, t]) => `<option value="${k}" ${k === base ? "selected" : ""}>${t}</option>`).join("")}</select></td>
@@ -943,5 +1043,6 @@ Responde en una tabla (cuenta | ¿se reporta? | concepto | columna | valor a tom
   Object.keys(nd.formatos).forEach((k) => { if (!E.normativo.formatos[k]) E.normativo.formatos[k] = nd.formatos[k]; });
   Object.keys(nd.topes).forEach((k) => { if (!E.normativo.topes[k]) E.normativo.topes[k] = nd.topes[k]; });
   if (!E.empresas.find((x) => x.id === E.activa)) E.activa = E.empresas[0] ? E.empresas[0].id : null;
+  if (migrado) { guardar(); setTimeout(() => toast("Parámetros normativos actualizados a la Res. 227/2025 (mod. 233/2025)."), 300); }
   render();
 })();

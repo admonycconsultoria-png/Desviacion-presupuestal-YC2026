@@ -28,6 +28,10 @@ CORRECCIONES = {
 
 @pytest.mark.parametrize("con_correcciones", [False, True])
 def test_paridad_python_js(tmp_path, con_correcciones):
+    _paridad(tmp_path, con_correcciones, simple=con_correcciones)
+
+
+def _paridad(tmp_path, con_correcciones, simple=False):
     import shutil
     import yaml
     cfgdir = tmp_path / "config"
@@ -35,6 +39,7 @@ def test_paridad_python_js(tmp_path, con_correcciones):
     if con_correcciones:
         p = yaml.safe_load((cfgdir / "parametros.yaml").read_text(encoding="utf-8"))
         p["correcciones_terceros"] = CORRECCIONES
+        p["forzar_no_deducible"] = simple
         (cfgdir / "parametros.yaml").write_text(yaml.safe_dump(p, allow_unicode=True), encoding="utf-8")
     ej = RAIZ / "ejemplos"
     subprocess.run([sys.executable, str(ej / "generar_ejemplo.py")], check=True, capture_output=True)
@@ -52,3 +57,6 @@ def test_paridad_python_js(tmp_path, con_correcciones):
         pd.testing.assert_frame_equal(a, b, obj=f"formato {fmt}")
     assert {tuple(map(str, h[:3])) for h in py["hallazgos"]} == {tuple(map(str, h[:3])) for h in js["hallazgos"]}
     assert sorted(py["sin_verificar"]) == sorted(js["sinVerificar"])
+    assert (py["cuadres"]["estado"] == "OK").all() and all(c["estado"] == "OK" for c in js["cuadres"])
+    if simple:
+        assert py["generados"]["1001"]["pago_deducible"].sum() == 0

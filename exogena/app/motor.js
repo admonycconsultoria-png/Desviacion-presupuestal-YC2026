@@ -412,6 +412,26 @@
     saldo_deb: (f) => f.saldo_final, saldo_cred: (f) => -f.saldo_final,
   };
 
+  function terceroFijo(cfg, v) {
+    v = String(v || "").trim();
+    return v === "informante" ? String(cfg.parametros.empresa.nit) : v.replace(/\D/g, "");
+  }
+  function topePesos(cfg, fmt) {
+    const t = (cfg.parametros.topes || {})[fmt] || {};
+    if (t.valor) return Number(t.valor);
+    if (!t.uvt) return null;
+    const uvt = (cfg.parametros.uvt || {})[String(cfg.parametros.anio_gravable)];
+    if (!uvt) throw new Error(`No hay valor de UVT para el año ${cfg.parametros.anio_gravable}`);
+    return Number(t.uvt) * Number(uvt);
+  }
+  function datosInformante(cfg) {
+    const e = cfg.parametros.empresa; let dv = "";
+    try { dv = String(calcularDv(e.nit)); } catch (x) { /* */ }
+    return { tipo_documento: "31", numero_identificacion: String(e.nit), dv, primer_apellido: "", segundo_apellido: "",
+      primer_nombre: "", otros_nombres: "", razon_social: textoDian(e.razon_social || ""), direccion: textoDian(e.direccion || ""),
+      codigo_departamento: e.codigo_departamento || "", codigo_municipio: e.codigo_municipio || "", pais: "169" };
+  }
+
   function reglaPara(cfg, fmt, cuenta) {
     let mejor = null;
     for (const r of cfg.reglas) {
@@ -432,7 +452,7 @@
       if (!f) { errores.push(`Regla ${i + 1}: formato ${r.formato} no existe`); return; }
       if (!/^\d+$/.test(r.prefijo)) errores.push(`Regla ${i + 1} (${r.formato}): prefijo '${r.prefijo}' no es numérico`);
       if (r.concepto === "EXCLUIR") return;
-      if (!(r.base in BASES) && r.base !== "saldo_deb_cuenta") errores.push(`Regla ${i + 1} (${r.formato} ${r.prefijo}): base '${r.base}' inválida`);
+      if (!(r.base in BASES) && !["saldo_deb_cuenta", "saldo_cred_cuenta"].includes(r.base)) errores.push(`Regla ${i + 1} (${r.formato} ${r.prefijo}): base '${r.base}' inválida`);
       if (!f.columnas.some(([c]) => c === r.columna)) errores.push(`Regla ${i + 1} (${r.formato} ${r.prefijo}): columna '${r.columna}' no existe en el formato`);
     });
     return errores;
@@ -453,13 +473,14 @@
         const valor = BASES[regla.base](fila);
         if (Math.abs(valor) < 0.5) continue;
         const modo = cfg.formatos[fmt].modo;
-        let motivo = "";
-        if (modo === "por_tercero") {
+        let motivo = "", nit = fila.nit;
+        if (modo === "por_tercero" && regla.tercero) nit = terceroFijo(cfg, regla.tercero);
+        else if (modo === "por_tercero") {
           if (!fila.nit) motivo = "sin_tercero";
           else if (excl[fmt].has(fila.nit)) motivo = "nit_excluido";
         }
         salida.push({ formato: fmt, cuenta: fila.cuenta, nombre_cuenta: fila.nombre_cuenta,
-          nit: modo === "por_tercero" ? fila.nit : "", concepto: regla.concepto, columna: regla.columna,
+          nit: modo === "por_tercero" ? nit : "", concepto: regla.concepto, columna: regla.columna,
           base: regla.base, prefijo_regla: regla.prefijo, valor, descartado: motivo });
       }
     }
@@ -469,10 +490,12 @@
       for (const fmt of formatos) {
         const regla = reglaPara(cfg, fmt, cuenta);
         if (!regla || regla.concepto === "EXCLUIR" || !regla.base.endsWith("_cuenta")) continue;
-        const valor = suma(g, (r) => r.saldo_final);
+        const valor = suma(g, (r) => r.saldo_final) * (regla.base === "saldo_cred_cuenta" ? -1 : 1);
         if (Math.abs(valor) < 0.5) continue;
-        let nit = String(fijos[cuenta] || "");
-        if (!nit) {
+        let nit = regla.tercero ? terceroFijo(cfg, regla.tercero) : String(fijos[cuenta] || "");
+        if (!nit && regla.base === "saldo_cred_cuenta") {
+          hallazgos.push(["ERROR", "Tercero de la cuenta sin definir", cuenta, `Formato ${fmt}: el saldo de la cuenta ${cuenta} (${fmtPesos(valor)}) se reporta a un solo acreedor; configúrelo en Cuentas con tercero fijo`]);
+        } else if (!nit) {
           const vistos = new Map();
           g.filter((r) => r.nit).forEach((r) => { if (!vistos.has(r.nit)) vistos.set(r.nit, r.nombre_tercero); });
           let cand = [...vistos].filter(([, n]) => PATRON_ENTIDAD.test(textoDian(n)));
@@ -517,7 +540,11 @@
     const ing = new Map();
     balance.filter((r) => r.cuenta.startsWith("4")).forEach((r) => ing.set(r.nit, (ing.get(r.nit) || 0) + r.credito - r.debito));
     tabla.forEach((t) => { t.base_retencion = 0; });
-    for (const [nit, g] of agrupar(tabla, (t) => t.nit)) {
+    for (const t of tabla.filter((x) => x.concepto === "1309")) {
+      t.base_retencion = t.retencion / 0.15;
+      hallazgos.push(["INFO", "Base 1309 estimada", t.nit, "Base del 1309 = valor del IVA, estimada como retención / 15%; validar contra certificados"]);
+    }
+    for (const [nit, g] of agrupar(tabla.filter((x) => x.concepto !== "1309"), (t) => t.nit)) {
       const base = ing.get(nit) || 0;
       const totRet = suma(g, (t) => t.retencion);
       if (base <= 0) {
@@ -550,27 +577,32 @@
     return tabla.filter((t) => !quitar.has(t));
   }
 
+  // Tope por tercero sumando TODO el formato (art. 1.3.5.2.1 par. 1; 1.3.5.6.1 y 1.3.5.7.1 par. 1).
+  // Un tercero con retención nunca se agrupa.
   function cuantiasMenores(fmt, tabla, valores, cfg) {
-    const tope = (cfg.parametros.topes || {})[fmt] || {};
-    if (!tope.valor) return tabla;
-    if (!tope.verificado) cfg._sinVerificar.add(`Tope cuantías menores formato ${fmt}`);
-    const cols = tope.columna.split("+");
+    const t = (cfg.parametros.topes || {})[fmt] || {};
+    const tope = topePesos(cfg, fmt);
+    if (!tope) return tabla;
+    if (!t.verificado) cfg._sinVerificar.add(`Tope cuantías menores formato ${fmt}`);
+    const cols = t.columna.split("+");
     const rets = valores.filter((c) => RETENCIONES.includes(c));
+    const porNit = new Map(), conRet = new Set();
+    for (const x of tabla) {
+      porNit.set(x.nit, (porNit.get(x.nit) || 0) + suma(cols, (c) => x[c] || 0));
+      if (rets.length && suma(rets, (c) => Math.abs(x[c])) > 0.5) conRet.add(x.nit);
+    }
     const noAgrupar = cfg.parametros.no_agrupar_si_retencion !== false;
-    const menores = [], mayores = [];
-    for (const t of tabla) {
-      let menor = suma(cols, (c) => t[c] || 0) < tope.valor;
-      if (menor && noAgrupar && rets.length && suma(rets, (c) => Math.abs(t[c])) > 0.5) menor = false;
-      (menor ? menores : mayores).push(t);
-    }
+    const menoresNit = new Set([...porNit].filter(([n, v]) => v < tope && !(noAgrupar && conRet.has(n)) && n !== String(cfg.parametros.empresa.nit)).map(([n]) => n));
+    const menores = tabla.filter((x) => menoresNit.has(x.nit));
     if (!menores.length) return tabla;
+    const out = tabla.filter((x) => !menoresNit.has(x.nit));
     const nitCm = cfg.parametros.cuantias_menores.nit;
-    for (const [concepto, g] of agrupar(menores, (t) => t.concepto)) {
+    for (const [concepto, g] of agrupar(menores, (x) => x.concepto)) {
       const fila = { concepto, nit: nitCm };
-      valores.forEach((c) => { fila[c] = suma(g, (t) => t[c] || 0); });
-      mayores.push(fila);
+      valores.forEach((c) => { fila[c] = suma(g, (x) => x[c] || 0); });
+      out.push(fila);
     }
-    return mayores;
+    return out;
   }
 
   function construirFormato(fmt, partidas, terceros, balance, cfg, hallazgos) {
@@ -583,9 +615,13 @@
     if (spec.modo === "sin_tercero") {
       return [...agrupar(p, (x) => x.concepto)].map(([concepto, g]) => {
         const o = { concepto };
-        valores.forEach((c) => { o[c] = r0(suma(g.filter((x) => x.columna === c), (x) => x.valor)); });
+        valores.forEach((c) => {
+          const v = suma(g.filter((x) => x.columna === c), (x) => x.valor);
+          if (v < -0.5) hallazgos.push(["ALERTA", "Valor negativo", concepto, `Formato ${fmt} concepto ${concepto}: ${Math.round(v).toLocaleString("es-CO")}; se reporta en cero`]);
+          o[c] = r0(Math.max(0, v));
+        });
         return o;
-      });
+      }).filter((o) => valores.some((c) => Math.abs(o[c]) > 0.5));
     }
     let tabla = [...agrupar(p, (x) => x.concepto + "|" + x.nit)].map(([, g]) => {
       const o = { concepto: g[0].concepto, nit: g[0].nit };
@@ -593,6 +629,11 @@
       return o;
     });
     if (fmt === "1003") base1003(tabla, balance, hallazgos);
+    if (fmt === "1001" && cfg.parametros.forzar_no_deducible) {
+      for (const t of tabla) for (const [d, nd] of [["pago_deducible", "pago_no_deducible"], ["iva_deducible", "iva_no_deducible"]]) {
+        if (d in t && nd in t) { t[nd] += t[d]; t[d] = 0; }
+      }
+    }
     for (const t of tabla) {
       for (const c of valores) {
         if (t[c] < -0.5) hallazgos.push(["ALERTA", "Valor negativo", t.nit, `Formato ${fmt} concepto ${t.concepto} columna ${c}: ${Math.round(t[c]).toLocaleString("es-CO")} (naturaleza contraria o reversión); se reporta en cero`]);
@@ -612,8 +653,10 @@
           codigo_departamento: emp.codigo_departamento || "", codigo_municipio: emp.codigo_municipio || "", pais: "169" };
       } else {
         t = terceros.get(r.nit) || { numero_identificacion: r.nit };
-        const exterior = !["", "169", undefined].includes(t.pais);
-        for (const req of spec.requiere || []) if (!(exterior && (req === "codigo_departamento" || req === "codigo_municipio")) && !t[req]) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
+        if (r.nit === String(cfg.parametros.empresa.nit)) t = { ...t, ...datosInformante(cfg) };
+        const exterior = !["", "169", undefined, null].includes(t.pais);
+        if (exterior) t = { ...t, direccion: "", codigo_departamento: "", codigo_municipio: "" };
+        for (const req of spec.requiere || []) if (!(exterior && ["direccion", "codigo_departamento", "codigo_municipio"].includes(req)) && !t[req]) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
       }
       const o = {};
       for (const c of campos) {
@@ -651,25 +694,39 @@
     return [depurar(pseudo, maestro, cfg, hallazgos), maestro];
   }
 
+  function porcentajeDian(p) {
+    const txt = (Math.round(Number(p) * 10000) / 10000).toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+    const [ent, dec = ""] = txt.split(".");
+    return [parseInt(ent + dec, 10), dec.length];
+  }
+
   function formato1010(filas, balance, cfg, hallazgos) {
     const campos = cfg.formatos["1010"].columnas.map(([c]) => c);
-    const [ter, lista] = personas(filas, ["porcentaje", "acciones"], cfg, hallazgos);
+    const [ter, lista] = personas(filas, ["porcentaje", "acciones", "valor_nominal", "capital", "prima"], cfg, hallazgos);
+    const tiene = (k) => lista.some((m) => !vacio(m["_" + k]) && String(m["_" + k]).trim() !== "");
     let pct;
-    if (lista.some((m) => !vacio(m._porcentaje) && m._porcentaje !== "")) pct = lista.map((m) => aNumero(m._porcentaje));
-    else if (lista.some((m) => !vacio(m._acciones) && m._acciones !== "")) {
+    if (tiene("porcentaje")) pct = lista.map((m) => aNumero(m._porcentaje));
+    else if (tiene("acciones")) {
       const acc = lista.map((m) => aNumero(m._acciones)); const tot = acc.reduce((a, b) => a + b, 0);
       pct = acc.map((a) => a / tot * 100);
     } else throw new Error("Accionistas: se requiere una columna 'porcentaje' o 'acciones'");
     const totalPct = pct.reduce((a, b) => a + b, 0);
-    if (Math.abs(totalPct - 100) > 0.01) hallazgos.push(["ERROR", "1010 participación", "", `Los porcentajes suman ${totalPct.toFixed(4)}%, no 100%`]);
-    const patrimonio = -suma(balance.filter((r) => r.cuenta.startsWith("3")), (r) => r.saldo_final);
-    cfg._sinVerificar.add("1010: forma de partir el % en entero/decimal (4 posiciones)");
+    if (Math.abs(totalPct - 100) > 0.0001) hallazgos.push(["ERROR", "1010 participación", "", `Los porcentajes suman ${totalPct.toFixed(4)}%, no 100%`]);
+    const capital = -suma(balance.filter((r) => r.cuenta.startsWith("31")), (r) => r.saldo_final);
+    const colNom = tiene("valor_nominal") ? "_valor_nominal" : tiene("capital") ? "_capital" : null;
+    const hayPrima = tiene("prima");
+    const primaBal = -suma(balance.filter((r) => r.cuenta.startsWith("3205")), (r) => r.saldo_final);
+    if (primaBal > 0.5 && !hayPrima) hallazgos.push(["ALERTA", "1010 prima en colocación", "", `El balance tiene prima en colocación de acciones (${fmtPesos(primaBal)}) y el libro de accionistas no trae la columna 'prima'. Asígnela por accionista según las actas; no la reparta a prorrata`]);
+    if (!colNom) hallazgos.push(["INFO", "1010 valor nominal estimado", "", `Sin columna 'valor nominal': se usa capital (cuenta 31, ${fmtPesos(capital)}) x participación`]);
     return lista.map((m, i) => {
-      const t = ter.get(m.nit) || {};
-      const p = pct[i], ent = Math.trunc(p);
+      let t = ter.get(m.nit) || {};
+      if (!["", "169", undefined, null].includes(t.pais)) t = { ...t, direccion: "", codigo_departamento: "", codigo_municipio: "" };
+      const [num, pos] = porcentajeDian(pct[i]);
       const o = {};
       campos.forEach((c) => { o[c] = t[c] || ""; });
-      o.valor_patrimonial = r0(patrimonio * p / 100); o.porcentaje_entero = ent; o.porcentaje_decimal = Math.round((p - ent) * 10000);
+      o.valor_nominal = r0(colNom ? aNumero(m[colNom]) : capital * pct[i] / 100);
+      o.prima = r0(hayPrima ? aNumero(m._prima) : 0);
+      o.porcentaje = num; o.posicion_decimal = pos;
       return o;
     });
   }
@@ -702,6 +759,10 @@
   function cuadres(partidas, generados, cfg) {
     const tol = cfg.parametros.validacion.tolerancia_cuadre;
     const out = [];
+    if (cfg.parametros.forzar_no_deducible) {
+      const mov = { pago_deducible: "pago_no_deducible", iva_deducible: "iva_no_deducible" };
+      partidas = partidas.map((p) => (p.formato === "1001" && mov[p.columna] ? { ...p, columna: mov[p.columna] } : p));
+    }
     const grupos = agrupar(partidas, (p) => p.formato + "|" + p.columna);
     for (const [k, g] of [...grupos].sort()) {
       const [fmt, col] = k.split("|");
@@ -750,6 +811,8 @@
 
   // ------------------------------------------------------------------ orquestación
   function prepararConfig(cfg) {
+    const anio = String(cfg.parametros.anio_gravable);
+    Object.values(cfg.formatos).forEach((f) => { if (f.version_por_anio && f.version_por_anio[anio]) f.version = f.version_por_anio[anio]; });
     cfg.divipola.forEach((d) => { d.k_mpio = clave(d.municipio); d.k_dpto = clave(d.departamento); });
     cfg._sinVerificar = new Set();
     return cfg;
@@ -779,6 +842,7 @@
     }
     for (const fmt of Object.keys(generados)) {
       if (!cfg.formatos[fmt].verificado) cfg._sinVerificar.add(`Layout formato ${fmt} v${cfg.formatos[fmt].version}`);
+      if (cfg.formatos[fmt].columnas_verificadas === false) cfg._sinVerificar.add(`Orden de columnas del formato ${fmt} v${cfg.formatos[fmt].version} (anexo técnico)`);
       const ok = new Set(cfg.conceptos.filter((c) => c.formato === fmt && String(c.verificado).toUpperCase() === "SI").map((c) => c.concepto));
       new Set(generados[fmt].map((r) => r.concepto).filter(Boolean)).forEach((c) => { if (!ok.has(c)) cfg._sinVerificar.add(`Concepto ${c} del formato ${fmt}`); });
     }
@@ -818,6 +882,6 @@
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, textoCsv, leerLibro, cargarBalance, prepararConfig, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);

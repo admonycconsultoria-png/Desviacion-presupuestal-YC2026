@@ -22,7 +22,7 @@ cuantias_menores:
   nit: "222222222"
   tipo_documento: "43"
   razon_social: "CUANTIAS MENORES"
-  verificado: false
+  verificado: true   # Res. 227/2025: identificación 222222222, "CUANTÍAS MENORES", tipo 43, dirección del informante
 
 # Terceros que nunca se reportan como contraparte en ciertos formatos
 # (pagos de impuestos a la DIAN, traslados internos con NIT propio, etc.)
@@ -34,24 +34,41 @@ nits_excluidos:
   "1006": ["800197268"]
   "1009": []
 
-# Topes por formato. Montos por debajo del tope (por tercero y concepto)
-# se agrupan en el NIT de cuantías menores. `null` = no aplica agrupación.
+# Valor de la UVT por año (los topes de exógena se expresan en UVT desde la Res. 000162 de 2023).
+uvt:                # Res. 238/2025 fija la de 2026
+  2024: 47065
+  2025: 49799
+  2026: 52374
+
+# Topes de cuantías menores. Se evalúan POR TERCERO SUMANDO TODO EL FORMATO (no concepto por
+# concepto): si el total del tercero en el formato es menor al tope, todas sus filas pasan al NIT
+# de cuantías menores, cada una en su concepto. `uvt: null` = el formato no tiene cuantía menor.
+# 1006 y 1007 no tienen tope: solo van a cuantías menores los terceros imposibles de identificar
+# (p. ej. POS a consumidor final). 1003, 1005 y 1010 se reportan al 100%.
+# Fuente: Res. 227/2025 art. 1.3.5.2.1 par. 1 (1001: 3 UVT por beneficiario por todo concepto),
+# art. 1.3.5.6.1 par. 1 y 1.3.5.7.1 par. 1 (1009 y 1008: 12 UVT de saldo acumulado por tercero),
+# arts. 1.3.5.4.1 par. 1 y 1.3.5.5.2 (1007 y 1006: solo terceros no identificables).
 topes:
-  "1001": { valor: 100000,  columna: "pago_deducible+pago_no_deducible", verificado: false }
-  "1003": { valor: null,    verificado: false }
-  "1005": { valor: 500000,  columna: "iva_descontable",  verificado: false }
-  "1006": { valor: 500000,  columna: "iva_generado",     verificado: false }
-  "1007": { valor: null,    verificado: false }
-  "1008": { valor: 1000000, columna: "saldo_cxc",        verificado: false }
-  "1009": { valor: 1000000, columna: "saldo_cxp",        verificado: false }
-  "1012": { valor: null,    verificado: false }
+  "1001": { uvt: 3,    columna: "pago_deducible+pago_no_deducible", verificado: true }
+  "1003": { uvt: null, verificado: true }
+  "1005": { uvt: null, verificado: true }
+  "1006": { uvt: null, verificado: true }
+  "1007": { uvt: null, verificado: true }
+  "1008": { uvt: 12,   columna: "saldo_cxc", verificado: true }
+  "1009": { uvt: 12,   columna: "saldo_cxp", verificado: true }
+  "1012": { uvt: null, verificado: true }
+
+# Régimen Simple, no contribuyentes y declarantes de ingresos y patrimonio: todos los pagos del
+# 1001 van en la columna NO deducible (el aplicativo lo activa según el diagnóstico de la empresa).
+forzar_no_deducible: false
 
 # Cuenta auxiliar bancaria -> NIT de la entidad (1012). Si se deja vacío el motor intenta
 # inferirla entre los terceros de la cuenta y deja una ALERTA para confirmar.
 cuentas_bancarias: {}
 #   "11100501": "860034313"   # cuenta auxiliar -> NIT del banco
 
-# Si un tercero tiene retención practicada, no se agrupa en cuantías menores
+# Todas las retenciones se reportan tercero a tercero sin importar la cuantía: si un tercero tiene
+# retención en el formato, ninguna de sus filas se agrupa en cuantías menores
 no_agrupar_si_retencion: true
 
 # Concepto destino de la retención de IVA cuando el tercero no tiene pagos en 1001

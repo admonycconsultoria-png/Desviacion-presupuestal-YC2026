@@ -32,9 +32,16 @@ def _personas(df: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
     return depurar(pseudo_balance, df[list(ALIAS_PERSONA)], cfg, hallazgos), df
 
 
+def porcentaje_dian(p: float) -> tuple[int, int]:
+    """49.5 -> (495, 1); 50 -> (50, 0); 33.3333 -> (333333, 4). Sin puntos ni comas + posición decimal."""
+    txt = f"{round(float(p), 4):.4f}".rstrip("0").rstrip(".")
+    ent, _, dec = txt.partition(".")
+    return int(ent + dec), len(dec)
+
+
 def formato_1010(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
-    """accionistas.csv: nit, nombre, ..., porcentaje (o acciones). Valor patrimonial =
-    patrimonio contable (clase 3) x % de participación."""
+    """Libro de accionistas: nit, nombre, ..., porcentaje (o acciones), y opcionalmente valor_nominal y prima.
+    Art. 1.3.5.1.1: valor nominal de la acción o aporte y valor pagado por prima en colocación, por accionista."""
     campos = [c for c, _ in cfg.formatos["1010"]["columnas"]]
     crudo = leer_tabla(ruta)
     terceros, df = _personas(crudo, cfg, hallazgos)
@@ -46,19 +53,31 @@ def formato_1010(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list)
         pct = acc / acc.sum() * 100
     else:
         raise ValueError("accionistas: se requiere columna 'porcentaje' o 'acciones'")
-    if abs(pct.sum() - 100) > 0.01:
+    if abs(pct.sum() - 100) > 0.0001:
         hallazgos.append(("ERROR", "1010 participación", "", f"Los porcentajes suman {pct.sum():.4f}%, no 100%"))
 
-    patrimonio = -balance.loc[balance["cuenta"].str.startswith("3"), "saldo_final"].sum()
+    capital = -balance.loc[balance["cuenta"].str.startswith("31"), "saldo_final"].sum()
+    col_nom = next((cols[k] for k in ("valor nominal", "valor_nominal", "capital") if k in cols), None)
+    col_prima = next((cols[k] for k in ("prima", "prima en colocacion") if k in cols), None)
+    prima_balance = -balance.loc[balance["cuenta"].str.startswith("3205"), "saldo_final"].sum()
+    if prima_balance > 0.5 and col_prima is None:
+        hallazgos.append(("ALERTA", "1010 prima en colocación", "",
+                          f"El balance tiene prima en colocación de acciones (${prima_balance:,.0f}) y el libro de "
+                          f"accionistas no trae la columna 'prima'. Asígnela por accionista según las actas; "
+                          f"no la reparta a prorrata"))
+    if col_nom is None:
+        hallazgos.append(("INFO", "1010 valor nominal estimado", "",
+                          f"Sin columna 'valor nominal': se usa capital (cuenta 31, ${capital:,.0f}) x participación"))
     filas = []
-    for nit, p in zip(df["nit"], pct):
+    for i, (nit, p) in enumerate(zip(df["nit"], pct)):
         t = terceros.loc[nit].to_dict()
-        entero = int(p)
-        decimal = int(round((p - entero) * 10000))
-        filas.append({**t, "valor_patrimonial": patrimonio * p / 100,
-                      "porcentaje_entero": entero, "porcentaje_decimal": decimal})
-    cfg.marcar_uso("1010: forma de partir el % en entero/decimal (4 posiciones)")
-    return _redondear(pd.DataFrame(filas)[campos], ["valor_patrimonial"])
+        if t.get("pais") not in ("", "169", None):
+            t = {**t, "direccion": "", "codigo_departamento": "", "codigo_municipio": ""}
+        num, pos = porcentaje_dian(p)
+        nominal = a_numero(crudo.iloc[i][col_nom]) if col_nom else capital * p / 100
+        prima = a_numero(crudo.iloc[i][col_prima]) if col_prima else 0.0
+        filas.append({**t, "valor_nominal": nominal, "prima": prima, "porcentaje": num, "posicion_decimal": pos})
+    return _redondear(pd.DataFrame(filas)[campos], ["valor_nominal", "prima"])
 
 
 def formato_2276(ruta: str, balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
