@@ -29,10 +29,33 @@ cuantias_menores:
 nits_excluidos:
   global:
     - "{empresa}"          # el propio informante (asientos internos/cierre)
-  "1001": ["800197268"]    # pagos de impuestos a DIAN no son pagos a terceros
+  "1001": []               # en el 1001 decide la CUENTA, no el NIT (ver nits_excluidos_excepto)
   "1005": ["800197268"]
   "1006": ["800197268"]
   "1009": []
+
+# NIT que NO se excluyen en un formato aunque estén en la lista global. En el 1001 los gastos a nombre de la
+# propia empresa o de la DIAN se reportan según la regla de su cuenta (las cuentas "No se reporta", como el
+# costo de ventas 61 o las depreciaciones, siguen fuera); a nombre de la empresa van con el NIT del informante
+# o en cuantías menores si no llegan al tope.
+nits_excluidos_excepto:
+  "1001": ["{empresa}"]
+
+# Pagos a la DIAN en el 1001 (intereses de mora, sanciones): no son deducibles. Van a "pago no deducible"
+# aunque la regla de la cuenta diga deducible, salvo en las cuentas de impuestos, donde decide la regla.
+pagos_dian_no_deducibles:
+  activo: true
+  nit: "800197268"
+  excepto_cuentas: ["5115", "5215"]
+
+# GMF (4 x 1000): el 50% es deducible (art. 115 E.T.). En el 1001 se reparte 50% deducible y 50% no deducible,
+# concepto 5015, a nombre del tercero de la partida (el banco). Se detecta por el nombre de la cuenta
+# (GRAVAMEN, GMF, 4 X MIL, CUATRO POR MIL) o por los prefijos de "cuentas".
+gmf:
+  activo: true
+  porcentaje_deducible: 50
+  concepto: "5015"
+  cuentas: []
 
 # Valor de la UVT por año (los topes de exógena se expresan en UVT desde la Res. 000162 de 2023).
 uvt:                # Res. 238/2025 fija la de 2026

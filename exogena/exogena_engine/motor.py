@@ -32,7 +32,6 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     Incluye las partidas descartadas con el motivo, para la trazabilidad y el cuadre."""
     salida = []
     formatos = [f for f, d in cfg.formatos.items() if d["modo"] in ("por_tercero", "sin_tercero")]
-    asumida = _cuentas_asumida(cfg)
     for fila in balance.itertuples(index=False):
         for fmt in formatos:
             regla = cfg.regla_para(fmt, fila.cuenta)
@@ -49,10 +48,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
             elif modo == "por_tercero":
                 if not fila.nit:
                     motivo = "sin_tercero"
-                elif fila.nit in cfg.nits_excluidos(fmt) and not (fmt == "1001" and asumida
-                                                                     and fila.cuenta.startswith(asumida)):
-                    # el gasto por retención asumida a nombre de la DIAN o de la empresa no se cruza,
-                    # pero sí se reporta como gasto (no es un NIT a excluir en esa cuenta)
+                elif fila.nit in cfg.nits_excluidos(fmt):
                     motivo = "nit_excluido"
             salida.append({
                 "formato": fmt, "cuenta": fila.cuenta, "nombre_cuenta": fila.nombre_cuenta,
@@ -63,7 +59,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     salida.extend(_partidas_por_cuenta(balance, formatos, cfg, hallazgos))
     partidas = pd.DataFrame(salida, columns=["formato", "cuenta", "nombre_cuenta", "nit", "concepto",
                                              "columna", "base", "prefijo_regla", "valor", "descartado"])
-    partidas = _retencion_asumida(partidas, cfg, hallazgos)
+    partidas = _ajustes_1001(partidas, cfg, hallazgos)
     # (las cuentas bancarias sin entidad ya tienen su propio hallazgo)
     sin_t = partidas[(partidas["descartado"] == "sin_tercero") & ~partidas["base"].str.endswith("_cuenta")]
     for (fmt, cuenta), g in sin_t.groupby(["formato", "cuenta"]):
@@ -78,19 +74,101 @@ def _cuentas_asumida(cfg: Config) -> tuple[str, ...]:
     return tuple(str(c) for c in (conf.get("cuentas_gasto") or ["5315"])) if conf.get("activa") is not False else ()
 
 
-def _retencion_asumida(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
+NIT_DIAN = "800197268"
+GMF_NOMBRE = re.compile(r"GRAVAMEN|\bGMF\b|4\s*X\s*(MIL|1000)|CUATRO\s+POR\s+MIL")
+
+
+def _ajustes_1001(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
+    """Ajustes del 1001 que dependen del tercero o de la naturaleza del gasto, en este orden:
+    GMF 50/50, pagos a la DIAN no deducibles, aviso de gastos a nombre de la empresa, retención asumida."""
+    if p.empty:
+        return p
+    recs = p.to_dict("records")
+    _gmf(recs, cfg, hallazgos)
+    _pagos_dian(recs, cfg, hallazgos)
+    _gastos_empresa(recs, cfg, hallazgos)
+    _retencion_asumida(recs, cfg, hallazgos)
+    return pd.DataFrame(recs, columns=p.columns)
+
+
+def _gmf(recs: list, cfg: Config, hallazgos: list) -> None:
+    conf = cfg.parametros.get("gmf") or {}
+    if conf.get("activo") is False:
+        return
+    pct = float(conf.get("porcentaje_deducible", 50)) / 100
+    cuentas = tuple(str(c) for c in (conf.get("cuentas") or []))
+    concepto = str(conf.get("concepto", "5015"))
+    nuevos, ctas = [], {}
+    for r in recs:
+        if r["formato"] != "1001" or r["columna"] not in ("pago_deducible", "pago_no_deducible"):
+            continue
+        if not ((cuentas and r["cuenta"].startswith(cuentas)) or GMF_NOMBRE.search(texto_dian(r["nombre_cuenta"]))):
+            continue
+        total = r["valor"]
+        r["concepto"], r["columna"], r["valor"] = concepto, "pago_deducible", total * pct
+        nuevos.append({**r, "columna": "pago_no_deducible", "valor": total - total * pct})
+        ctas[r["cuenta"]] = r["nombre_cuenta"]
+    recs.extend(nuevos)
+    for c in sorted(ctas):
+        hallazgos.append(("INFO", "GMF 50% deducible", c,
+                          f"Cuenta {c} ({ctas[c]}): {pct:.0%} en pago deducible y el resto en no deducible, concepto "
+                          f"{concepto}, a nombre del banco (art. 115 E.T.)"))
+
+
+def _pagos_dian(recs: list, cfg: Config, hallazgos: list) -> None:
+    conf = cfg.parametros.get("pagos_dian_no_deducibles") or {}
+    if conf.get("activo") is False:
+        return
+    dian = str(conf.get("nit", NIT_DIAN))
+    excepto = tuple(str(c) for c in (conf.get("excepto_cuentas") or []))
+    ctas: dict[str, float] = {}
+    for r in recs:
+        if r["formato"] == "1001" and r["nit"] == dian and r["columna"] == "pago_deducible" \
+                and not (excepto and r["cuenta"].startswith(excepto)):
+            r["columna"] = "pago_no_deducible"
+            ctas[r["cuenta"]] = ctas.get(r["cuenta"], 0.0) + r["valor"]
+    for c in sorted(ctas):
+        hallazgos.append(("INFO", "Pago a la DIAN no deducible", c,
+                          f"Cuenta {c}: ${ctas[c]:,.0f} a nombre de la DIAN van a pago no deducible (intereses de mora "
+                          f"y sanciones no son deducibles)"))
+
+
+def _gastos_empresa(recs: list, cfg: Config, hallazgos: list) -> None:
+    """Gasto reportado a nombre de la propia empresa (no por una regla con NIT del informante): aviso por cuenta."""
+    fijos = {r.prefijo for rs in cfg.reglas.values() for r in rs if r.tercero}
+    ctas: dict[str, list] = {}
+    for r in recs:
+        if r["formato"] == "1001" and r["nit"] == cfg.nit_empresa and r["descartado"] == "" \
+                and r["prefijo_regla"] not in fijos and abs(r["valor"]) >= 0.5:
+            x = ctas.setdefault(r["cuenta"], [r["nombre_cuenta"], 0.0])
+            x[1] += r["valor"]
+    for c in sorted(ctas):
+        hallazgos.append(("ALERTA", "Gasto a nombre de la empresa", c,
+                          f"Formato 1001: ${ctas[c][1]:,.0f} en la cuenta {c} ({ctas[c][0]}) a nombre de la propia "
+                          f"empresa: se reporta con el NIT del informante (o en cuantías menores si no llega al tope). "
+                          f"Si hay un tercero real, reclasifíquelo; si la cuenta no se reporta, márquela así en el "
+                          f"Asistente"))
+
+
+def _cuentas_asumida(cfg: Config) -> tuple[str, ...]:
+    conf = cfg.parametros.get("retencion_asumida") or {}
+    return tuple(str(c) for c in (conf.get("cuentas_gasto") or ["5315"])) if conf.get("activa") is not False else ()
+
+
+def _retencion_asumida(recs: list, cfg: Config, hallazgos: list) -> None:
     """1001, por tercero: el gasto por retención asumida (5315) se cruza con su retención de renta. Lo asumido es el
     menor de los dos: esa parte de la retención va a 'ret_asumida' y esa parte del gasto se descarta (no es un pago
     al tercero). El resto de la retención sigue como practicada y el resto del gasto como pago no deducible.
     La DIAN y la propia empresa no se cruzan: su gasto se reporta según la regla de la cuenta."""
     cuentas = _cuentas_asumida(cfg)
-    if p.empty or not cuentas:
-        return p
+    if not cuentas:
+        return
     tol = float((cfg.parametros.get("retencion_asumida") or {}).get("tolerancia", 1))
-    no_cruzan = cfg.nits_excluidos("1001")
-    recs = p.to_dict("records")
+    no_cruzan = {cfg.nit_empresa, str((cfg.parametros.get("pagos_dian_no_deducibles") or {}).get("nit", NIT_DIAN))}
     base = lambda r: r["formato"] == "1001" and r["descartado"] == "" and r["nit"] != ""  # noqa: E731
-    es_gasto = lambda r: base(r) and r["cuenta"].startswith(cuentas) and r["columna"] != "ret_renta"  # noqa: E731
+    # el GMF puede estar dentro de la 5315 (p. ej. 53152001): nunca es retención asumida
+    es_gasto = lambda r: (base(r) and r["cuenta"].startswith(cuentas) and r["columna"] != "ret_renta"  # noqa: E731
+                          and not GMF_NOMBRE.search(texto_dian(r["nombre_cuenta"])))
     es_ret = lambda r: base(r) and r["columna"] == "ret_renta"  # noqa: E731
     gasto: dict[str, float] = {}
     ret: dict[str, float] = {}
@@ -132,7 +210,7 @@ def _retencion_asumida(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.Data
             hallazgos.append(("INFO", "Retención asumida parcial", nit,
                               f"Retención de renta ${rt:,.0f} y gasto {ctas} ${v:,.0f}: ${a:,.0f} va en 'Retención "
                               f"asumida'; " + "; ".join(resto)))
-    return pd.DataFrame(recs + nuevos, columns=p.columns)
+    recs.extend(nuevos)
 
 
 PATRON_ENTIDAD = re.compile(r"\b(BANCO|BANCOLOMBIA|DAVIVIENDA|BBVA|COLPATRIA|SCOTIABANK|ITAU|AV VILLAS|"
@@ -287,7 +365,9 @@ def construir_formato(fmt: str, partidas: pd.DataFrame, terceros: pd.DataFrame,
                     # ERROR solo si el prevalidador rechaza la columna vacía; si no, dato que la norma pide y falta
                     if req in spec.get("obligatorios", [req]):
                         hallazgos.append(("ERROR", f"Falta {req}", r["nit"],
-                                          f"Formato {fmt}: el tercero no tiene {req} y el prevalidador lo exige"))
+                                          f"Formato {fmt}: el tercero no tiene {req} y el prevalidador lo exige"
+                                          + (" (es la propia empresa: complete sus datos en Datos y diagnóstico)"
+                                             if r["nit"] == cfg.nit_empresa else "")))
                     else:
                         hallazgos.append(("ALERTA", f"Falta {req}", r["nit"],
                                           f"Formato {fmt}: el tercero no tiene {req}. El prevalidador acepta la "

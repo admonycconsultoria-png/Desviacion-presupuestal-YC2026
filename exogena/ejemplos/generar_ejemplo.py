@@ -12,6 +12,9 @@ Errores sembrados (el motor debe encontrarlos todos):
   - 79555111: gasto 531520 $300.000 < retención $1.100.000 (asume $300.000, practica $800.000)
   - 900222333: retención compras $50.000 < gasto 531520 $75.000 (asume $50.000; $25.000 pago no deducible)
   - DIAN con gasto 531520: no se cruza, se reporta como pago no deducible a nombre de la DIAN
+  - GMF (530595) con el banco: 50% deducible y 50% no deducible, concepto 5015
+  - Intereses de mora a la DIAN (530520): pago no deducible aunque la regla de intereses diga deducible
+  - Gasto a nombre de la propia empresa (519595): se reporta con el NIT del informante y deja ALERTA
 """
 from pathlib import Path
 
@@ -77,6 +80,10 @@ MOV = [
     # a nombre de la DIAN: no se cruza; pago no deducible a la DIAN
     ("531520", "Impuestos asumidos", "800197268", "DIRECCION DE IMPUESTOS Y ADUANAS NACIONALES", 0, 200_000, 0),
     ("110505", "Caja general", "", "", 0, 0, 200_000),
+    ("530595", "Gravamen a los movimientos financieros", "860034313", "BANCO DAVIVIENDA SA", 0, 1_200_000, 0),
+    ("530520", "Intereses de mora", "800197268", "DIRECCION DE IMPUESTOS Y ADUANAS NACIONALES", 0, 300_000, 0),
+    ("519595", "Otros gastos diversos", "900123456", "EMPRESA DEMO SAS", 0, 500_000, 0),
+    ("110505", "Caja general", "", "", 0, 0, 2_000_000),
     ("613520", "Costo de ventas", "900123456", "EMPRESA DEMO SAS", 0, 115_000_000, 0),
 ]
 

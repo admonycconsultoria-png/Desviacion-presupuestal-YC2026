@@ -565,7 +565,9 @@
   function nitsExcluidos(cfg, fmt) {
     const ex = cfg.parametros.nits_excluidos || {};
     const l = (ex.global || []).concat(ex[fmt] || []);
-    return new Set(l.map((n) => (n === "{empresa}" ? String(cfg.parametros.empresa.nit) : String(n))));
+    const f = (n) => (n === "{empresa}" ? String(cfg.parametros.empresa.nit) : String(n));
+    const excepto = new Set((((cfg.parametros.nits_excluidos_excepto || {})[fmt]) || []).map(f));
+    return new Set(l.map(f).filter((n) => !excepto.has(n)));
   }
 
   function validarReglas(cfg) {
@@ -588,7 +590,6 @@
     const formatos = Object.keys(cfg.formatos).filter((f) => ["por_tercero", "sin_tercero"].includes(cfg.formatos[f].modo));
     const excl = {};
     formatos.forEach((f) => { excl[f] = nitsExcluidos(cfg, f); });
-    const asumida = cuentasAsumida(cfg);
     const salida = [];
     for (const fila of balance) {
       for (const fmt of formatos) {
@@ -601,8 +602,7 @@
         if (modo === "por_tercero" && regla.tercero) nit = terceroFijo(cfg, regla.tercero);
         else if (modo === "por_tercero") {
           if (!fila.nit) motivo = "sin_tercero";
-          // el gasto por retención asumida a nombre de la DIAN o de la empresa no se cruza, pero sí se reporta como gasto
-          else if (excl[fmt].has(fila.nit) && !(fmt === "1001" && asumida.some((c) => fila.cuenta.startsWith(c)))) motivo = "nit_excluido";
+          else if (excl[fmt].has(fila.nit)) motivo = "nit_excluido";
         }
         salida.push({ formato: fmt, cuenta: fila.cuenta, nombre_cuenta: fila.nombre_cuenta,
           nit: modo === "por_tercero" ? nit : "", concepto: regla.concepto, columna: regla.columna,
@@ -636,7 +636,7 @@
           columna: regla.columna, base: regla.base, prefijo_regla: regla.prefijo, valor, descartado: nit ? "" : "sin_tercero" });
       }
     }
-    retencionAsumida(salida, cfg, hallazgos);
+    ajustes1001(salida, cfg, hallazgos);
     const sinT = salida.filter((p) => p.descartado === "sin_tercero" && !p.base.endsWith("_cuenta"));
     for (const [, g] of agrupar(sinT, (p) => p.formato + "|" + p.cuenta)) {
       hallazgos.push(["ERROR", "Movimiento sin tercero", g[0].cuenta, `Formato ${g[0].formato}: ${fmtPesos(suma(g, (p) => p.valor))} en la cuenta ${g[0].cuenta} sin NIT; no se puede reportar hasta asignarle tercero`]);
@@ -647,6 +647,55 @@
   // 1001, por tercero: el gasto por retención asumida (5315) se cruza con su retención de renta. Lo asumido es el menor
   // de los dos: esa parte de la retención va a "ret_asumida" y esa parte del gasto se descarta (no es un pago al tercero);
   // el resto sigue como retención practicada / pago no deducible. La DIAN y la empresa no se cruzan. Espejo de motor.py.
+  // Ajustes del 1001 que dependen del tercero o de la naturaleza del gasto (espejo de motor._ajustes_1001)
+  const NIT_DIAN = "800197268";
+  const GMF_NOMBRE = /GRAVAMEN|\bGMF\b|4\s*X\s*(MIL|1000)|CUATRO\s+POR\s+MIL/;
+  function ajustes1001(partidas, cfg, hallazgos) {
+    gmf(partidas, cfg, hallazgos);
+    pagosDian(partidas, cfg, hallazgos);
+    gastosEmpresa(partidas, cfg, hallazgos);
+    retencionAsumida(partidas, cfg, hallazgos);
+  }
+  function gmf(partidas, cfg, hallazgos) {
+    const conf = cfg.parametros.gmf || {};
+    if (conf.activo === false) return;
+    const pct = Number(conf.porcentaje_deducible === undefined ? 50 : conf.porcentaje_deducible) / 100;
+    const cuentas = (conf.cuentas || []).map(String), concepto = String(conf.concepto || "5015");
+    const nuevos = [], ctas = new Map();
+    for (const r of partidas) {
+      if (r.formato !== "1001" || !["pago_deducible", "pago_no_deducible"].includes(r.columna)) continue;
+      if (!(cuentas.some((c) => r.cuenta.startsWith(c)) || GMF_NOMBRE.test(textoDian(r.nombre_cuenta)))) continue;
+      const total = r.valor;
+      r.concepto = concepto; r.columna = "pago_deducible"; r.valor = total * pct;
+      nuevos.push({ ...r, columna: "pago_no_deducible", valor: total - total * pct });
+      ctas.set(r.cuenta, r.nombre_cuenta);
+    }
+    nuevos.forEach((x) => partidas.push(x));
+    [...ctas.keys()].sort().forEach((c) => hallazgos.push(["INFO", "GMF 50% deducible", c, `Cuenta ${c} (${ctas.get(c)}): ${Math.round(pct * 100)}% en pago deducible y el resto en no deducible, concepto ${concepto}, a nombre del banco (art. 115 E.T.)`]));
+  }
+  function pagosDian(partidas, cfg, hallazgos) {
+    const conf = cfg.parametros.pagos_dian_no_deducibles || {};
+    if (conf.activo === false) return;
+    const dian = String(conf.nit || NIT_DIAN), excepto = (conf.excepto_cuentas || []).map(String);
+    const ctas = new Map();
+    for (const r of partidas) {
+      if (r.formato === "1001" && r.nit === dian && r.columna === "pago_deducible" && !excepto.some((c) => r.cuenta.startsWith(c))) {
+        r.columna = "pago_no_deducible"; ctas.set(r.cuenta, (ctas.get(r.cuenta) || 0) + r.valor);
+      }
+    }
+    [...ctas.keys()].sort().forEach((c) => hallazgos.push(["INFO", "Pago a la DIAN no deducible", c, `Cuenta ${c}: ${fmtPesos(ctas.get(c))} a nombre de la DIAN van a pago no deducible (intereses de mora y sanciones no son deducibles)`]));
+  }
+  function gastosEmpresa(partidas, cfg, hallazgos) {
+    const empresa = String(cfg.parametros.empresa.nit);
+    const fijos = new Set(cfg.reglas.filter((r) => r.tercero).map((r) => r.prefijo));
+    const ctas = new Map();
+    for (const r of partidas) {
+      if (r.formato === "1001" && r.nit === empresa && r.descartado === "" && !fijos.has(r.prefijo_regla) && Math.abs(r.valor) >= 0.5) {
+        const x = ctas.get(r.cuenta) || [r.nombre_cuenta, 0]; x[1] += r.valor; ctas.set(r.cuenta, x);
+      }
+    }
+    [...ctas.keys()].sort().forEach((c) => hallazgos.push(["ALERTA", "Gasto a nombre de la empresa", c, `Formato 1001: ${fmtPesos(ctas.get(c)[1])} en la cuenta ${c} (${ctas.get(c)[0]}) a nombre de la propia empresa: se reporta con el NIT del informante (o en cuantías menores si no llega al tope). Si hay un tercero real, reclasifíquelo; si la cuenta no se reporta, márquela así en el Asistente`]));
+  }
   function cuentasAsumida(cfg) {
     const conf = cfg.parametros.retencion_asumida || {};
     return conf.activa === false ? [] : (conf.cuentas_gasto || ["5315"]).map(String);
@@ -655,9 +704,10 @@
     const cuentas = cuentasAsumida(cfg);
     if (!cuentas.length) return;
     const conf = cfg.parametros.retencion_asumida || {}, tol = Number(conf.tolerancia === undefined ? 1 : conf.tolerancia);
-    const noCruzan = nitsExcluidos(cfg, "1001");
+    const noCruzan = new Set([String(cfg.parametros.empresa.nit), String((cfg.parametros.pagos_dian_no_deducibles || {}).nit || NIT_DIAN)]);
     const base = (p) => p.formato === "1001" && p.descartado === "" && p.nit !== "";
-    const esGasto = (p) => base(p) && cuentas.some((c) => p.cuenta.startsWith(c)) && p.columna !== "ret_renta";
+    // el GMF puede estar dentro de la 5315 (p. ej. 53152001): nunca es retención asumida
+    const esGasto = (p) => base(p) && cuentas.some((c) => p.cuenta.startsWith(c)) && p.columna !== "ret_renta" && !GMF_NOMBRE.test(textoDian(p.nombre_cuenta));
     const esRet = (p) => base(p) && p.columna === "ret_renta";
     const gasto = new Map(), ret = new Map();
     partidas.forEach((p) => { if (esGasto(p)) gasto.set(p.nit, (gasto.get(p.nit) || 0) + p.valor); else if (esRet(p)) ret.set(p.nit, (ret.get(p.nit) || 0) + p.valor); });
@@ -826,7 +876,7 @@
         for (const req of spec.requiere || []) {
           if ((exterior && ["direccion", "codigo_departamento", "codigo_municipio"].includes(req)) || t[req]) continue;
           // ERROR solo si el prevalidador rechaza la columna vacía; si no, dato que la norma pide y falta
-          if ((spec.obligatorios || [req]).includes(req)) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige`]);
+          if ((spec.obligatorios || [req]).includes(req)) hallazgos.push(["ERROR", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req} y el prevalidador lo exige${r.nit === String(cfg.parametros.empresa.nit) ? " (es la propia empresa: complete sus datos en Datos y diagnóstico)" : ""}`]);
           else hallazgos.push(["ALERTA", "Falta " + req, r.nit, `Formato ${fmt}: el tercero no tiene ${req}. El prevalidador acepta la columna vacía, pero repórtela si la conoce`]);
         }
         const minimo = spec.direccion_minima || 0;

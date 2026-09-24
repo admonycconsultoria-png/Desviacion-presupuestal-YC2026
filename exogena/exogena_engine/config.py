@@ -52,7 +52,9 @@ class Config:
     def nits_excluidos(self, formato: str) -> set[str]:
         ex = self.parametros.get("nits_excluidos", {}) or {}
         nits = list(ex.get("global", [])) + list(ex.get(formato, []) or [])
-        return {self.nit_empresa if n == "{empresa}" else str(n) for n in nits}
+        excepto = list(((self.parametros.get("nits_excluidos_excepto") or {}).get(formato)) or [])
+        f = lambda n: self.nit_empresa if n == "{empresa}" else str(n)  # noqa: E731
+        return {f(n) for n in nits} - {f(n) for n in excepto}
 
     def tope(self, formato: str) -> float | None:
         """Tope de cuantías menores en pesos: uvt x UVT del año gravable (o `valor` fijo si se da)."""

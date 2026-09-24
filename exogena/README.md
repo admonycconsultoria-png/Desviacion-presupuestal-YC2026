@@ -184,6 +184,10 @@ formato,prefijo,concepto,columna,base,notas
   reportados que el prevalidador rechazaría y los municipios homónimos, por prioridad y monto; el equipo lo
   llena (RUT, facturas, RUES) y se carga de vuelta como corrección de cada tercero, con fecha y fuente. Las
   filas con dirección inválida o municipio no encontrado se rechazan con el motivo.
+- En el 1001 decide la cuenta, no el NIT (`nits_excluidos_excepto`): los gastos a nombre de la empresa se
+  reportan con el NIT del informante (o en cuantías menores) con ALERTA por cuenta; los de la DIAN van a no
+  deducible (`pagos_dian_no_deducibles`, salvo cuentas de impuestos). El GMF, detectado por el nombre de la
+  cuenta o `gmf.cuentas`, se reparte 50% deducible y 50% no deducible en el concepto 5015 (art. 115 E.T.).
 - Retención asumida (1001): por tercero se asume el menor entre el gasto 5315
   (`parametros.retencion_asumida.cuentas_gasto`) y su retención de renta. Esa parte va a la columna asumida y se
   descarta como pago (el cuadre lo explica en `gasto_retencion_asumida`); el resto de la retención sigue

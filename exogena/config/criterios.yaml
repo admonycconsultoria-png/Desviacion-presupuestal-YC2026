@@ -12,6 +12,14 @@ criterios:
     texto: "Cuantía menor: 3 UVT por beneficiario sumando TODOS los conceptos del formato. Todo pago con retención se reporta identificando al tercero, sin importar el monto."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 1"
   - formato: "1001"
+    prefijos: []
+    texto: "En el 1001 decide la CUENTA, no el NIT: los gastos a nombre de la DIAN o de la propia empresa se reportan según la regla de su cuenta (las cuentas 'No se reporta', como el costo de ventas 61, siguen fuera). A nombre de la empresa van con el NIT del informante o en cuantías menores y dejan ALERTA para buscar el tercero real. A nombre de la DIAN (intereses de mora, sanciones) van a no deducible, salvo en las cuentas de impuestos."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 (pagos no solicitados como deducción); Práctica"
+  - formato: "1001"
+    prefijos: []
+    texto: "GMF (4 x 1000): el aplicativo lo detecta por el nombre de la cuenta (GRAVAMEN, GMF, 4 X MIL) y lo reparte 50% deducible y 50% no deducible, concepto 5015, a nombre del banco. Registre el GMF con el NIT del banco que lo retuvo."
+    fuente: "E.T. art. 115; Res. 227/2025 art. 1.3.5.2.1 par. 16"
+  - formato: "1001"
     prefijos: ["5105", "5205", "7205", "236505"]
     texto: "Los pagos por rentas de trabajo (nómina, e independientes a los que se aplicó la tabla del art. 383) van SOLO en el 2276. Independientes con tarifas normales (honorarios, servicios, comisiones) van en el 1001."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 12 y 13"

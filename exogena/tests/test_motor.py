@@ -66,11 +66,12 @@ def test_cuadres_explican_todas_las_diferencias(resultado):
     assert (resultado["cuadres"]["estado"] == "OK").all(), resultado["cuadres"].to_string()
 
 
-def test_1001_excluye_dian_y_propio_nit_y_prorratea_iva(resultado):
+def test_1001_decide_por_cuenta_y_prorratea_iva(resultado):
     f = resultado["generados"]["1001"]
-    # la DIAN solo aparece por el gasto de retención asumida a su nombre (cuenta 5315), nunca por otras cuentas
-    assert set(f.loc[f["numero_identificacion"] == "800197268", "concepto"]) <= {"5016"}
-    assert "900123456" not in set(f["numero_identificacion"])
+    # la DIAN aparece solo por gastos a su nombre (5315 -> 5016, intereses de mora -> 5006), no por retenciones
+    assert set(f.loc[f["numero_identificacion"] == "800197268", "concepto"]) <= {"5016", "5006"}
+    # la propia empresa solo aparece por el gasto a su nombre (519595 -> 5016), nunca por costo de ventas o depreciación
+    assert set(f.loc[f["numero_identificacion"] == "900123456", "concepto"]) <= {"5016"}
     serv = f[(f["numero_identificacion"] == "901234567") & (f["concepto"] == "5004")].iloc[0]
     assert serv["ret_iva_comun"] == 570000 and serv["ret_renta"] == 800000
     # arrendamiento de $60.000 < tope -> cuantías menores con tipo 43
@@ -258,9 +259,22 @@ def test_retencion_asumida_cruza_con_gasto_5315(resultado):
     c = f[f["numero_identificacion"] == "900222333"].set_index("concepto")
     assert c.loc["5007", "ret_asumida"] == 50_000 and c.loc["5007", "pago_deducible"] == 1_250_000
     assert c.loc["5016", "pago_no_deducible"] == 25_000
-    # DIAN: no se cruza; el gasto se reporta como pago no deducible a su nombre
-    d = f[f["numero_identificacion"] == "800197268"]
-    assert len(d) == 1 and d.iloc[0]["pago_no_deducible"] == 200_000 and d.iloc[0]["ret_asumida"] == 0
+    # DIAN: no se cruza; el gasto 5315 (200.000) y los intereses de mora (300.000) van como pago no deducible
+    d = f[f["numero_identificacion"] == "800197268"].set_index("concepto")
+    assert d.loc["5016", "pago_no_deducible"] == 200_000 and d.loc["5006", "pago_no_deducible"] == 300_000
+    assert d["pago_deducible"].sum() == 0 and d["ret_asumida"].sum() == 0
     h = {(x[1], x[2]) for x in resultado["hallazgos"]}
     assert ("Retención asumida", "900888777") in h
     assert ("Retención asumida parcial", "79555111") in h and ("Retención asumida parcial", "900222333") in h
+
+
+def test_gmf_mitad_deducible_y_gasto_a_nombre_de_la_empresa(resultado):
+    f = resultado["generados"]["1001"]
+    b = f[(f["numero_identificacion"] == "860034313") & (f["concepto"] == "5015")].iloc[0]
+    assert b["pago_deducible"] == 600_000 and b["pago_no_deducible"] == 600_000       # GMF 50/50 con el banco
+    e = f[f["numero_identificacion"] == "900123456"].iloc[0]
+    assert e["concepto"] == "5016" and e["pago_deducible"] == 500_000 and e["tipo_documento"] == "31"
+    h = {(x[0], x[1], x[2]) for x in resultado["hallazgos"]}
+    assert ("INFO", "GMF 50% deducible", "530595") in h
+    assert ("INFO", "Pago a la DIAN no deducible", "530520") in h
+    assert ("ALERTA", "Gasto a nombre de la empresa", "519595") in h
