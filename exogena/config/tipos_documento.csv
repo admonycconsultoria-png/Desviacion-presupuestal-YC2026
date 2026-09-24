@@ -1,0 +1,12 @@
+codigo,descripcion,alias,persona
+11,Registro civil de nacimiento,RC|REGISTRO CIVIL,natural
+12,Tarjeta de identidad,TI|TARJETA DE IDENTIDAD,natural
+13,Cédula de ciudadanía,CC|C.C.|CEDULA|CEDULA DE CIUDADANIA,natural
+21,Tarjeta de extranjería,TE|TARJETA DE EXTRANJERIA,natural
+22,Cédula de extranjería,CE|C.E.|CEDULA DE EXTRANJERIA,natural
+31,NIT,NIT|N.I.T.|NUMERO DE IDENTIFICACION TRIBUTARIA|NUMERO DE IDENTIFICACION TRIBUTARIA NIT,ambas
+41,Pasaporte,PA|PAS|PASAPORTE,natural
+42,Documento de identificación extranjero,DIE|DOCUMENTO EXTRANJERO|ID EXTRANJERO|NIT DE OTRO PAIS|IDENTIFICACION TRIBUTARIA EXTRANJERA,ambas
+43,Sin identificación del exterior o para uso definido por la DIAN,SIN IDENTIFICACION,ambas
+47,Permiso especial de permanencia PEP,PEP,natural
+48,Permiso por protección temporal PPT,PPT,natural

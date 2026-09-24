@@ -1,0 +1,130 @@
+# =====================================================================
+# Parámetros generales — Información exógena AG 2026 (se presenta en 2027)
+# ---------------------------------------------------------------------
+# Todo valor con `verificado: false` se debe contrastar contra la
+# resolución DIAN vigente para el AG 2026 y su anexo técnico antes de
+# generar archivos definitivos. El motor imprime una advertencia por
+# cada parámetro sin verificar que haya sido usado.
+# =====================================================================
+
+anio_gravable: 2026
+
+empresa:
+  nit: "900123456"        # NIT del informante SIN dígito de verificación
+  razon_social: "EMPRESA DEMO SAS"
+  # La DIAN pide la ubicación del informante en la fila de cuantías menores
+  direccion: "CL 1 1 1"
+  codigo_departamento: "05"
+  codigo_municipio: "001"
+
+# NIT genérico para cuantías menores y tipo de documento asociado.
+cuantias_menores:
+  nit: "222222222"
+  tipo_documento: "43"
+  razon_social: "CUANTIAS MENORES"
+  verificado: true   # Res. 227/2025: identificación 222222222, "CUANTÍAS MENORES", tipo 43, dirección del informante
+
+# Terceros que nunca se reportan como contraparte en ciertos formatos
+# (pagos de impuestos a la DIAN, traslados internos con NIT propio, etc.)
+nits_excluidos:
+  global:
+    - "{empresa}"          # el propio informante (asientos internos/cierre)
+  "1001": []               # en el 1001 decide la CUENTA, no el NIT (ver nits_excluidos_excepto)
+  "1005": ["800197268"]
+  "1006": ["800197268"]
+  "1009": []
+
+# NIT que NO se excluyen en un formato aunque estén en la lista global. En el 1001 los gastos a nombre de la
+# propia empresa o de la DIAN se reportan según la regla de su cuenta (las cuentas "No se reporta", como el
+# costo de ventas 61 o las depreciaciones, siguen fuera). Lo que queda a nombre de la empresa va SIEMPRE a
+# cuantías menores (222222222) en su concepto y columna: la empresa no puede reportarse a sí misma.
+nits_excluidos_excepto:
+  "1001": ["{empresa}"]
+
+# Pagos a la DIAN en el 1001 (intereses de mora, sanciones): no son deducibles. Van a "pago no deducible"
+# aunque la regla de la cuenta diga deducible, salvo en las cuentas de impuestos, donde decide la regla.
+pagos_dian_no_deducibles:
+  activo: true
+  nit: "800197268"
+  excepto_cuentas: ["5115", "5215"]
+
+# GMF (4 x 1000): el 50% es deducible (art. 115 E.T.). En el 1001 se reparte 50% deducible y 50% no deducible,
+# concepto 5015, a nombre del tercero de la partida (el banco). Se detecta por el nombre de la cuenta
+# (GRAVAMEN, GMF, 4 X MIL, CUATRO POR MIL) o por los prefijos de "cuentas".
+gmf:
+  activo: true
+  porcentaje_deducible: 50
+  concepto: "5015"
+  cuentas: []
+
+# Valor de la UVT por año (los topes de exógena se expresan en UVT desde la Res. 000162 de 2023).
+uvt:                # Res. 238/2025 fija la de 2026
+  2024: 47065
+  2025: 49799
+  2026: 52374
+
+# Topes de cuantías menores. Se evalúan POR TERCERO SUMANDO TODO EL FORMATO (no concepto por
+# concepto): si el total del tercero en el formato es menor al tope, todas sus filas pasan al NIT
+# de cuantías menores, cada una en su concepto. `uvt: null` = el formato no tiene cuantía menor.
+# 1006 y 1007 no tienen tope: solo van a cuantías menores los terceros imposibles de identificar
+# (p. ej. POS a consumidor final). 1003, 1005 y 1010 se reportan al 100%.
+# Fuente: Res. 227/2025 art. 1.3.5.2.1 par. 1 (1001: 3 UVT por beneficiario por todo concepto),
+# art. 1.3.5.6.1 par. 1 y 1.3.5.7.1 par. 1 (1009 y 1008: 12 UVT de saldo acumulado por tercero),
+# arts. 1.3.5.4.1 par. 1 y 1.3.5.5.2 (1007 y 1006: solo terceros no identificables).
+topes:
+  "1001": { uvt: 3,    columna: "pago_deducible+pago_no_deducible", verificado: true }
+  "1003": { uvt: null, verificado: true }
+  "1005": { uvt: null, verificado: true }
+  "1006": { uvt: null, verificado: true }
+  "1007": { uvt: null, verificado: true }
+  "1008": { uvt: 12,   columna: "saldo_cxc", verificado: true }
+  "1009": { uvt: 12,   columna: "saldo_cxp", verificado: true }
+  "1012": { uvt: null, verificado: true }
+
+# Régimen Simple, no contribuyentes y declarantes de ingresos y patrimonio: todos los pagos del
+# 1001 van en la columna NO deducible (el aplicativo lo activa según el diagnóstico de la empresa).
+forzar_no_deducible: false
+
+# 2276: código de la columna 'Entidad informante' (tabla DEntidadInfor del prevalidador):
+# 1 Informante general, 2 Fiduciarias, 3 Mandatario/administrador delegado, 4 Consorcio/UT,
+# 5 Exploración de hidrocarburos, 6 Joint venture, 7 Cuentas en participación, 8 Convenios con entidades públicas
+entidad_informante_2276: "1"
+
+# Cuenta auxiliar bancaria -> NIT de la entidad (1012). Si se deja vacío el motor intenta
+# inferirla entre los terceros de la cuenta y deja una ALERTA para confirmar.
+cuentas_bancarias: {}
+#   "11100501": "860034313"   # cuenta auxiliar -> NIT del banco
+
+# Todas las retenciones se reportan tercero a tercero sin importar la cuantía: si un tercero tiene
+# retención en el formato, ninguna de sus filas se agrupa en cuantías menores
+no_agrupar_si_retencion: true
+
+# Retención asumida (1001): la retención de renta se registra practicada (2365) y su contrapartida va a un
+# gasto (5315). Por tercero se asume el MENOR entre el gasto y la retención de renta del año: esa parte va a
+# "Retención en la fuente asumida Renta" y no se reporta como pago (no es un pago al tercero); el resto de la
+# retención sigue practicada y el resto del gasto queda como pago no deducible. El gasto a nombre de la DIAN
+# o de la propia empresa no se cruza con ninguna retención y se reporta como pago no deducible.
+retencion_asumida:
+  activa: true
+  cuentas_gasto: ["5315"]     # prefijos del gasto por retención asumida (p. ej. 531520 impuestos asumidos)
+  tolerancia: 1               # pesos de diferencia admitida por redondeo
+
+# Concepto destino de la retención de IVA cuando el tercero no tiene pagos en 1001
+concepto_prorrata_defecto:
+  "1001": "5016"
+
+# Tolerancias de validación
+validacion:
+  # diferencia máxima (en pesos) aceptada al cuadrar formato vs. balance
+  tolerancia_cuadre: 1000
+  # % de débitos en cuentas de ingreso (41/42) sobre créditos que dispara alerta
+  alerta_debitos_ingresos_pct: 2.0
+  # ¿Los nombres de personas naturales vienen "NOMBRES APELLIDOS" o "APELLIDOS NOMBRES"?
+  orden_nombre_completo: "apellidos_nombres"   # o "nombres_apellidos"
+
+# Filtro de asientos de cierre: si la fuente trae el movimiento del
+# comprobante de cierre dentro del débito/crédito anual, poner el tipo
+# de comprobante aquí para que el motor lo excluya (solo aplica a
+# fuentes con detalle de movimiento). Con balance por tercero, el motor
+# usa por defecto solo la columna correcta (créditos en ingresos, etc.).
+comprobantes_cierre: ["CIERRE", "CC", "99"]

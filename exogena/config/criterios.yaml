@@ -1,0 +1,135 @@
+# =====================================================================
+# Criterios que el Asistente por formato muestra junto a cada cuenta.
+# prefijos: cuentas PUC a las que aplica el criterio (vacío = todo el formato).
+# fuente:   artículo de la Res. 227/2025 (texto oficial) o "Práctica" cuando
+#           es un criterio de práctica profesional (capacitación AG 2024), que
+#           se debe aplicar con juicio y documentar.
+# =====================================================================
+criterios:
+  # ---------------- 1001
+  - formato: "1001"
+    prefijos: []
+    texto: "Cuantía menor: 3 UVT por beneficiario sumando TODOS los conceptos del formato. Todo pago con retención se reporta identificando al tercero, sin importar el monto."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 1"
+  - formato: "1001"
+    prefijos: []
+    texto: "En el 1001 decide la CUENTA, no el NIT: los gastos a nombre de la DIAN o de la propia empresa se reportan según la regla de su cuenta (las cuentas 'No se reporta', como el costo de ventas 61, siguen fuera). A nombre de la empresa van SIEMPRE a cuantías menores (222222222) en su concepto y columna, porque la empresa no puede reportarse a sí misma; dejan ALERTA para buscar el tercero real. A nombre de la DIAN (intereses de mora, sanciones) van a no deducible, salvo en las cuentas de impuestos."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 (pagos no solicitados como deducción); Práctica"
+  - formato: "1001"
+    prefijos: []
+    texto: "GMF (4 x 1000): el aplicativo lo detecta por el nombre de la cuenta (GRAVAMEN, GMF, 4 X MIL) y lo reparte 50% deducible y 50% no deducible, concepto 5015, a nombre del banco. Registre el GMF con el NIT del banco que lo retuvo."
+    fuente: "E.T. art. 115; Res. 227/2025 art. 1.3.5.2.1 par. 16"
+  - formato: "1001"
+    prefijos: ["5105", "5205", "7205", "236505"]
+    texto: "Los pagos por rentas de trabajo (nómina, e independientes a los que se aplicó la tabla del art. 383) van SOLO en el 2276. Independientes con tarifas normales (honorarios, servicios, comisiones) van en el 1001."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 12 y 13"
+  - formato: "1001"
+    prefijos: ["510568", "510569", "510570", "510572", "510575", "510578", "520568", "520569", "520570", "2370"]
+    texto: "Aportes a EPS, ARL, pensiones y parafiscales: a nombre de la ENTIDAD. Aporte del empleador en 'deducible'; aporte descontado al trabajador (cuenta 2370) en 'no deducible' del mismo concepto."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 10"
+  - formato: "1001"
+    prefijos: ["14", "6205"]
+    texto: "Compras de inventario: concepto 5007 y SIEMPRE en la columna deducible. Base 'compras netas': débitos menos las notas crédito (devoluciones) del mismo proveedor; los créditos de terceros sin compras son salidas al costo y no se restan. No reporte el costo de ventas (6135), ya quedó en la compra."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 4"
+  - formato: "1001"
+    prefijos: ["15", "16"]
+    texto: "Todo lo que se capitaliza en activos fijos (incluidas construcciones en curso con honorarios o servicios capitalizados) va en 5008, no en 5002/5004: si no, la exógena muestra más gasto que la renta. 5020 es solo para activos fijos reales productivos con deducción del art. 158-3."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 ítems 10 y 21; Práctica"
+  - formato: "1001"
+    prefijos: ["17", "5165", "5265"]
+    texto: "Gastos pagados por anticipado: el pago va en 5029-5035 según su naturaleza y la amortización en 5019, ambos con el NIT del tercero (no el del informante)."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 5, ítems 35-42"
+  - formato: "1001"
+    prefijos: ["530525"]
+    texto: "Diferencia en cambio: concepto 5088 con el NIT del INFORMANTE. Práctica: realizada en deducible y no realizada en no deducible."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 ítem 60; Práctica"
+  - formato: "1001"
+    prefijos: ["5115", "5215"]
+    texto: "Impuestos solicitados como deducción: 5015. GMF con el NIT del banco que lo retuvo: la parte deducible en deducible y el resto en no deducible."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 ítem 16 y par. 16"
+  - formato: "1001"
+    prefijos: ["2360", "236510"]
+    texto: "Dividendos decretados en calidad de exigibles: 5068-5071 según año de las utilidades y si son gravados o no, en la columna no deducible, con la retención practicada al accionista."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 ítems 48-51"
+  - formato: "1001"
+    prefijos: ["5155", "519520"]
+    texto: "Viáticos y gastos de representación que NO son ingreso para el trabajador: 5055 y 5056. Si son ingreso del trabajador van al 2276."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 ítems 1 y 2"
+  - formato: "1001"
+    prefijos: ["5315", "531520"]
+    texto: "Retención asumida: se registra practicada (2365) y la contrapartida va al gasto 5315. Por tercero se asume el menor entre la retención de renta y el gasto: esa parte va a 'Retención asumida' y no se reporta como pago; si la retención es mayor, el resto sigue practicada; si el gasto es mayor, el resto es pago no deducible. El gasto a nombre de la DIAN o de la empresa no se cruza y se reporta como pago no deducible."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 (retenciones practicadas o asumidas); Práctica"
+  - formato: "1001"
+    prefijos: ["2365", "2367"]
+    texto: "Las retenciones se reportan en la misma fila (concepto y tercero) del pago que las originó. Las autorretenciones no se reportan."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 1 y 3"
+  # ---------------- 1003
+  - formato: "1003"
+    prefijos: []
+    texto: "Sin cuantía menor: se reportan todos los agentes que le retuvieron, con la BASE sujeta a retención (no el total facturado). La norma pide quien le 'practicó' la retención, no solo quien la certificó."
+    fuente: "Res. 227/2025 art. 1.3.5.3.1; Práctica"
+  - formato: "1003"
+    prefijos: ["135517"]
+    texto: "Concepto 1309 (reteIVA): la base a reportar es el valor del IVA, no el valor del pago."
+    fuente: "Res. 233/2025 art. 4 (par. 1 art. 1.3.5.3.1)"
+  # ---------------- 1005 / 1006
+  - formato: "1005"
+    prefijos: []
+    texto: "Versión 9: IVA descontable e IVA por devoluciones en ventas, al 100% y sin conceptos. Debe cuadrar con el IVA descontable de las declaraciones de IVA del año. Si la empresa no es responsable de IVA no hay 1005."
+    fuente: "Res. 233/2025 art. 6 (art. 1.3.5.5.1); Práctica"
+  - formato: "1006"
+    prefijos: []
+    texto: "Sin cuantía menor: solo va a 222222222 lo que no se pueda identificar por ningún medio (p. ej. POS a consumidor final). Debe cuadrar con el IVA generado declarado."
+    fuente: "Res. 233/2025 art. 7 (art. 1.3.5.5.2)"
+  # ---------------- 1007
+  - formato: "1007"
+    prefijos: []
+    texto: "Ingresos DEVENGADOS por tercero, sin cuantía menor (solo 222222222 si no es posible identificar al adquirente). Las propiedades horizontales no reportan cuotas de administración, sus intereses de mora ni multas."
+    fuente: "Res. 227/2025 art. 1.3.5.4.1 par. 1; Res. 233/2025 art. 5"
+  - formato: "1007"
+    prefijos: ["421020"]
+    texto: "Ingreso por diferencia en cambio: concepto 4018 con el NIT del informante."
+    fuente: "Res. 227/2025 art. 1.3.5.4.1"
+  - formato: "1007"
+    prefijos: ["4250"]
+    texto: "4017 solo para recuperaciones que constituyen renta líquida (arts. 195-198 E.T.); si no se identifica el tercero, con el NIT del informante. Las demás recuperaciones van en 4002."
+    fuente: "Res. 227/2025 art. 1.3.5.4.1"
+  # ---------------- 1008
+  - formato: "1008"
+    prefijos: []
+    texto: "Cuantía menor: 12 UVT de saldo acumulado por deudor (todos los conceptos)."
+    fuente: "Res. 227/2025 art. 1.3.5.7.1 par. 1 (mod. Res. 233/2025)"
+  - formato: "1008"
+    prefijos: ["1399"]
+    texto: "1318 es el deterioro FISCAL de cartera (el de la declaración de renta), en positivo y con el NIT de cada deudor, nunca con el del informante."
+    fuente: "Res. 227/2025 art. 1.3.5.7.1"
+  - formato: "1008"
+    prefijos: ["1325", "1320", "1315"]
+    texto: "1316: accionistas, socios y vinculadas. Revise si hay préstamos en dinero a socios: la DIAN cruza con intereses presuntos."
+    fuente: "Res. 227/2025 art. 1.3.5.7.1; Práctica"
+  # ---------------- 1009
+  - formato: "1009"
+    prefijos: []
+    texto: "Cuantía menor: 12 UVT de saldo acumulado por acreedor. No se reportan pasivos estimados ni provisiones (no son obligaciones ciertas)."
+    fuente: "Res. 227/2025 art. 1.3.5.6.1 par. 1; Práctica"
+  - formato: "1009"
+    prefijos: ["2510", "2370", "238030"]
+    texto: "2214: aportes parafiscales, salud, pensión y CESANTÍAS a nombre de la ENTIDAD (fondo de cesantías), no del trabajador, aunque en libros estén por empleado."
+    fuente: "Res. 227/2025 art. 1.3.5.6.1 ítem 5"
+  - formato: "1009"
+    prefijos: ["25"]
+    texto: "2215: pasivos laborales reales consolidados en cabeza del trabajador (nómina, prima, vacaciones), SIN cesantías."
+    fuente: "Res. 227/2025 art. 1.3.5.6.1 ítem 6"
+  - formato: "1009"
+    prefijos: ["2365", "2367"]
+    texto: "Retenciones por pagar: en la práctica se reportan en 2206 (demás pasivos) a nombre de la DIAN; confirme si prefiere 2204 (impuestos)."
+    fuente: "Práctica"
+  # ---------------- 1010 / 1011 / 1012
+  - formato: "1011"
+    prefijos: []
+    texto: "El formato pide VALOR PATRIMONIAL (fiscal) a 31 de diciembre: costo menos depreciación fiscal. La depreciación, amortización y deterioro solo se reportan aquí (costos y deducciones de la renta), no en el 1001."
+    fuente: "Res. 233/2025 art. 13 (art. 1.3.5.10.4); art. 1.3.5.10.7"
+  - formato: "1012"
+    prefijos: []
+    texto: "Saldos bancarios a nombre de la ENTIDAD financiera (1110 nacional, 1115 exterior); inversiones por valor patrimonial a nombre del emisor (1200-1205)."
+    fuente: "Res. 233/2025 arts. 10 y 11 (arts. 1.3.5.10.1 y 1.3.5.10.2)"

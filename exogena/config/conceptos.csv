@@ -1,0 +1,371 @@
+formato,concepto,descripcion,verificado,fuente
+1001,5055,Viáticos efectivamente pagados que no constituyen ingreso para el trabajador,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5056,Gastos de representación que no constituyen ingreso para el trabajador,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5002,Honorarios (sin rentas de trabajo),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5003,Comisiones (sin rentas de trabajo),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5004,Servicios (sin rentas de trabajo),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5005,Arrendamientos,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5006,Intereses y rendimientos financieros causados,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5063,Intereses y rendimientos financieros efectivamente pagados,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5007,"Compra de activos movibles (inventarios, E.T. art. 60)",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5008,Compra de activos fijos (E.T. art. 60),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5010,"Aportes parafiscales SENA, cajas de compensación e ICBF",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5011,"EPS y riesgos laborales, incluidos aportes del trabajador",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5012,"Aportes obligatorios a fondos de pensiones, incluidos aportes del trabajador",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5013,Donaciones en dinero,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5014,Donaciones en activos diferentes a dinero,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5015,Impuestos solicitados como deducción; GMF con NIT del agente retenedor: parte deducible y parte no deducible (par. 16),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5066,Impuesto nacional al consumo,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5058,"Aportes, tasas y contribuciones solicitados como deducción",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5060,Redención de inversiones (títulos de capitalización),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5016,Demás costos y deducciones,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5020,Compra de activos fijos reales productivos (E.T. art. 158-3),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5027,Pagos al exterior por servicios técnicos,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5023,Pagos al exterior por asistencia técnica,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5067,Pagos al exterior por consultoría,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5024,Pagos al exterior por marcas,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5025,Pagos al exterior por patentes,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5026,Pagos al exterior por regalías,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5080,Proveedores del exterior: servicios audiovisuales digitales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5081,Proveedores del exterior: plataformas digitales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5082,Proveedores del exterior: publicidad online,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5083,Proveedores del exterior: enseñanza a distancia,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5084,Proveedores del exterior: derechos de uso de intangibles,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5085,Proveedores del exterior: otros servicios electrónicos o digitales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5028,Devolución de pagos o abonos y retenciones de años anteriores,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5029,Gastos pagados por anticipado por compras,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5030,Gastos pagados por anticipado por honorarios,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5031,Gastos pagados por anticipado por comisiones,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5032,Gastos pagados por anticipado por servicios,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5033,Gastos pagados por anticipado por arrendamientos,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5034,Gastos pagados por anticipado por intereses,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5035,Gastos pagados por anticipado por otros conceptos,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5019,Amortizaciones realizadas,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5044,"Pago por loterías, rifas, apuestas y similares",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5046,Enajenación de activos fijos de personas naturales ante tránsito,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5045,Retención sobre ingresos de tarjetas débito y crédito,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5059,Fondo para revalorización de aportes (cooperados),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5068,"Dividendos exigibles 2016 y anteriores, par. 2 art. 49 E.T.",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5069,"Dividendos exigibles 2016 y anteriores, num. 3 art. 49 E.T.",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5070,"Dividendos exigibles 2017 y siguientes, par. 2 art. 49 E.T.",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5071,"Dividendos exigibles 2017 y siguientes, num. 3 art. 49 E.T.",SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5100,Prima en colocación de acciones y otros conceptos patrimoniales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5086,Retención trasladada por dividendos recibidos (art. 242-1),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5073,Desembolsos por depósitos judiciales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5074,Reintegros de depósitos judiciales,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5075,Regalías y explotación de propiedad intelectual,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5079,Intereses a vinculados en subcapitalización (art. 118-1),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5087,Puntos premio redimidos que afectan el gasto,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5088,Costos o gastos por diferencia en cambio (NIT del informante),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5089,Compra de acciones que no cotizan en bolsa,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5090,Donación de acciones que no cotizan en bolsa,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5091,Cesión de acciones que no cotizan en bolsa,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5092,Pago que constituye ingreso en especie (art. 29-1),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5101,GMF. El prevalidador lo acepta en cualquier 1001 pero la Res. lo ubica en el bloque de fondos de pensiones: el GMF de una empresa normal va en 5015 (par. 16),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025); Prevalidador DIAN AG2025 v3.3.0-26
+1001,5103,Pagos a través de contratos de colaboración como partícipe (NIT del gestor),SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5053,Retenciones practicadas a título de timbre,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1001,5054,Devolución de retenciones de timbre de años anteriores,SI,Res. 227/2025 art. 1.3.5.2.1 (mod. Res. 233/2025)
+1003,1301,"Retención por salarios, prestaciones y demás pagos laborales",SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1302,Retención por ventas,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1303,Retención por servicios,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1304,Retención por honorarios,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1305,Retención por comisiones,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1306,Retención por intereses y rendimientos financieros,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1307,Retención por arrendamientos,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1308,Retención por otros conceptos,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1309,Retención en la fuente de IVA (la base es el valor del IVA),SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1310,Retención por dividendos y participaciones,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1311,Retención por enajenación de activos fijos de personas naturales,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1312,Retención por ingresos de tarjetas débito y crédito,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1313,"Retención por loterías, rifas y apuestas",SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1314,Retención por impuesto de timbre,SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1003,1320,Retención por dividendos recibidos por sociedades nacionales (art. 242-1),SI,Res. 227/2025 art. 1.3.5.3.1 (mod. Res. 233/2025)
+1007,4001,Ingresos brutos de actividades ordinarias,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4002,Otros ingresos brutos,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4003,Ingresos por intereses y rendimientos financieros,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4004,Intereses por créditos hipotecarios,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4005,Ingresos a través de consorcios o uniones temporales,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4006,Ingresos a través de mandato o administración delegada,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4007,Ingresos a través de exploración y explotación de hidrocarburos,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4008,Ingresos a través de fiducia,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4009,Ingresos a través de terceros (beneficiario),SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4011,Ingresos a través de joint venture,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4012,Ingresos a través de cuentas en participación,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4013,Ingresos a través de convenios con entidades públicas,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4017,Recuperaciones de costos y deducciones (arts. 195 a 198 E.T.),SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4018,Ingresos por diferencia en cambio (NIT del informante),SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4019,Ingresos brutos constitutivos de ganancia ocasional,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4020,Venta de acciones que no cotizan en bolsa: renta,SI,Res. 227/2025 art. 1.3.5.4.1
+1007,4021,Venta de acciones que no cotizan en bolsa: ganancia ocasional,SI,Res. 227/2025 art. 1.3.5.4.1
+1008,1315,Cuentas por cobrar a clientes,SI,Res. 227/2025 art. 1.3.5.7.1
+1008,1316,"Cuentas por cobrar a accionistas, socios, cooperados y vinculadas",SI,Res. 227/2025 art. 1.3.5.7.1
+1008,1317,Otras cuentas por cobrar,SI,Res. 227/2025 art. 1.3.5.7.1
+1008,1318,Saldo fiscal del deterioro de cartera (NIT del deudor),SI,Res. 227/2025 art. 1.3.5.7.1
+1009,2201,Pasivos con proveedores,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2202,"Pasivos con compañías vinculadas, accionistas y socios",SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2203,Obligaciones financieras,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2204,"Pasivos por impuestos, gravámenes y tasas",SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2214,"Aportes parafiscales, salud, pensión y cesantías (a la entidad)",SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2215,"Pasivos laborales consolidados en cabeza del trabajador, sin cesantías",SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2207,Pasivo por cálculo actuarial (NIT del informante),SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2208,Pasivos respaldados en documento de fecha cierta,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2211,Pasivos por depósitos judiciales,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2212,Ingresos diferidos por puntos premio,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2213,Ingresos diferidos del art. 23-1 E.T.,SI,Res. 227/2025 art. 1.3.5.6.1
+1009,2206,Demás pasivos,SI,Res. 227/2025 art. 1.3.5.6.1
+1012,1110,Saldo de cuentas corrientes y de ahorro nacionales,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1115,Saldo de cuentas corrientes y de ahorro en el exterior,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1200,Valor patrimonial de bonos,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1201,Valor patrimonial de certificados de depósito (CDT),SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1202,Valor patrimonial de títulos,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1203,Valor patrimonial de derechos fiduciarios,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1204,Valor patrimonial de las demás inversiones,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1012,1205,Valor patrimonial de criptoactivos,SI,Res. 227/2025 arts. 1.3.5.10.1 y 1.3.5.10.2 (mod. Res. 233/2025)
+1011,1105,Saldo en caja a 31 de diciembre,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1502,"Vehículos, maquinaria y equipo (valor patrimonial)",SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1512,Activos fijos intangibles,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1513,Activos fijos agotables,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1519,Activos biológicos plantas,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1520,Activos biológicos animales,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1521,Casa o apartamento de habitación,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1522,Lotes rurales y fincas,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1523,Lotes urbanos,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1524,Otros bienes inmuebles,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1525,Otros bienes muebles,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1526,Otros activos no relacionados,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1527,Valor patrimonial del inventario,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1011,1528,Activos poseídos a través de contratos de colaboración,SI,Res. 227/2025 art. 1.3.5.10.4 (mod. Res. 233/2025)
+1001,5018,Importe de las primas de reaseguros pagados o abonados en cuenta,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5047,Importe de los siniestros por lucro cesante pagados o abonados en cuenta,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5048,Importe de los siniestros por daño emergente pagados o abonados en cuenta,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5061,"Utilidades Pagadas o abonadas en cuenta, cuando el beneficiario es diferente al fideicomitente",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5064,Devoluciones de saldos de aportes pensionales pagados,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5065,Excedentes pensionales de libre disponibilidad componente de capital pagados,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5072,El importe de los siniestros por seguros de vida pagados o abonados en cuenta,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5076,"Valor de utilidades distribuidas provenientes de diferimiento de ingresos, inciso 4 del art. 23-1 del E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5093,"Donaciones de bebidas ultraprocesadas y azucaradas a los bancos de alimentos por los responsables del impuesto a estos bienes ET art 513-1, par 5 adicionado por el art 54 L 2277/2022",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5094,"Donaciones de productos comestibles ultraprocesados industrialmente y/o con alto contenido de azucares añadidos, sodio o grasas saturadas a los bancos de alimentos por los responsables del impuesto a estos bienes ET art 513-1, par 5 adicionado por el art 54 L 2277/2022",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5095,Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de hidrocarburos por entes diferentes a los organismos descentralizados. ET art 115 par 1,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5096,Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de gas por entes diferentes a los organismos descentralizados. ET art 115 par 1,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5097,Pago por concepto de regalías pagadas a la nación u otros entes territoriales por la explotación de carbón por entes diferentes a los organismos descentralizados. ET art 115 par 1,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5098,Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de otros minerales y piedras preciosas por entes diferentes a los organismos descentralizados. ET art 115 par 1,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5099,Pago por concepto de regalías pagadas a la Nación u otros entes territoriales por la explotación de sal y materiales de construcción por entes diferentes a los organismos descentralizados. ET art 115 par 1,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1001,5102,Valor de los pagos por apoyos económicos no reembolsables o condonados para financiar educación con recurso públicos art. 46 E.T,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1007,4014,"Ingresos por ventas con puntos premio redimidos en el período, procedentes de programas de fidelización",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1007,4015,"Ingresos por puntos premio vencidos y no reclamados en el periodo, procedentes de programas de fidelización, artículo 28 numeral 8 del Estatuto Tributario. Se debe reportar con el NIT del informante.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1007,4016,"Ingresos por ventas con puntos premio redimidos en el período, incluidos en el concepto 4015 que corresponden en años anteriores, en virtud de la aplicación del artículo 28 numeral 8 del Estatuto Tributario. Se debe reportar con el NIT del informante.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1009,2209,Pasivos exclusivos de las compañías de seguros,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1009,2216,El valor de saldo de los pasivos de entidades financieras donde no sea posible identificar al acreedor nacional. Se debe reportar con el NIT de la entidad informante.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1009,2217,El valor de saldo de los pasivos de entidades financieras donde no sea posible identificar al acreedor del exterior. Se debe reportar con el NIT de la entidad informante.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,1601,"Inversiones Zomac realizadas en el año representadas en inventarios, propiedad planta y equipo y otras inversiones",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,1602,"Inversiones en Megainversiones en el año representadas en propiedad, planta y equipo.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,1603,"Inversiones realizadas por empresas de economía naranja de que trata el numeral 1 del artículo 235-2 del E.T., en propiedad, planta y equipo, intangibles de que trata el numeral 1 del artículo 74 e inversiones del numeral 3 del artículo 74-1, del E.T",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,1604,"Inversiones realizadas por empresas dedicas al desarrollo del campo colombiano de que trata el numeral 2 del artículo 235-2 del E.T., en propiedad, planta y equipo y activos biológicos productores",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8104,"Renta exenta por venta energía eléctrica generada con base en energía eólica, biomasa o residuos agrícolas, solar, geotérmica o de los mares. Art.235-2 numeral 3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8106,"Renta exenta por aprovechamiento de nuevas plantaciones forestales incluida la guadua el caucho y el marañón. Art. 235-2 numeral 5, Inciso 1",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8109,Renta exenta por prestación de servicio de transporte fluvial con embarcaciones y planchones de bajo calado Art. 235-2 numeral 6.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8111,Rentas exentas por la utilidad en la enajenación de predios destinados a fines de utilidad pública. Num 9 Art. 207-2 E.T. Sentencia C-083 del 2018,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8120,Rentas exentas por aplicación de algún convenio para evitar la doble tributación.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8121,Renta exenta por creaciones literarias dela economía naranja contenidas en el artículo 28 de la Ley 98 de 1993. Art. 235-2 numeral 8.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8125,"Rentas exentas por Intereses, comisiones y pagos por deuda pública externa, E.T. art. 218 E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8127,"Rentas exentas por inversión en nuevos aserríos, plantas de procesamiento y plantaciones de árboles maderables y árboles en producción de frutos. E.T., art. 235-2, numeral 5.Incisos 2 y 3",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8133,"Rentas exentas por servicios prestados en hoteles nuevos. E.T., Art. 207-2, Num 3 Sentencia C 235 del 29 de mayo de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8134,"Rentas exentas por servicios prestados en hoteles remodelado y/o ampliados. E.T., Art. 207-2 E.T, Num. 4. Sentencia C 235 del 29 de mayo de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8140,"Rentas exentas por aportes voluntarios a los fondos de pensiones. E.T. art. 126-1, inc. 2",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8141,"Rentas exentas por los ahorros a largo plazo para el fomento de la construcción. E.T., art. 126-4.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8142,"Rentas exentas del beneficio neto o excedente para las entidades sin ánimo de lucro. E.T., art 358 E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8145,"Rentas exentas de fondos provenientes de auxilios o donaciones de entidades o gobiernos extranjeros. Convenidos con el Gobierno colombiano, destinados a programas de utilidad común y registrados por la Agencia Presidencial de la Cooperación Internacional. Art. 96 L. 788/2002",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8156,Rentas exentas prestaciones provenientes de un fondo de pensiones. E.T. art. 207.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8159,"Renta exenta pago principal y demás rendimientos generados en actividades financieras por parte de entidades gubernamentales de carácter financiero y de cooperación para el desarrollo. E.T., art. 207-2, numeral 12.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8160,"Rentas exentas de los industriales de la cinematografía, personas naturales. L. 397/1997, art. 46.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8164,"Renta exenta por la utilidad en la enajenación de predios destinados al desarrollo de proyectos de vivienda interés social y/o prioritario. Art. 235-2 numeral 4, literal a)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8165,"Renta exenta por la utilidad en la primera enajenación de viviendas de interés social y/o prioritario. E.T., art. 235-2, numeral 4, literal b).",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8167,"Renta exenta de que trata L. 546/1999, art. 16. Modificado. L. 964/2005 asociados a proyectos de vivienda de interés y prioritario. E.T., art. 235-2, numeral 4, literal d).",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8168,"Renta exenta por rendimientos financieros provenientes de créditos para adquisición de vivienda de interés social y/o prioritario. E.T., art. 235-2, numeral 4 literal e)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8169,Renta exenta por los rendimientos generados por la reserva de estabilización que constituyen las entidades administradoras de fondos de pensiones y cesantías. Art. 101 de la Ley 100 de 1993. Art. 235-2 numeral 9.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8171,"Renta exenta. Incentivo tributario para empresas de economía naranja E.T., Art. 235-2 numeral 1, E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8172,"Renta exenta. Incentivo tributario para el desarrollo del campo colombiano E.T., Art. 235-2 numeral 2, E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8173,Renta exenta de capital por dividendos o participaciones distribuidos por no residentes a CHC y por prima en colocación de acciones. Art.895 E.T..,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8174,Renta exenta ganancia ocasional derivada de la venta o transmisión de la participación de una CHC en entidades no residentes. Art. 896 E.T,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8175,"Renta exenta de las sumas destinadas al pago de los seguros de invalidez y de sobrevivientes dentro del mismo régimen de ahorro individual con solidaridad. L. 100/93, art. 135",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8176,"Rentas exentas provenientes de bienes inmuebles situados en otro país de la CAN. Decisión 578 de 2004, art. 4",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8177,"Rentas exentas provenientes de la explotación de recursos naturales en otro país de la CAN . Decisión 578 de 2004, art. 5",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8178,"Rentas exentas por actividades empresariales efectuadas en otro país de la CAN. Decisión 578 de 2004, art. 6",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8179,"Rentas exentas de empresas de transporte domiciliadas en otro país de la CAN. Decisión 578 de 2004, art. 8",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8180,"Rentas exentas por regalías de bienes intangibles en un país miembro de la CAN. Decisión 578 de 2004, art. 9",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8181,"Rentas exentas por intereses y demás rendimientos financieros cuyo pago se registra e imputa en otro país miembro de la CAN. Decisión 578 de 2004, art. 10",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8182,"Rentas exentas por dividendos y participaciones distribuidos por empresas domiciliadas en otro país miembro de la CAN. Decisión 578 de 2004, art. 11.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8183,"Rentas exentas por ganancias de capital obtenidas en la venta de bienes situados en otro país miembro de la CAN. Decisión 578 de 2004, art. 12",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8184,"Renta exenta generados por la prestación de servicios personales prestados en otro país miembro de la CAN. Decisión 578 de 2004, art. 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8185,"Rentas exentas por beneficios empresariales en servicios, servicios técnicos, asistencia técnica y consultoría prestados en otro país de la CAN. Decisión 578 de 2004, art. 14",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8186,"Rentas exentas por pensiones y anualidades obtenidas de fuentes productoras situadas en otro país miembro de la CAN. . Decisión 578 de 2004, art. 15",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8187,"Rentas exentas provenientes de actividades de entretenimiento público efectuadas en otro país miembro de la CAN. Decisión 578 de 2004, art. 16",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8200,"Deducción en la declaración de renta por las inversiones realizadas en activos fijos reales productivos. E.T., Art. 158-3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8207,"Costo o deducción por salarios, prestaciones sociales y demás pagos laborales. No debe contener los valores especificados en otros conceptos.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8208,"Deducción por pagos efectuados a la casa matriz. E.T., art. 124.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8209,"Deducción por gastos en el exterior. E.T., art. 121. No debe contener los valores especificados en el concepto 8282 ni la diferencia en cambio.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8210,"Costo en la enajenación de activos fijos poseídos por menos de dos años. E.T., art. 179.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8211,"Deducción del gravamen a los movimientos financieros. E.T., art. 115.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8212,"Deducción por agotamiento en explotación de hidrocarburos, E.T., art. 161.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8215,"Deducción por intereses sobre préstamos educativos del Icetex y para adquisición de vivienda. E.T., art. 119, modificado por L. 2010/2019, art. 89.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8217,"Deducción por donación o inversión en producción cinematográfica. L. 814/2003, art. 16.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8218,"Deducción por protección, mantenimiento y conservación muebles e inmuebles de interés cultural, L. 1185/2008, art. 14.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8225,"Deducción por donaciones del sector privado en la red nacional de bibliotecas públicas y biblioteca nacional. E.T., art 125. Modificado. L. 1819/2016, art. 75.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8228,Costo o deducción por las reparaciones locativas realizadas sobre inmuebles.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8230,"Deducción por las inversiones realizadas en librerías. L. 98/1993, art. 30.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8231,"Deducción por la inversión realizada en centros de reclusión. L.633/2000, art.98",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8233,Deducción de impuestos devengados y pagados. E.T. arts.115 y 115-1. No debe contener los valores especificados en otros conceptos.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8234,"Costo o deducción de intereses. E.T., art. 117. No debe contener los valores especificados en el concepto 8236.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8236,"Costo o deducción por contratos de leasing. E.T., art. 127-1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8237,"Deducción por costos y gastos por campañas de publicidad de productos extranjeros. E.T., art. 88-1",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8238,"Deducción de la provisión de cartera de créditos y provisión de coeficiente de riesgo, provisiones realizadas durante el respectivo año gravable sobre bienes recibidos en dación en pago y sobre contratos de leasing. E.T., art.145, par.1. (Modificado. L. 1819/2016, art. 87).",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8239,"Deducción por deudas manifiestamente pérdidas o sin valor. E.T., art. 146.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8240,Deducción por pérdida de activos. E.T. art. 148.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8241,"Costo o deducción por aportes al Instituto Colombiano de Bienestar Familiar, (ICBF). E.T., art. 114.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8242,"Costo o deducción por aportes a Cajas de Compensación Familiar. E.T., art. 115.1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8243,"Costo o deducción por aportes al Servicio Nacional de Aprendizaje, (SENA). E.T., art. 114.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8244,"Deducción de contribuciones a fondos de pensiones de jubilación e invalidez y fondos de cesantías. E.T. Art. 126-1, modificado L. 1819/2016, art. 15.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8245,"Deducción por concepto de cesantías pagadas, E.T., art. 109. No debe contener los valores especificados en los conceptos 8248, 8250, 8263 y 8271.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8246,"Deducción por concepto de aportes a cesantías por los trabajadores independientes. E.T., art- 126-1, inciso 6.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8247,Deducción por concepto de contribuciones parafiscales agropecuarias efectuadas por los productores a los fondos de estabilización de la L. 101/1993. art 29,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8248,"Deducción por salarios, prestaciones sociales y demás pagos laborales, pagados a viudas y huérfanos de miembros de las Fuerzas Armadas muertos en combate, secuestrados o desaparecidos. Art. 108-1 del E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8249,"Costo o deducción por apoyo de sostenimiento mensual de los trabajadores contratados como aprendices. L.115/1994, art. 189.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8250,"Costo o deducción por salarios pagados, durante el cautiverio, a sus empleados víctimas de secuestros. L. 986/2005, art. 21.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8255,Costo o deducción por pagos a terceros por concepto de alimentación del trabajador y su familia o suministro de alimentación para los mismos.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8256,"Costo o deducción por el pago de estudios a trabajadores en instituciones de educación superior. L. 30/1992, art. 124",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8257,"Deducción por factor especial de agotamiento en explotación de hidrocarburos, E.T. art. 166.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8259,Deducción por tasas y contribuciones fiscales pagadas Art 115 ET,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8261,"Deducción de la provisión para el pago de futuras pensiones. E.T., art. 112.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8263,"Costo o deducción por salarios y prestaciones sociales a trabajadores con discapacidad no inferior al 25%. L.361/1997, art. 31.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8265,"Deducción por aumento en la reserva técnica de FOGAFIN Y FOGACOOP. E.T., art. 19-3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8271,"Deducción por salarios y prestaciones sociales pagados a mujeres víctimas de violencia comprobada. L. 1257/2008, art. 23.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8272,Deducción del 100% por inversiones en infraestructura para la realización de espectáculos públicos. Art. 4 L. 1493/11.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8273,"Deducción por inversiones en jardines botánicos. L. 299/1996, art. 12",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8274,"Deducción por inversiones en fuentes de energía no convencional. L.1715/2014, art. 11.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8275,"Deducción por depreciación de maquinarias, equipos y obras civiles de proyectos de fuentes de energía no convencionales. Art. 14 L. 1715/2014",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8276,"Costos y deducciones fiscales no reconocidas contablemente (diferencias temporarias), E.T., art. 59 y 105, num.1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8277,"Deducciones por atenciones a clientes, proveedores y trabajadores. E.T., art. 107-1, inciso 1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8278,"Deducciones por pagos salariales y prestacionales, provenientes de litigios. E.T., art. 107-1, inciso 2.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8279,"Deducción de cesantías consolidadas. E.T., art.110. No debe contener los valores especificados en otros conceptos.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8282,"Pagos a jurisdicciones no cooperantes, de baja o nula imposición y a entidades con regímenes preferentes. E.T., art. 124-2",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8283,"Deducción por depreciación. E.T., art. 128.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8284,Costo por depreciación,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8285,"Costo o deducción por obsolescencia. E.T., art. 129",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8286,"Deducción de inversiones. E.T., art. 142",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8287,"Deducción por amortización de activos intangibles. E.T., Art. 143 del E.T. (Modificado por el artículo 85 de la Ley 1819 de 2016)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8288,"Amortización inversiones en exploración, desarrollo y construcción de minas, y yacimientos de petróleo y gas. E.T., art. 143-1, modificado L. 1819/2016, art. 86",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8290,"Pérdidas sufridas en actividades agropecuarias. E.T., art. 150",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8292,"Deducción por inversiones en evaluación y exploración de recursos naturales no renovables. E.T., Art.159, modificado L. 1819/2016, art. 92.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8293,"Deducción por agotamiento en explotación de minas, gases distintos de hidrocarburos y depósitos naturales. E.T., art. 167",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8294,"Deducción por pago impuesto al carbono, como mayor valor del costo del bien. L. 1819/2016, Art. 222, parágrafo 2. Sujeto pasivo del impuesto",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8295,Deducción por pagos efectuados a las empresas promotoras de salud EPS y los aportes al Sistema de Riesgos Laborales.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8296,"Deducciones por contribución a educación destinados a programas de becas de estudios totales o parciales. E.T., art. 107-2 literal a)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8297,"Deducciones por contribución a educación destinados a programas o centros de atención, estimulación y desarrollo integral. E.T., art. 107-2 literal b)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8298,"Deducciones por contribución a educación por aportes a instituciones de educación básica-primaria y secundaria y media reconocidas por el Ministerio de Educación y educación técnica, tecnológica y educación superior. E.T., art. 107-2 literal c)",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8299,Deducciones de otros pagos a casas matrices o sucursales 124-1 E.T.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8400,"Deducción del 120% de los pagos que el empleador realice por concepto de salario, en relación con los empleados que sean menores de veintiocho (28) años, siempre y cuando se trate del primer empleo de la persona. E.T., art. 108-5, adicionado L. 2010 de 2019, art. 88.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8401,"Deducción de las instituciones prestadoras de salud (IPS) contribuyentes por la cartera, reconocida y certificada por el liquidador, correspondiente a los patrimonios de las Entidades Promotoras de Salud (EPS) que se encuentren en medida de intervención forzosa administrativa para liquidar por parte de la Superintendencia Nacional de Salud. L. 2010 de 2019, art. 97.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8402,Deducción por inversiones o donaciones en proyectos de economía creativa del artículo 195 de la Ley 1607 de 2012 (adicionado por la Ley 1955 de 2019 Art. 180).,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8403,Deducción por donaciones realizadas por entidades del régimen tributario especial parágrafo 1 del artículo 357 del estatuto Tributario.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8405,"Deducción por deterioro (provisión individual) de cartera de dudoso o difícil cobro. E.T.,art.145, DUR 1625 de 2016 arts.1.2.1.18.19 y 1.2.1.18.20.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8406,"Deducción por deterioro (provisión general) de cartera de dudoso o difícil cobro. E.T.,art.145, DUR 1625 de 2016 art.1.2.1.18.21.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8407,"Deducción por inversiones realizadas en investigación, desarrollo tecnológico e innovación. E.T., art.158-1, inc. 1",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8412,"Depreciación especial aplicada por contribuyentes del régimen de Mega-inversiones que realicen nuevas inversiones. E.T. art.235-3, num.2.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8413,Deducción por provisiones de cartera hipotecaria de dudoso o difícil cobro. DUR 1625 de 2016 art.1.2.1.18.26.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8414,"Deducción deterioro de cartera de Entidades Promotoras de Salud -EPS en liquidación forzosa intervenidas por la Superintendencia Nacional de Salud. L. 1819/2016, art.375,modificado por L. 2010/ 2019, art.97",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8415,Deducción deterioro de cartera de dudoso o difícil cobro E.T. art. 145. Par. 1.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8421,"Deducción por pérdida en Ia enajenación de activos. E.T., art. 149",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8422,"Deducción por pérdida en Ia enajenación de plusvalía. E.T., art. 154.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8423,Deducción por perdida en la enajenación de bonos para la seguridad art 4 L 345/1996 derogado por el art 96 L 2277/2022,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8424,Deducción por perdida en la enajenación de bonos para la seguridad para la paz art 5 L 487/1998 derogado por el art 96 L 2277/2022,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,8425,Deducción del 120% de salarios y prestaciones sociales por contratación de adulto mayor sin pensión L 2040/2020 art 2.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9001,"Exclusión de IVA por venta de materias primas químicas con destinación específica. E.T., art. 424, num. 1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9002,Exclusión de IVA por venta de materias primas destinadas a la producción de vacunas. Num 2 Art. 424 E.T.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9003,"Exclusión de IVA por venta de computadores personales. E.T., art. 424, num. 3, modificado L.1819/2016, art.175, num. 5.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9004,"Exclusión de IVA por venta de anticonceptivos femeninos. E.T., art.424, num.4.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9007,"Exclusión de IVA por venta de equipos, entre otros, para construcción, instalación, montaje y operación de sistemas de control y monitoreo ambiental. E.T., art. 424, num. 7.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9008,"Exclusión de IVA por venta de dispositivos móviles inteligentes. E.T., art. 424, num.6.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9009,"Exclusión de IVA por donaciones de alimentos de consumo humano a Bancos de Alimentos. E.T., art. 424, num.9",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9012,"Exclusiones de IVA por venta de objetos con interés artístico, cultural e histórico. E.T., art. 424, num. 13, modificado L. 1819/2016, art. 175, num. 11",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9013,"Exclusiones de IVA por venta de combustible para aviación para el servicio de transporte aéreo nacional con origen y destino a Guainía, Amazonas, Vaupés, San Andrés Islas y Providencia, Arauca y Vichada. E.T., art. 424, num 14",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9014,"Exclusiones de IVA en la venta de pólizas de seguros de carácter individual. E.T., art. 427. E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9015,"Exclusión de IVA en la venta de equipos, entre otros, para fuentes de energía no convencionales. Art. 12 Ley 1715 de 2014.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9016,"Exclusión de IVA por venta de servicios médicos odontológicos, entre otros. E.T., art. 476, num. 1. Art. 476 E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9017,"Exclusión de IVA por venta de servicios de transporte. E.T., art. 476, num. 9.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9018,"Exclusión en IVA en intereses y rendimientos financieros por operaciones de crédito, E.T., art. 476, num. 16.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9019,"Exclusión de IVA en venta de servicios públicos. E.T., art. 476, numerales 11, 12, 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9020,"Exclusión de IVA en venta de servicio de arrendamiento. E.T., art. 476, num. 15.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9021,"Exclusión de IVA en venta de servicios de educación. E.T., art. 476, num.5",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9023,"Exclusión de IVA en venta de planes obligatorios de salud, ahorro individual, riesgos laborales y servicios de seguros y reaseguros. E.T., art. 476, num. 3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9025,"Exclusión de IVA en servicios de promoción y fomento deportivo. E.T., art. 476, num. 29.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9026,"Exclusión de IVA en cine, en eventos y espectáculos. E.T., art. 476, num. 18, modificado por L 2277/2022 art 76.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9027,"Exclusión de IVA en venta de servicios de adecuación de tierras, producción agropecuaria y pesquera. E.T., art. 476, num. 24, modificado por L 2277/2022 art 76.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9028,"Exclusión de IVA comisiones pagadas en procesos de titularización de activos. E.T., art. 476, num. 22",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9029,"Exclusión de IVA en servicios funerarios, cremación, inhumación y exhumación E.T., art. 476, num. 19.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9030,"Exclusión de IVA en servicios de conexión y acceso a Internet estrato 3. E.T., art. 476, num 7.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9031,"Exclusión de IVA en comisiones por intermediación por la colocación de los planes de salud del sistema general de seguridad social. E.T., art. 476, num. 4",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9032,"Exclusión de IVA en comisiones percibidas por utilización de tarjetas crédito y débito. E.T., art. 476, num. 28",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9033,"Exclusión de IVA en servicios de alimentación contratados con recursos públicos y destinados al sistema penitenciario, de asistencia social y escuelas de educación pública. E.T., art. 476, num. 14.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9034,"Exclusión de IVA en servicios de transporte aéreo nacional donde no exista transporte terrestre organizado y hacia los demás destinos contemplados. E.T., art. 476, num. 10.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9035,"Exclusión de IVA en publicidad a través de periódicos y medios regionales. E.T., art. 476, num. 31",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9036,"Exclusión de IVA en la venta de productos de soporte nutricional del régimen especial. E.T., art. 424, num. 3, adicionado por L. 1819/2016 art. 175",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9037,"Exclusión de IVA en la venta de alimentos para propósitos médicos especiales para pacientes que requieren nutrición enteral. E.T., art. 424, num. 3, adicionado por L. 1819/2016 art. 175",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9038,"Exclusión de IVA en el territorio intendencia de San Andrés y Providencia. E.T., art. 423.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9039,"Exclusión de IVA en la venta de alimentos de consumo humano y animales importados de países colindantes de Vichada, Guajira, Guainía y Vaupés, destinados a consumo local en el departamento. E.T., art. 424, num. 8, modificado L. 1819/2016, art. 175, num. 8",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9041,"Exclusión de IVA en compraventa de maquinaria y equipos registrados en el registro nacional de reducción de emisiones de gases efecto invernadero. E.T., art. 424, num. 16, adicionado L. 1819/2016, art. 175, num. 16.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9042,"Exclusión de IVA en el petróleo crudo recibido por la Agencia Nacional de Hidrocarburos por regalías para su respectiva monetización. E.T., art. 424, parágrafo, adicionado L. 1819/2016, art. 175.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9043,"Exclusión de IVA en los servicios de educación virtual para el desarrollo de contenidos digitales. E.T., art. 476, num. 6, adicionado por L. 1819/2016 art. 187.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9044,"Exclusión de IVA en suministro de páginas web, servidores, computadora en la nube y mantenimiento a distancia. E.T., art. 476, num. 21, adicionado por L. 1819/2016 art. 187.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9045,"Exclusión de IVA en adquisición de licencias de software para el desarrollo comercial de contenidos digitales. E.T., art. 476, num. 20, adicionado por L. 1819/2016 art. 187.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9046,"Exclusión de IVA en servicios de reparación y mantenimiento de naves y artefactos marítimos y fluviales. E.T., art. 476, num. 30, adicionado por L. 1819/2016 art. 187.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9047,"Exclusión de IVA por servicios de hotelería y turismo prestados en zonas del régimen aduanero especial de Urabá, Tumaco, Guapi, Inírida, Puerto Carreño, La Primavera y Cumaribo, Maicao, Uribía y Manaure. E.T., art. 476, num. 26",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9048,"Exclusión de IVA por operaciones cambiarias de compra y venta de divisas. E.T., art. 476, num. 27",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9049,"Exclusión de IVA por servicios de intermediación para el pago de incentivos o transferencias monetarias condicionadas en el marco de los programas sociales. E.T., art. 476, num. 17",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9051,"Exclusión de IVA en la venta de alimentos consumo humano o animal, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9052,"Exclusión de IVA en la venta de elementos de aseo, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9053,"Exclusión de IVA en la venta de vestuario, destinado a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9054,"Exclusión de IVA en la venta de medicamentos de uso humano y veterinario, destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9055,"Exclusión de IVA en la venta de materiales de construcción destinados a los departamentos de Amazonas, Guainía y Vaupés. E.T., art. 424, num. 13, adicionado L 1819/2016, art. 175, num. 13.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9056,"Exclusión de IVA en la venta de bicicletas, bicicletas eléctricas, motos eléctricas, patines, monopatines, monopatines eléctricos, patinetas, y patinetas eléctricas, de hasta 50 UVT. E.T., art. 424, num 17.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9057,"Exclusión de IVA en la venta de bienes facturados por los comerciantes definidos en el parágrafo 2 del artículo 34 de la Ley 98 de 1993. E.T., art. 424, num 18",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9058,"Exclusión de IVA en la venta de productos comprados o introducidos al Amazonas en el marco del convenio Colombo-Peruano y el convenio con la República Federativa del Brasil. E.T., art. 424, num 15",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9059,"Exclusión de IVA en servicios de administración de fondos del Estado y los servicios vinculados con la seguridad social de acuerdo con lo previsto en la Ley 100 de 1993, E.T., art. 476, num. 2",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9060,"Exclusión de IVA, primeros trescientos veinticinco (325) minutos mensuales del servicio telefónico local facturado a los usuarios estratos 1, 2 y 3 y servicio prestado desde teléfonos públicos, E.T., art. 476, num. 8",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9061,"Exclusión de IVA en comisiones percibidas por la administración de fondos de inversión colectiva, E.T., art. 476, num. 23.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9062,"Exclusión de IVA en servicios de corretaje de contratos de reaseguros, E.T., art. 476, num.32",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9065,"Exclusión de IVA en los servicios prestados a la ONU y a las entidades multilaterales de crédito, de acuerdo con los convenios ratificados por Colombia. Reglamentación Dec. 2076/1992, art. 21",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9066,"Exclusión de IVA en venta de chatarra de las subpartidas 72.04, 74.04 y 76.02. cuando no intervenga como enajenante o adquiriente una siderúrgica. Art.437-4 E.T., Art.1.3.2.1.9. Decreto 1625 de 2016",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9067,"Exclusión del IVA por la venta de bienes de diferentes partidas arancelarias que inician con la partida 01.03 y termina con la subpartida 96.09.10.00.00, contempladas en el inciso 1 del art. 424 E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9069,Exclusión de IVA por venta de bienes inmuebles numeral 12 Artículo 424 E.T,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9070,"Exclusión de IVA en comercialización de animales vivos, excepto los animales domésticos de compañía. ET art 476 núm. 25 modificado ley 2277/2020 art 76, art. 1",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9072,Exclusión de IVA en el servicio de faenamiento ET art 476 núm. 25 A,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9073,Exclusión de IVA en los contratos de Obras Públicas que celebren las personas naturales o jurídicas con las Entidades Territoriales y/o Entidades Descentralizadas del Orden Departamental y Municipal. Art. 100 L.21/1992,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9100,"Tarifa del 5% venta de servicios de almacenamiento y comisiones productos agrícolas. E.T., art. 468-3, num. 1,",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9101,"Tarifa del 5% por venta de seguro agropecuario. E.T., art. 468-3, num. 2.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9102,"Tarifa del 5% por venta de servicios prestados mediante entidades del Num. 1 Art. 19 E.T., con discapacidad. E.T., art. 468-3, num. 4, modificado por L. 1819/2016, art. 186.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9103,"Tarifa de 5% en venta de servicios de medicina prepagada y pólizas relacionadas. E.T., art. 468-3, num. 3,",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9105,"Tarifa del 5% en venta de bienes sujetos a participación o impuesto al consumo de licores, vinos, aperitivos y similares del art. 202 L. 223/1995. E.T., art. 468-1, num. 2, adicionado L. 1819/2016, art. 185, num. 2.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9106,"Tarifa del 5% en las neveras nuevas para sustitución, sujetas al reglamento técnico de etiquetado (RETIQ). E.T., art. 468-1, num. 3, adicionado L. 1819/2016, art. 185, num.3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9107,Tarifa del 5%. El ingreso al productor en la venta de Gasolina y ACPM. E.T. Numeral 4 art. 468-1 del Art. 174 Ley 1955 de 2019.,SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9110,"Tarifa del 5% en la venta de bienes de las partidas que inician desde la 09.01. y termina en la partida 90.32., contemplados en el inciso 1 del artículo 468-1 E.T..",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9200,"Exención de IVA en venta de alcohol carburante. E.T., art. 477, num. 1.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9202,"Exención de IVA venta de libros y revistas de carácter científico y cultural. E.T., art. 478.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9203,"Exención de IVA por prestación servicios en el país utilizados en el exterior. E.T., art. 481, lit. c.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9204,"Exención de IVA por prestación de servicios turísticos a extranjeros en el territorio colombiano. E.T., art. 481, lit. d.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9205,"Exención de IVA por cuadernos subpartida 48.20.20.00.00, diarios, publicaciones periódicas, impresos, demás subpartida 49.02. E.T., art. 481, lit. f.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9206,"Exención de IVA por servicio de conexión estrato 1 y 2. E.T., art. 481, lit. h.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9207,"Exención de IVA en venta de municiones y material de guerra y elementos pertenecientes a Fuerzas Militares y Policía Nacional. E.T., art. 477, num. 3.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9208,"Exención de IVA en la venta de vehículos automotores de transporte público de pasajeros completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo, de transporte público de pasajeros. E.T., art. 477, num. 4",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9209,"Exención de IVA en la venta de vehículos automotores de servicio público o particular, de transporte de carga completos y el chasis con motor y la carrocería adquiridos individualmente para conformar un vehículo automotor completo nuevo de transporte de carga de más de 10.5 toneladas de peso bruto vehicular. E.T., art. 477, num. 5..",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9210,"Exención en IVA en la venta de bicicletas y sus partes; motocicletas y sus partes y motocarros y sus partes, que se introduzcan y comercialicen en los departamentos de Amazonas, Guainía, Guaviare, Vaupés y Vichada, siempre y cuando se destinen exclusivamente al consumo dentro del mismo departamento. Numeral 6 del art. 477 del E.T..",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9211,"Exención de IVA en la venta de alimentos consumo humano o animal que se introduzcan y comercialicen al departamento de Amazonas E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9212,"Exención de IVA en la venta de elementos de aseo que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9213,"Exención de IVA en la venta de vestuario, que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9214,"Exención de IVA en la venta de medicamentos de uso humano y veterinario, que se introduzcan y comercialicen al departamento de Amazonas E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9215,"Exención de IVA en la venta de materiales de construcción que se introduzcan y comercialicen al departamento de Amazonas. E.T., art. 477, num. 7, adicionado por el art. 12 de la Ley 2010 de 2019",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9216,"Exención por prestación de servicios turísticos a extranjeros en el territorio colombiano. E.T., art. 481, lit. d, inc. 2",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9217,"Exención de IVA en la venta de bienes que inician desde la partida 01.02, y termina en la partida 96.19. contemplados en el inciso 1 del artículo 477 del E.T. y Sentencia C117 de 2018.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9218,"Exención de IVA por uso de recursos de auxilios o donaciones de entidades o gobiernos extranjeros convenidos con el Gobierno colombiano, destinados a realizar programas de utilidad común y registrados en la Agencia Presidencial de la Cooperación Internacional. L. 788/2002, art. 96, modificado por el art. 38 de la Ley 2010 de 2019.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9221,"Exención de IVA en compra o donación de vehículos, equipos o elementos nuevos o usados utilizados para la gestión integral del riesgo, preparativos y atención de rescate a la actividad bomberil y la atención de incidentes con materiales peligrosos. L.1575/2012, art. 32, modificado por L.2010/2019, art. 32",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1011,9222,"Exención de IVA por exportación de servicios relacionados con la producción de obra de cine, televisión, audiovisuales de cualquier género y con el desarrollo de software. Parágrafo del Art. 481 del E.T.",SI,Prevalidador DIAN AG2025 v3.3.0-26
+1012,1206,Valor patrimonial de los criptoactivos,SI,Prevalidador DIAN AG2025 v3.3.0-26
