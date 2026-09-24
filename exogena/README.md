@@ -184,6 +184,9 @@ formato,prefijo,concepto,columna,base,notas
   reportados que el prevalidador rechazaría y los municipios homónimos, por prioridad y monto; el equipo lo
   llena (RUT, facturas, RUES) y se carga de vuelta como corrección de cada tercero, con fecha y fuente. Las
   filas con dirección inválida o municipio no encontrado se rechazan con el motivo.
+- Retención asumida (1001): si el gasto 5315 de un tercero (`parametros.retencion_asumida.cuentas_gasto`)
+  cruza exacto con su retención de renta, la retención va a la columna asumida y el gasto se descarta como pago
+  (el cuadre lo explica en `gasto_retencion_asumida`); si no cruza, ALERTA. Criterio de práctica profesional.
 - La severidad de un dato faltante sale del prevalidador: ERROR si la columna es obligatoria, ALERTA si la
   acepta vacía. Ojo: la fila "obligatorio" de las hojas del prevalidador dice N para dirección, departamento y
   municipio, pero sus macros (E0074, E0075, E0076, E0100) los exigen cuando el país es Colombia y los

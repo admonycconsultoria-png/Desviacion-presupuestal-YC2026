@@ -634,11 +634,40 @@
           columna: regla.columna, base: regla.base, prefijo_regla: regla.prefijo, valor, descartado: nit ? "" : "sin_tercero" });
       }
     }
+    retencionAsumida(salida, cfg, hallazgos);
     const sinT = salida.filter((p) => p.descartado === "sin_tercero" && !p.base.endsWith("_cuenta"));
     for (const [, g] of agrupar(sinT, (p) => p.formato + "|" + p.cuenta)) {
       hallazgos.push(["ERROR", "Movimiento sin tercero", g[0].cuenta, `Formato ${g[0].formato}: ${fmtPesos(suma(g, (p) => p.valor))} en la cuenta ${g[0].cuenta} sin NIT; no se puede reportar hasta asignarle tercero`]);
     }
     return salida;
+  }
+
+  // 1001: si el gasto por retención asumida (5315) de un tercero cruza exacto con su retención de renta, la retención
+  // pasa a "ret_asumida" y el gasto se descarta (no es un pago al tercero). Espejo de motor._retencion_asumida.
+  function retencionAsumida(partidas, cfg, hallazgos) {
+    const conf = cfg.parametros.retencion_asumida || {};
+    if (conf.activa === false) return [];
+    const cuentas = (conf.cuentas_gasto || ["5315"]).map(String), tol = Number(conf.tolerancia === undefined ? 1 : conf.tolerancia);
+    const base = (p) => p.formato === "1001" && p.descartado === "" && p.nit !== "";
+    const esGasto = (p) => base(p) && cuentas.some((c) => p.cuenta.startsWith(c)) && p.columna !== "ret_renta";
+    const esRet = (p) => base(p) && p.columna === "ret_renta";
+    const gasto = new Map(), ret = new Map();
+    partidas.forEach((p) => { if (esGasto(p)) gasto.set(p.nit, (gasto.get(p.nit) || 0) + p.valor); else if (esRet(p)) ret.set(p.nit, (ret.get(p.nit) || 0) + p.valor); });
+    const resumen = [];
+    for (const [nit, v] of [...gasto].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+      const r = ret.get(nit) || 0;
+      if (v < 0.5 || r < 0.5) continue;
+      if (Math.abs(v - r) <= tol) {
+        const ctas = [...new Set(partidas.filter((p) => esGasto(p) && p.nit === nit).map((p) => p.cuenta))].sort();
+        partidas.forEach((p) => { if (p.nit === nit) { if (esRet(p)) p.columna = "ret_asumida"; else if (esGasto(p)) p.descartado = "retencion_asumida"; } });
+        hallazgos.push(["INFO", "Retención asumida", nit, `Gasto ${ctas.join(", ")} ${fmtPesos(v)} = retención de renta ${fmtPesos(r)}: va en 'Retención asumida' y el gasto no se reporta como pago`]);
+        resumen.push({ nit, gasto: v, retencion: r, cruza: true });
+      } else {
+        hallazgos.push(["ALERTA", "Posible retención asumida", nit, `Gasto en ${cuentas.join("/")} ${fmtPesos(v)} y retención de renta ${fmtPesos(r)} del mismo tercero no cruzan exacto: queda como retención practicada y el gasto como pago no deducible. Si asumió solo una parte, lleve esa parte a una subcuenta propia de la 5315 o ajuste la fila del 1001 con el soporte`]);
+        resumen.push({ nit, gasto: v, retencion: r, cruza: false });
+      }
+    }
+    return resumen;
   }
 
   function prorratear(p, cfg) {
@@ -910,13 +939,14 @@
       const total = suma(g, (p) => p.valor);
       const excl = suma(g.filter((p) => p.descartado === "nit_excluido"), (p) => p.valor);
       const sinT = suma(g.filter((p) => p.descartado === "sin_tercero"), (p) => p.valor);
+      const asumida = suma(g.filter((p) => p.descartado === "retencion_asumida"), (p) => p.valor);
       const enArchivo = suma(generados[fmt], (r) => r[col] || 0);
       const lineas = agrupar(g.filter((p) => p.descartado === ""), (p) => p.concepto + "|" + p.nit);
       let neg = 0;
       for (const [, l] of lineas) { const s = suma(l, (p) => p.valor); if (s < -0.5) neg += s; }
-      const noExp = total - excl - sinT - neg - enArchivo;
+      const noExp = total - excl - sinT - asumida - neg - enArchivo;
       out.push({ formato: fmt, columna: col, total_balance_segun_reglas: r0(total), excluido_por_nit: r0(excl),
-        sin_tercero: r0(sinT), negativos_llevados_a_cero: r0(neg), total_en_formato: r0(enArchivo),
+        sin_tercero: r0(sinT), gasto_retencion_asumida: r0(asumida), negativos_llevados_a_cero: r0(neg), total_en_formato: r0(enArchivo),
         diferencia_no_explicada: r0(noExp), estado: Math.abs(noExp) <= tol ? "OK" : "REVISAR" });
     }
     return out;
@@ -1101,6 +1131,6 @@
     return filasDeHoja(XLSX, wb.Sheets[wb.SheetNames[0]]);
   }
 
-  const api = { ejecutar, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, ubicar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
+  const api = { ejecutar, generarPartidas, retencionAsumida, estadoColumnas, leerPrevalidador, leerFacturaXml, leerFacturasArchivo, completarMaestro, ubicar, textoCsv, leerLibro, cargarBalance, prepararConfig, porcentajeDian, topePesos, calcularDv, separarDv, aNumero, clave, textoDian, partirNombre, validarReglas, reglaPara };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.Exogena = api;
 })(typeof window !== "undefined" ? window : globalThis);

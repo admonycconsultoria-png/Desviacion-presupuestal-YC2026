@@ -23,14 +23,16 @@ def cuadres(partidas: pd.DataFrame, generados: dict[str, pd.DataFrame], cfg: Con
         total = g["valor"].sum()
         excl = g.loc[g["descartado"] == "nit_excluido", "valor"].sum()
         sin_t = g.loc[g["descartado"] == "sin_tercero", "valor"].sum()
+        asumida = g.loc[g["descartado"] == "retencion_asumida", "valor"].sum()
         en_archivo = generados[fmt][col].sum() if col in generados[fmt] else 0
         validas = g[g["descartado"] == ""]
         por_linea = validas.groupby(["concepto", "nit"])["valor"].sum()
         negativos = por_linea[por_linea < -0.5].sum()
-        no_explicado = total - excl - sin_t - negativos - en_archivo
+        no_explicado = total - excl - sin_t - asumida - negativos - en_archivo
         filas.append({
             "formato": fmt, "columna": col, "total_balance_segun_reglas": round(total),
             "excluido_por_nit": round(excl), "sin_tercero": round(sin_t),
+            "gasto_retencion_asumida": round(asumida),
             "negativos_llevados_a_cero": round(negativos),
             "total_en_formato": round(en_archivo),
             "diferencia_no_explicada": round(no_explicado),

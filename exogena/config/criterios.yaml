@@ -48,6 +48,10 @@ criterios:
     texto: "Viáticos y gastos de representación que NO son ingreso para el trabajador: 5055 y 5056. Si son ingreso del trabajador van al 2276."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 ítems 1 y 2"
   - formato: "1001"
+    prefijos: ["5315", "531520"]
+    texto: "Retención asumida: se registra practicada (2365) y la contrapartida va al gasto 5315. Si el gasto del tercero cruza exacto con su retención de renta, el aplicativo lleva la retención a 'Retención asumida' y no reporta el gasto como pago (no es un pago al tercero). Si no cruza, queda ALERTA."
+    fuente: "Res. 227/2025 art. 1.3.5.2.1 (retenciones practicadas o asumidas); Práctica"
+  - formato: "1001"
     prefijos: ["2365", "2367"]
     texto: "Las retenciones se reportan en la misma fila (concepto y tercero) del pago que las originó. Las autorretenciones no se reportan."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 1 y 3"

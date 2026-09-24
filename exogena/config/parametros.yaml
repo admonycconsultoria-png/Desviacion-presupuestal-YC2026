@@ -76,6 +76,15 @@ cuentas_bancarias: {}
 # retención en el formato, ninguna de sus filas se agrupa en cuantías menores
 no_agrupar_si_retencion: true
 
+# Retención asumida (1001): la retención de renta se registra practicada (2365) y su contrapartida va a un
+# gasto (5315). Si, para un mismo tercero, el gasto cruza exacto con la retención de renta del año, la
+# retención va a la columna "Retención en la fuente asumida Renta" y ese gasto no se reporta como pago
+# (no es un pago al tercero). Si no cruzan exacto, queda una ALERTA para revisarlo.
+retencion_asumida:
+  activa: true
+  cuentas_gasto: ["5315"]     # prefijos del gasto por retención asumida (p. ej. 531520 impuestos asumidos)
+  tolerancia: 1               # pesos de diferencia admitida por redondeo
+
 # Concepto destino de la retención de IVA cuando el tercero no tiene pagos en 1001
 concepto_prorrata_defecto:
   "1001": "5016"

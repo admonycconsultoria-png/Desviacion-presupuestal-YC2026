@@ -8,6 +8,8 @@ Errores sembrados (el motor debe encontrarlos todos):
   - Honorarios 511025 con $1.500.000 sin tercero
   - Tercero 79555111 sin ciudad ni dirección
   - Cliente 900777888 con saldo crédito (anticipo mal clasificado)
+  - 900888777 con retención asumida: gasto 531520 = retención 236515 (va en 'Retención asumida')
+  - 79555111 con gasto 531520 que no cruza con su retención (ALERTA)
 """
 from pathlib import Path
 
@@ -56,6 +58,14 @@ MOV = [
     ("513525", "Servicios", "901234567", "SERVICIOS INTEGRALES SAS", 0, 20_000_000, 0),
     ("516005", "Depreciación", "900123456", "EMPRESA DEMO SAS", 0, 1_200_000, 0),
     ("530520", "Intereses", "860034313", "BANCO DAVIVIENDA SA", 0, 900_000, 0),
+    # retención asumida: honorarios con retención que la empresa asumió (gasto 531520 = retención 236515)
+    ("511025", "Honorarios revisoría", "900888777", "ASESORIAS LEGALES SAS", 0, 4_000_000, 0),
+    ("233525", "Honorarios por pagar", "900888777", "ASESORIAS LEGALES SAS", 0, 0, 4_000_000),
+    ("236515", "Retención honorarios", "900888777", "ASESORIAS LEGALES SAS", 0, 0, 440_000),
+    ("531520", "Impuestos asumidos", "900888777", "ASESORIAS LEGALES SAS", 0, 440_000, 0),
+    # gasto 531520 que NO cruza con la retención del tercero
+    ("531520", "Impuestos asumidos", "79555111", "PEDRO ANTONIO RAMIREZ", 0, 300_000, 0),
+    ("110505", "Caja general", "", "", 0, 0, 300_000),
     ("613520", "Costo de ventas", "900123456", "EMPRESA DEMO SAS", 0, 115_000_000, 0),
 ]
 
@@ -73,6 +83,7 @@ TERCEROS = [
     ("CC", "71234567", "", "", "PEREZ", "GOMEZ", "JUAN", "CARLOS", "CL 1 2 3", "Itagüí", "Antioquia"),
     ("CC", "1098765432", "", "", "PEREZ", "GOMEZ", "JUAN", "CARLOS", "CL 9 9 9", "Bucaramanga", "Santander"),
     ("NIT", "900156264", "", "NUEVA EPS S.A.", "", "", "", "", "CR 85K 46A 66", "Bogotá", ""),
+    ("NIT", "900888777", "", "ASESORIAS LEGALES SAS", "", "", "", "", "CL 40 30 20", "Medellín", "Antioquia"),
     ("CC", "43111222", "", "", "OSPINA", "", "LUZ", "MARINA", "CL 70 50 20", "Medellín", "Antioquia"),
     ("NIT", "900123456", "", "EMPRESA DEMO SAS", "", "", "", "", "CL 1 1 1", "Medellín", "Antioquia"),
 ]

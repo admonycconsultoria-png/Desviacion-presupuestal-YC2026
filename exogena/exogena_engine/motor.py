@@ -59,6 +59,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     salida.extend(_partidas_por_cuenta(balance, formatos, cfg, hallazgos))
     partidas = pd.DataFrame(salida, columns=["formato", "cuenta", "nombre_cuenta", "nit", "concepto",
                                              "columna", "base", "prefijo_regla", "valor", "descartado"])
+    partidas = _retencion_asumida(partidas, cfg, hallazgos)
     # (las cuentas bancarias sin entidad ya tienen su propio hallazgo)
     sin_t = partidas[(partidas["descartado"] == "sin_tercero") & ~partidas["base"].str.endswith("_cuenta")]
     for (fmt, cuenta), g in sin_t.groupby(["formato", "cuenta"]):
@@ -66,6 +67,39 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
                           f"Formato {fmt}: ${g['valor'].sum():,.0f} en la cuenta {cuenta} sin NIT; "
                           f"no se puede reportar hasta asignarle tercero"))
     return partidas
+
+
+def _retencion_asumida(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
+    """1001: si el gasto por retención asumida (5315) de un tercero cruza exacto con su retención de renta,
+    la retención pasa a 'ret_asumida' y el gasto se descarta (no es un pago al tercero)."""
+    conf = cfg.parametros.get("retencion_asumida") or {}
+    if p.empty or conf.get("activa") is False:
+        return p
+    cuentas = tuple(str(c) for c in (conf.get("cuentas_gasto") or ["5315"]))
+    tol = float(conf.get("tolerancia", 1))
+    base = (p["formato"] == "1001") & (p["descartado"] == "") & (p["nit"] != "")
+    es_gasto = base & p["cuenta"].str.startswith(cuentas) & (p["columna"] != "ret_renta")
+    es_ret = base & (p["columna"] == "ret_renta")
+    gasto = p[es_gasto].groupby("nit")["valor"].sum()
+    ret = p[es_ret].groupby("nit")["valor"].sum()
+    for nit, v in gasto.items():
+        r = float(ret.get(nit, 0.0))
+        if v < 0.5 or r < 0.5:
+            continue
+        if abs(v - r) <= tol:
+            p.loc[es_ret & (p["nit"] == nit), "columna"] = "ret_asumida"
+            p.loc[es_gasto & (p["nit"] == nit), "descartado"] = "retencion_asumida"
+            hallazgos.append(("INFO", "Retención asumida", nit,
+                              f"Gasto {', '.join(sorted(set(p.loc[es_gasto & (p['nit'] == nit), 'cuenta'])))} "
+                              f"${v:,.0f} = retención de renta ${r:,.0f}: va en 'Retención asumida' y el gasto "
+                              f"no se reporta como pago"))
+        else:
+            hallazgos.append(("ALERTA", "Posible retención asumida", nit,
+                              f"Gasto en {'/'.join(cuentas)} ${v:,.0f} y retención de renta ${r:,.0f} del mismo tercero "
+                              f"no cruzan exacto: queda como retención practicada y el gasto como pago no deducible. Si "
+                              f"asumió solo una parte, lleve esa parte a una subcuenta propia de la 5315 o ajuste la fila "
+                              f"del 1001 con el soporte"))
+    return p
 
 
 PATRON_ENTIDAD = re.compile(r"\b(BANCO|BANCOLOMBIA|DAVIVIENDA|BBVA|COLPATRIA|SCOTIABANK|ITAU|AV VILLAS|"

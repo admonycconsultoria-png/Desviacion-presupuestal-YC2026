@@ -241,3 +241,15 @@ def test_nit_repetido_usa_sucursal_principal_o_fila_mas_completa():
     textos = {x[2]: x[3] for x in h if x[1] == "Duplicado en maestro"}
     assert "sucursales 1, 0" in textos["900555111"] and "principal (0)" in textos["900555111"]
     assert "más completa" in textos["71234567"]
+
+
+def test_retencion_asumida_cruza_con_gasto_5315(resultado):
+    f = resultado["generados"]["1001"]
+    a = f[f["numero_identificacion"] == "900888777"]
+    assert a["ret_asumida"].sum() == 440_000 and a["ret_renta"].sum() == 0
+    assert a["pago_no_deducible"].sum() == 0 and a["pago_deducible"].sum() == 4_000_000   # el 5315 no es pago
+    b = f[f["numero_identificacion"] == "79555111"]
+    assert b["ret_asumida"].sum() == 0 and b["pago_no_deducible"].sum() == 300_000        # no cruza: sigue como gasto
+    h = resultado["hallazgos"]
+    assert any(x[0] == "INFO" and x[1] == "Retención asumida" and x[2] == "900888777" for x in h)
+    assert any(x[0] == "ALERTA" and x[1] == "Posible retención asumida" and x[2] == "79555111" for x in h)
