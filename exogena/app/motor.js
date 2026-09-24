@@ -588,6 +588,7 @@
     const formatos = Object.keys(cfg.formatos).filter((f) => ["por_tercero", "sin_tercero"].includes(cfg.formatos[f].modo));
     const excl = {};
     formatos.forEach((f) => { excl[f] = nitsExcluidos(cfg, f); });
+    const asumida = cuentasAsumida(cfg);
     const salida = [];
     for (const fila of balance) {
       for (const fmt of formatos) {
@@ -600,7 +601,8 @@
         if (modo === "por_tercero" && regla.tercero) nit = terceroFijo(cfg, regla.tercero);
         else if (modo === "por_tercero") {
           if (!fila.nit) motivo = "sin_tercero";
-          else if (excl[fmt].has(fila.nit)) motivo = "nit_excluido";
+          // el gasto por retención asumida a nombre de la DIAN o de la empresa no se cruza, pero sí se reporta como gasto
+          else if (excl[fmt].has(fila.nit) && !(fmt === "1001" && asumida.some((c) => fila.cuenta.startsWith(c)))) motivo = "nit_excluido";
         }
         salida.push({ formato: fmt, cuenta: fila.cuenta, nombre_cuenta: fila.nombre_cuenta,
           nit: modo === "por_tercero" ? nit : "", concepto: regla.concepto, columna: regla.columna,
@@ -642,32 +644,45 @@
     return salida;
   }
 
-  // 1001: si el gasto por retención asumida (5315) de un tercero cruza exacto con su retención de renta, la retención
-  // pasa a "ret_asumida" y el gasto se descarta (no es un pago al tercero). Espejo de motor._retencion_asumida.
-  function retencionAsumida(partidas, cfg, hallazgos) {
+  // 1001, por tercero: el gasto por retención asumida (5315) se cruza con su retención de renta. Lo asumido es el menor
+  // de los dos: esa parte de la retención va a "ret_asumida" y esa parte del gasto se descarta (no es un pago al tercero);
+  // el resto sigue como retención practicada / pago no deducible. La DIAN y la empresa no se cruzan. Espejo de motor.py.
+  function cuentasAsumida(cfg) {
     const conf = cfg.parametros.retencion_asumida || {};
-    if (conf.activa === false) return [];
-    const cuentas = (conf.cuentas_gasto || ["5315"]).map(String), tol = Number(conf.tolerancia === undefined ? 1 : conf.tolerancia);
+    return conf.activa === false ? [] : (conf.cuentas_gasto || ["5315"]).map(String);
+  }
+  function retencionAsumida(partidas, cfg, hallazgos) {
+    const cuentas = cuentasAsumida(cfg);
+    if (!cuentas.length) return;
+    const conf = cfg.parametros.retencion_asumida || {}, tol = Number(conf.tolerancia === undefined ? 1 : conf.tolerancia);
+    const noCruzan = nitsExcluidos(cfg, "1001");
     const base = (p) => p.formato === "1001" && p.descartado === "" && p.nit !== "";
     const esGasto = (p) => base(p) && cuentas.some((c) => p.cuenta.startsWith(c)) && p.columna !== "ret_renta";
     const esRet = (p) => base(p) && p.columna === "ret_renta";
     const gasto = new Map(), ret = new Map();
     partidas.forEach((p) => { if (esGasto(p)) gasto.set(p.nit, (gasto.get(p.nit) || 0) + p.valor); else if (esRet(p)) ret.set(p.nit, (ret.get(p.nit) || 0) + p.valor); });
-    const resumen = [];
-    for (const [nit, v] of [...gasto].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
-      const r = ret.get(nit) || 0;
-      if (v < 0.5 || r < 0.5) continue;
-      if (Math.abs(v - r) <= tol) {
-        const ctas = [...new Set(partidas.filter((p) => esGasto(p) && p.nit === nit).map((p) => p.cuenta))].sort();
-        partidas.forEach((p) => { if (p.nit === nit) { if (esRet(p)) p.columna = "ret_asumida"; else if (esGasto(p)) p.descartado = "retencion_asumida"; } });
-        hallazgos.push(["INFO", "Retención asumida", nit, `Gasto ${ctas.join(", ")} ${fmtPesos(v)} = retención de renta ${fmtPesos(r)}: va en 'Retención asumida' y el gasto no se reporta como pago`]);
-        resumen.push({ nit, gasto: v, retencion: r, cruza: true });
-      } else {
-        hallazgos.push(["ALERTA", "Posible retención asumida", nit, `Gasto en ${cuentas.join("/")} ${fmtPesos(v)} y retención de renta ${fmtPesos(r)} del mismo tercero no cruzan exacto: queda como retención practicada y el gasto como pago no deducible. Si asumió solo una parte, lleve esa parte a una subcuenta propia de la 5315 o ajuste la fila del 1001 con el soporte`]);
-        resumen.push({ nit, gasto: v, retencion: r, cruza: false });
+    const nuevos = [];
+    for (const nit of [...gasto.keys()].sort()) {
+      const v = gasto.get(nit), rt = ret.get(nit) || 0;
+      if (noCruzan.has(nit) || v < 0.5 || rt < 0.5) continue;
+      const a = Math.abs(v - rt) <= tol ? rt : Math.min(v, rt);
+      const filasRet = partidas.filter((p) => esRet(p) && p.nit === nit), filasGasto = partidas.filter((p) => esGasto(p) && p.nit === nit);
+      const ctas = [...new Set(filasGasto.map((p) => p.cuenta))].sort().join(", ");
+      for (const p of filasRet) {
+        if (a >= rt - tol) p.columna = "ret_asumida";
+        else { const parte = p.valor * a / rt; nuevos.push({ ...p, columna: "ret_asumida", valor: parte }); p.valor -= parte; }
+      }
+      for (const p of filasGasto) {
+        if (a >= v - tol) p.descartado = "retencion_asumida";
+        else { const parte = p.valor * a / v; nuevos.push({ ...p, descartado: "retencion_asumida", valor: parte }); p.valor -= parte; }
+      }
+      if (Math.abs(v - rt) <= tol) hallazgos.push(["INFO", "Retención asumida", nit, `Gasto ${ctas} ${fmtPesos(v)} = retención de renta ${fmtPesos(rt)}: va en 'Retención asumida' y el gasto no se reporta como pago`]);
+      else {
+        const resto = [].concat(rt - a > tol ? [`${fmtPesos(rt - a)} sigue como retención practicada`] : [], v - a > tol ? [`${fmtPesos(v - a)} del gasto queda como pago no deducible`] : []);
+        hallazgos.push(["INFO", "Retención asumida parcial", nit, `Retención de renta ${fmtPesos(rt)} y gasto ${ctas} ${fmtPesos(v)}: ${fmtPesos(a)} va en 'Retención asumida'; ${resto.join("; ")}`]);
       }
     }
-    return resumen;
+    nuevos.forEach((p) => partidas.push(p));
   }
 
   function prorratear(p, cfg) {

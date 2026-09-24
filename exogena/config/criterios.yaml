@@ -49,7 +49,7 @@ criterios:
     fuente: "Res. 227/2025 art. 1.3.5.2.1 ítems 1 y 2"
   - formato: "1001"
     prefijos: ["5315", "531520"]
-    texto: "Retención asumida: se registra practicada (2365) y la contrapartida va al gasto 5315. Si el gasto del tercero cruza exacto con su retención de renta, el aplicativo lleva la retención a 'Retención asumida' y no reporta el gasto como pago (no es un pago al tercero). Si no cruza, queda ALERTA."
+    texto: "Retención asumida: se registra practicada (2365) y la contrapartida va al gasto 5315. Por tercero se asume el menor entre la retención de renta y el gasto: esa parte va a 'Retención asumida' y no se reporta como pago; si la retención es mayor, el resto sigue practicada; si el gasto es mayor, el resto es pago no deducible. El gasto a nombre de la DIAN o de la empresa no se cruza y se reporta como pago no deducible."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 (retenciones practicadas o asumidas); Práctica"
   - formato: "1001"
     prefijos: ["2365", "2367"]

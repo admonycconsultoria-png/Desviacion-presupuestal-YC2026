@@ -771,14 +771,14 @@
   function panelRetencionAsumida(emp, bal) {
     const h = [];
     try { const cfg = Exogena.prepararConfig(construirCfg(emp)); Exogena.generarPartidas(bal, cfg, h); } catch (e) { return ""; }
-    const si = h.filter((x) => x[1] === "Retención asumida"), no = h.filter((x) => x[1] === "Posible retención asumida");
+    const si = h.filter((x) => x[1] === "Retención asumida"), no = h.filter((x) => x[1] === "Retención asumida parcial");
     const conf = DEF.parametros.retencion_asumida || {};
     if (!si.length && !no.length) return "";
     const lista = (xs) => `<ul style="margin:4px 0 0 18px">${xs.slice(0, 15).map((x) => `<li><b>${esc(x[2])}</b> ${esc(nombreTercero(bal, x[2]))}: ${esc(x[3])}</li>`).join("")}${xs.length > 15 ? `<li>… y ${xs.length - 15} más (ver Hallazgos)</li>` : ""}</ul>`;
     return `<div class="panel"><h2>Retención asumida (cruce ${esc((conf.cuentas_gasto || ["5315"]).join(", "))} ↔ retención de renta, por tercero)</h2>
       ${si.length ? `<p><span class="chip OK">${si.length} cruzan exacto</span> Su retención va en la columna <b>Retención en la fuente asumida Renta</b> y el gasto no se reporta como pago no deducible (no es un pago al tercero).</p>${lista(si)}` : ""}
-      ${no.length ? `<p style="margin-top:8px"><span class="chip REVISAR">${no.length} no cruzan</span> El gasto y la retención del tercero son distintos: quedan como retención practicada y el gasto como pago no deducible. Si asumió solo una parte, lleve esa parte a una subcuenta propia de la 5315 o ajuste la fila del 1001 con el soporte.</p>${lista(no)}` : ""}
-      <p class="ayuda" style="margin-top:8px">Criterio: práctica profesional (la Res. 227 pide reportar las retenciones "practicadas o asumidas"; el gasto por asumirla no es un pago al tercero). Cuentas del gasto y tolerancia en parametros.retencion_asumida.</p></div>`;
+      ${no.length ? `<p style="margin-top:8px"><span class="chip ALERTA">${no.length} parciales</span> Se asume el menor entre la retención y el gasto: si la retención es mayor, el resto sigue como retención practicada; si el gasto es mayor, el resto queda como pago no deducible del tercero.</p>${lista(no)}` : ""}
+      <p class="ayuda" style="margin-top:8px">El gasto a nombre de la DIAN o de la propia empresa no se cruza con ninguna retención: se reporta como pago no deducible. Criterio: práctica profesional (la Res. 227 pide reportar las retenciones "practicadas o asumidas"; el gasto por asumirla no es un pago al tercero). Cuentas del gasto y tolerancia en parametros.retencion_asumida.</p></div>`;
   }
   function nombreTercero(bal, nit) { const f = bal.find((r) => r.nit === nit && r.nombre_tercero); return f ? f.nombre_tercero : ""; }
 

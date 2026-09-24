@@ -9,7 +9,9 @@ Errores sembrados (el motor debe encontrarlos todos):
   - Tercero 79555111 sin ciudad ni dirección
   - Cliente 900777888 con saldo crédito (anticipo mal clasificado)
   - 900888777 con retención asumida: gasto 531520 = retención 236515 (va en 'Retención asumida')
-  - 79555111 con gasto 531520 que no cruza con su retención (ALERTA)
+  - 79555111: gasto 531520 $300.000 < retención $1.100.000 (asume $300.000, practica $800.000)
+  - 900222333: retención compras $50.000 < gasto 531520 $75.000 (asume $50.000; $25.000 pago no deducible)
+  - DIAN con gasto 531520: no se cruza, se reporta como pago no deducible a nombre de la DIAN
 """
 from pathlib import Path
 
@@ -63,9 +65,18 @@ MOV = [
     ("233525", "Honorarios por pagar", "900888777", "ASESORIAS LEGALES SAS", 0, 0, 4_000_000),
     ("236515", "Retención honorarios", "900888777", "ASESORIAS LEGALES SAS", 0, 0, 440_000),
     ("531520", "Impuestos asumidos", "900888777", "ASESORIAS LEGALES SAS", 0, 440_000, 0),
-    # gasto 531520 que NO cruza con la retención del tercero
+    # asunción parcial: gasto menor que la retención (asume 300.000; 800.000 siguen practicados)
     ("531520", "Impuestos asumidos", "79555111", "PEDRO ANTONIO RAMIREZ", 0, 300_000, 0),
     ("110505", "Caja general", "", "", 0, 0, 300_000),
+    # gasto mayor que la retención: asume 50.000 y 25.000 quedan como pago no deducible
+    ("143505", "Mercancías", "900222333", "COMERCIO SAS", 0, 1_250_000, 0),
+    ("220505", "Proveedores nacionales", "900222333", "COMERCIO SAS", 0, 0, 1_250_000),
+    ("236540", "Retención compras", "900222333", "COMERCIO SAS", 0, 0, 50_000),
+    ("531520", "Impuestos asumidos", "900222333", "COMERCIO SAS", 0, 75_000, 0),
+    ("110505", "Caja general", "", "", 0, 0, 25_000),
+    # a nombre de la DIAN: no se cruza; pago no deducible a la DIAN
+    ("531520", "Impuestos asumidos", "800197268", "DIRECCION DE IMPUESTOS Y ADUANAS NACIONALES", 0, 200_000, 0),
+    ("110505", "Caja general", "", "", 0, 0, 200_000),
     ("613520", "Costo de ventas", "900123456", "EMPRESA DEMO SAS", 0, 115_000_000, 0),
 ]
 
@@ -84,6 +95,7 @@ TERCEROS = [
     ("CC", "1098765432", "", "", "PEREZ", "GOMEZ", "JUAN", "CARLOS", "CL 9 9 9", "Bucaramanga", "Santander"),
     ("NIT", "900156264", "", "NUEVA EPS S.A.", "", "", "", "", "CR 85K 46A 66", "Bogotá", ""),
     ("NIT", "900888777", "", "ASESORIAS LEGALES SAS", "", "", "", "", "CL 40 30 20", "Medellín", "Antioquia"),
+    ("NIT", "900222333", "", "COMERCIO SAS", "", "", "", "", "CR 50 45 60", "Medellín", "Antioquia"),
     ("CC", "43111222", "", "", "OSPINA", "", "LUZ", "MARINA", "CL 70 50 20", "Medellín", "Antioquia"),
     ("NIT", "900123456", "", "EMPRESA DEMO SAS", "", "", "", "", "CL 1 1 1", "Medellín", "Antioquia"),
 ]

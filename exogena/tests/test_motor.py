@@ -68,7 +68,8 @@ def test_cuadres_explican_todas_las_diferencias(resultado):
 
 def test_1001_excluye_dian_y_propio_nit_y_prorratea_iva(resultado):
     f = resultado["generados"]["1001"]
-    assert "800197268" not in set(f["numero_identificacion"])
+    # la DIAN solo aparece por el gasto de retención asumida a su nombre (cuenta 5315), nunca por otras cuentas
+    assert set(f.loc[f["numero_identificacion"] == "800197268", "concepto"]) <= {"5016"}
     assert "900123456" not in set(f["numero_identificacion"])
     serv = f[(f["numero_identificacion"] == "901234567") & (f["concepto"] == "5004")].iloc[0]
     assert serv["ret_iva_comun"] == 570000 and serv["ret_renta"] == 800000
@@ -245,11 +246,21 @@ def test_nit_repetido_usa_sucursal_principal_o_fila_mas_completa():
 
 def test_retencion_asumida_cruza_con_gasto_5315(resultado):
     f = resultado["generados"]["1001"]
-    a = f[f["numero_identificacion"] == "900888777"]
-    assert a["ret_asumida"].sum() == 440_000 and a["ret_renta"].sum() == 0
-    assert a["pago_no_deducible"].sum() == 0 and a["pago_deducible"].sum() == 4_000_000   # el 5315 no es pago
-    b = f[f["numero_identificacion"] == "79555111"]
-    assert b["ret_asumida"].sum() == 0 and b["pago_no_deducible"].sum() == 300_000        # no cruza: sigue como gasto
-    h = resultado["hallazgos"]
-    assert any(x[0] == "INFO" and x[1] == "Retención asumida" and x[2] == "900888777" for x in h)
-    assert any(x[0] == "ALERTA" and x[1] == "Posible retención asumida" and x[2] == "79555111" for x in h)
+    tot = lambda nit, col: f.loc[f["numero_identificacion"] == nit, col].sum()  # noqa: E731
+    # gasto = retención: todo asumido y el gasto no es pago
+    assert tot("900888777", "ret_asumida") == 440_000 and tot("900888777", "ret_renta") == 0
+    assert tot("900888777", "pago_no_deducible") == 0 and tot("900888777", "pago_deducible") == 4_000_000
+    # gasto 300.000 < retención 1.100.000: asume 300.000 y practica 800.000; no queda gasto
+    assert tot("79555111", "ret_asumida") == 300_000 and tot("79555111", "ret_renta") == 800_000
+    assert tot("79555111", "pago_no_deducible") == 0
+    # retención 50.000 < gasto 75.000: asume 50.000; 25.000 pago no deducible (concepto de la 5315)
+    assert tot("900222333", "ret_asumida") == 50_000 and tot("900222333", "ret_renta") == 0
+    c = f[f["numero_identificacion"] == "900222333"].set_index("concepto")
+    assert c.loc["5007", "ret_asumida"] == 50_000 and c.loc["5007", "pago_deducible"] == 1_250_000
+    assert c.loc["5016", "pago_no_deducible"] == 25_000
+    # DIAN: no se cruza; el gasto se reporta como pago no deducible a su nombre
+    d = f[f["numero_identificacion"] == "800197268"]
+    assert len(d) == 1 and d.iloc[0]["pago_no_deducible"] == 200_000 and d.iloc[0]["ret_asumida"] == 0
+    h = {(x[1], x[2]) for x in resultado["hallazgos"]}
+    assert ("Retención asumida", "900888777") in h
+    assert ("Retención asumida parcial", "79555111") in h and ("Retención asumida parcial", "900222333") in h

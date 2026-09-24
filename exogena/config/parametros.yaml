@@ -77,9 +77,10 @@ cuentas_bancarias: {}
 no_agrupar_si_retencion: true
 
 # Retención asumida (1001): la retención de renta se registra practicada (2365) y su contrapartida va a un
-# gasto (5315). Si, para un mismo tercero, el gasto cruza exacto con la retención de renta del año, la
-# retención va a la columna "Retención en la fuente asumida Renta" y ese gasto no se reporta como pago
-# (no es un pago al tercero). Si no cruzan exacto, queda una ALERTA para revisarlo.
+# gasto (5315). Por tercero se asume el MENOR entre el gasto y la retención de renta del año: esa parte va a
+# "Retención en la fuente asumida Renta" y no se reporta como pago (no es un pago al tercero); el resto de la
+# retención sigue practicada y el resto del gasto queda como pago no deducible. El gasto a nombre de la DIAN
+# o de la propia empresa no se cruza con ninguna retención y se reporta como pago no deducible.
 retencion_asumida:
   activa: true
   cuentas_gasto: ["5315"]     # prefijos del gasto por retención asumida (p. ej. 531520 impuestos asumidos)

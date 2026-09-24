@@ -32,6 +32,7 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     Incluye las partidas descartadas con el motivo, para la trazabilidad y el cuadre."""
     salida = []
     formatos = [f for f, d in cfg.formatos.items() if d["modo"] in ("por_tercero", "sin_tercero")]
+    asumida = _cuentas_asumida(cfg)
     for fila in balance.itertuples(index=False):
         for fmt in formatos:
             regla = cfg.regla_para(fmt, fila.cuenta)
@@ -48,7 +49,10 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
             elif modo == "por_tercero":
                 if not fila.nit:
                     motivo = "sin_tercero"
-                elif fila.nit in cfg.nits_excluidos(fmt):
+                elif fila.nit in cfg.nits_excluidos(fmt) and not (fmt == "1001" and asumida
+                                                                     and fila.cuenta.startswith(asumida)):
+                    # el gasto por retención asumida a nombre de la DIAN o de la empresa no se cruza,
+                    # pero sí se reporta como gasto (no es un NIT a excluir en esa cuenta)
                     motivo = "nit_excluido"
             salida.append({
                 "formato": fmt, "cuenta": fila.cuenta, "nombre_cuenta": fila.nombre_cuenta,
@@ -69,37 +73,66 @@ def generar_partidas(balance: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.
     return partidas
 
 
-def _retencion_asumida(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
-    """1001: si el gasto por retención asumida (5315) de un tercero cruza exacto con su retención de renta,
-    la retención pasa a 'ret_asumida' y el gasto se descarta (no es un pago al tercero)."""
+def _cuentas_asumida(cfg: Config) -> tuple[str, ...]:
     conf = cfg.parametros.get("retencion_asumida") or {}
-    if p.empty or conf.get("activa") is False:
+    return tuple(str(c) for c in (conf.get("cuentas_gasto") or ["5315"])) if conf.get("activa") is not False else ()
+
+
+def _retencion_asumida(p: pd.DataFrame, cfg: Config, hallazgos: list) -> pd.DataFrame:
+    """1001, por tercero: el gasto por retención asumida (5315) se cruza con su retención de renta. Lo asumido es el
+    menor de los dos: esa parte de la retención va a 'ret_asumida' y esa parte del gasto se descarta (no es un pago
+    al tercero). El resto de la retención sigue como practicada y el resto del gasto como pago no deducible.
+    La DIAN y la propia empresa no se cruzan: su gasto se reporta según la regla de la cuenta."""
+    cuentas = _cuentas_asumida(cfg)
+    if p.empty or not cuentas:
         return p
-    cuentas = tuple(str(c) for c in (conf.get("cuentas_gasto") or ["5315"]))
-    tol = float(conf.get("tolerancia", 1))
-    base = (p["formato"] == "1001") & (p["descartado"] == "") & (p["nit"] != "")
-    es_gasto = base & p["cuenta"].str.startswith(cuentas) & (p["columna"] != "ret_renta")
-    es_ret = base & (p["columna"] == "ret_renta")
-    gasto = p[es_gasto].groupby("nit")["valor"].sum()
-    ret = p[es_ret].groupby("nit")["valor"].sum()
-    for nit, v in gasto.items():
-        r = float(ret.get(nit, 0.0))
-        if v < 0.5 or r < 0.5:
+    tol = float((cfg.parametros.get("retencion_asumida") or {}).get("tolerancia", 1))
+    no_cruzan = cfg.nits_excluidos("1001")
+    recs = p.to_dict("records")
+    base = lambda r: r["formato"] == "1001" and r["descartado"] == "" and r["nit"] != ""  # noqa: E731
+    es_gasto = lambda r: base(r) and r["cuenta"].startswith(cuentas) and r["columna"] != "ret_renta"  # noqa: E731
+    es_ret = lambda r: base(r) and r["columna"] == "ret_renta"  # noqa: E731
+    gasto: dict[str, float] = {}
+    ret: dict[str, float] = {}
+    for r in recs:
+        if es_gasto(r):
+            gasto[r["nit"]] = gasto.get(r["nit"], 0.0) + r["valor"]
+        elif es_ret(r):
+            ret[r["nit"]] = ret.get(r["nit"], 0.0) + r["valor"]
+    nuevos = []
+    for nit in sorted(gasto):
+        v, rt = gasto[nit], ret.get(nit, 0.0)
+        if nit in no_cruzan or v < 0.5 or rt < 0.5:
             continue
-        if abs(v - r) <= tol:
-            p.loc[es_ret & (p["nit"] == nit), "columna"] = "ret_asumida"
-            p.loc[es_gasto & (p["nit"] == nit), "descartado"] = "retencion_asumida"
+        a = rt if abs(v - rt) <= tol else min(v, rt)
+        filas_ret = [r for r in recs if es_ret(r) and r["nit"] == nit]
+        filas_gasto = [r for r in recs if es_gasto(r) and r["nit"] == nit]
+        ctas = ", ".join(sorted({r["cuenta"] for r in filas_gasto}))
+        for r in filas_ret:
+            if a >= rt - tol:
+                r["columna"] = "ret_asumida"
+            else:
+                parte = r["valor"] * a / rt
+                nuevos.append({**r, "columna": "ret_asumida", "valor": parte})
+                r["valor"] -= parte
+        for r in filas_gasto:
+            if a >= v - tol:
+                r["descartado"] = "retencion_asumida"
+            else:
+                parte = r["valor"] * a / v
+                nuevos.append({**r, "descartado": "retencion_asumida", "valor": parte})
+                r["valor"] -= parte
+        if abs(v - rt) <= tol:
             hallazgos.append(("INFO", "Retención asumida", nit,
-                              f"Gasto {', '.join(sorted(set(p.loc[es_gasto & (p['nit'] == nit), 'cuenta'])))} "
-                              f"${v:,.0f} = retención de renta ${r:,.0f}: va en 'Retención asumida' y el gasto "
-                              f"no se reporta como pago"))
+                              f"Gasto {ctas} ${v:,.0f} = retención de renta ${rt:,.0f}: va en 'Retención asumida' y "
+                              f"el gasto no se reporta como pago"))
         else:
-            hallazgos.append(("ALERTA", "Posible retención asumida", nit,
-                              f"Gasto en {'/'.join(cuentas)} ${v:,.0f} y retención de renta ${r:,.0f} del mismo tercero "
-                              f"no cruzan exacto: queda como retención practicada y el gasto como pago no deducible. Si "
-                              f"asumió solo una parte, lleve esa parte a una subcuenta propia de la 5315 o ajuste la fila "
-                              f"del 1001 con el soporte"))
-    return p
+            resto = [f"${rt - a:,.0f} sigue como retención practicada"] if rt - a > tol else []
+            resto += [f"${v - a:,.0f} del gasto queda como pago no deducible"] if v - a > tol else []
+            hallazgos.append(("INFO", "Retención asumida parcial", nit,
+                              f"Retención de renta ${rt:,.0f} y gasto {ctas} ${v:,.0f}: ${a:,.0f} va en 'Retención "
+                              f"asumida'; " + "; ".join(resto)))
+    return pd.DataFrame(recs + nuevos, columns=p.columns)
 
 
 PATRON_ENTIDAD = re.compile(r"\b(BANCO|BANCOLOMBIA|DAVIVIENDA|BBVA|COLPATRIA|SCOTIABANK|ITAU|AV VILLAS|"
