@@ -281,3 +281,23 @@ def test_gmf_mitad_deducible_y_gasto_a_nombre_de_la_empresa(resultado):
     assert ("INFO", "GMF 50% deducible", "530595") in h
     assert ("INFO", "Pago a la DIAN no deducible", "530520") in h
     assert ("ALERTA", "Gasto a nombre de la empresa", "519595") in h
+
+
+def test_retencion_de_servicios_sobre_compra_queda_en_la_fila_del_gasto(tmp_path):
+    """Compra de bienes (14) con retención practicada como servicios (236525): una sola fila 5007 con el pago y la
+    retención; nunca una fila con pago y sin retención y otra con retención y pago cero."""
+    import pandas as pd
+    enc = {"cuenta": "Cuenta", "nombre_cuenta": "Nombre cuenta", "nit": "Identificación", "nombre_tercero": "Nombre tercero",
+           "saldo_inicial": "Saldo inicial", "debito": "Débito", "credito": "Crédito", "saldo_final": "Saldo final"}
+    filas = [("143505", "Mercancías", "900444555", 1_000_000, 0), ("220505", "Proveedores", "900444555", 960_000, 1_000_000),
+             ("236525", "Retención servicios", "900444555", 0, 40_000), ("110505", "Caja", "", 0, 960_000)]
+    pd.DataFrame([{"cuenta": c, "nombre_cuenta": n, "nit": t, "nombre_tercero": "FERRETERIA EJEMPLO SAS" if t else "",
+                   "saldo_inicial": 0, "debito": d, "credito": cr, "saldo_final": d - cr} for c, n, t, d, cr in filas]
+                 ).rename(columns=enc).to_excel(tmp_path / "bal.xlsx", index=False)
+    pd.DataFrame([{"Identificación": "900444555", "Tipo de identificación": "NIT", "Nombre tercero": "FERRETERIA EJEMPLO SAS",
+                   "Dirección": "CL 50 40 30", "Ciudad": "Medellín"}]).to_excel(tmp_path / "ter.xlsx", index=False)
+    r = ejecutar("generico", str(tmp_path / "bal.xlsx"), str(tmp_path / "ter.xlsx"), str(tmp_path / "out"), formatos=["1001"])
+    f = r["generados"]["1001"]
+    assert len(f) == 1
+    assert f.iloc[0]["concepto"] == "5007" and f.iloc[0]["pago_deducible"] == 1_000_000 and f.iloc[0]["ret_renta"] == 40_000
+    assert any(h[1] == "Retención reasignada" for h in r["hallazgos"])
