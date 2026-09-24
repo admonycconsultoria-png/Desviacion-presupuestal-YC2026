@@ -685,16 +685,18 @@
     }
     [...ctas.keys()].sort().forEach((c) => hallazgos.push(["INFO", "Pago a la DIAN no deducible", c, `Cuenta ${c}: ${fmtPesos(ctas.get(c))} a nombre de la DIAN van a pago no deducible (intereses de mora y sanciones no son deducibles)`]));
   }
+  // La empresa no puede ser beneficiaria de su propio gasto: va a cuantías menores en su concepto y columna
   function gastosEmpresa(partidas, cfg, hallazgos) {
-    const empresa = String(cfg.parametros.empresa.nit);
+    const empresa = String(cfg.parametros.empresa.nit), nitCm = String(cfg.parametros.cuantias_menores.nit);
     const fijos = new Set(cfg.reglas.filter((r) => r.tercero).map((r) => r.prefijo));
     const ctas = new Map();
     for (const r of partidas) {
       if (r.formato === "1001" && r.nit === empresa && r.descartado === "" && !fijos.has(r.prefijo_regla) && Math.abs(r.valor) >= 0.5) {
+        r.nit = nitCm;
         const x = ctas.get(r.cuenta) || [r.nombre_cuenta, 0]; x[1] += r.valor; ctas.set(r.cuenta, x);
       }
     }
-    [...ctas.keys()].sort().forEach((c) => hallazgos.push(["ALERTA", "Gasto a nombre de la empresa", c, `Formato 1001: ${fmtPesos(ctas.get(c)[1])} en la cuenta ${c} (${ctas.get(c)[0]}) a nombre de la propia empresa: se reporta con el NIT del informante (o en cuantías menores si no llega al tope). Si hay un tercero real, reclasifíquelo; si la cuenta no se reporta, márquela así en el Asistente`]));
+    [...ctas.keys()].sort().forEach((c) => hallazgos.push(["ALERTA", "Gasto a nombre de la empresa", c, `Formato 1001: ${fmtPesos(ctas.get(c)[1])} en la cuenta ${c} (${ctas.get(c)[0]}) a nombre de la propia empresa van a cuantías menores (${nitCm}) en su concepto y columna: la empresa no puede reportarse a sí misma. Si hay un tercero real, reclasifíquelo en el software`]));
   }
   function cuentasAsumida(cfg) {
     const conf = cfg.parametros.retencion_asumida || {};
@@ -704,7 +706,7 @@
     const cuentas = cuentasAsumida(cfg);
     if (!cuentas.length) return;
     const conf = cfg.parametros.retencion_asumida || {}, tol = Number(conf.tolerancia === undefined ? 1 : conf.tolerancia);
-    const noCruzan = new Set([String(cfg.parametros.empresa.nit), String((cfg.parametros.pagos_dian_no_deducibles || {}).nit || NIT_DIAN)]);
+    const noCruzan = new Set([String(cfg.parametros.empresa.nit), String(cfg.parametros.cuantias_menores.nit), String((cfg.parametros.pagos_dian_no_deducibles || {}).nit || NIT_DIAN)]);
     const base = (p) => p.formato === "1001" && p.descartado === "" && p.nit !== "";
     // el GMF puede estar dentro de la 5315 (p. ej. 53152001): nunca es retención asumida
     const esGasto = (p) => base(p) && cuentas.some((c) => p.cuenta.startsWith(c)) && p.columna !== "ret_renta" && !GMF_NOMBRE.test(textoDian(p.nombre_cuenta));
@@ -809,11 +811,12 @@
       if (rets.length && suma(rets, (c) => Math.abs(x[c])) > 0.5) conRet.add(x.nit);
     }
     const noAgrupar = cfg.parametros.no_agrupar_si_retencion !== false;
+    const nitCm = cfg.parametros.cuantias_menores.nit;
     const menoresNit = new Set([...porNit].filter(([n, v]) => v < tope && !(noAgrupar && conRet.has(n)) && n !== String(cfg.parametros.empresa.nit)).map(([n]) => n));
+    menoresNit.add(String(nitCm));   // lo que ya llega como cuantías menores (gastos a nombre de la empresa) se fusiona
     const menores = tabla.filter((x) => menoresNit.has(x.nit));
     if (!menores.length) return tabla;
     const out = tabla.filter((x) => !menoresNit.has(x.nit));
-    const nitCm = cfg.parametros.cuantias_menores.nit;
     for (const [concepto, g] of agrupar(menores, (x) => x.concepto)) {
       const fila = { concepto, nit: nitCm };
       valores.forEach((c) => { fila[c] = suma(g, (x) => x[c] || 0); });

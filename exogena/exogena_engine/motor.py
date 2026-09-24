@@ -134,20 +134,23 @@ def _pagos_dian(recs: list, cfg: Config, hallazgos: list) -> None:
 
 
 def _gastos_empresa(recs: list, cfg: Config, hallazgos: list) -> None:
-    """Gasto reportado a nombre de la propia empresa (no por una regla con NIT del informante): aviso por cuenta."""
+    """La empresa no puede ser beneficiaria de su propio gasto: lo que la regla de la cuenta reporta a nombre de la
+    empresa va a cuantías menores (222222222) en su concepto y su columna (deducible o no deducible). Se exceptúan
+    las reglas que por norma llevan el NIT del informante (p. ej. diferencia en cambio)."""
     fijos = {r.prefijo for rs in cfg.reglas.values() for r in rs if r.tercero}
+    nit_cm = str(cfg.parametros["cuantias_menores"]["nit"])
     ctas: dict[str, list] = {}
     for r in recs:
         if r["formato"] == "1001" and r["nit"] == cfg.nit_empresa and r["descartado"] == "" \
                 and r["prefijo_regla"] not in fijos and abs(r["valor"]) >= 0.5:
+            r["nit"] = nit_cm
             x = ctas.setdefault(r["cuenta"], [r["nombre_cuenta"], 0.0])
             x[1] += r["valor"]
     for c in sorted(ctas):
         hallazgos.append(("ALERTA", "Gasto a nombre de la empresa", c,
                           f"Formato 1001: ${ctas[c][1]:,.0f} en la cuenta {c} ({ctas[c][0]}) a nombre de la propia "
-                          f"empresa: se reporta con el NIT del informante (o en cuantías menores si no llega al tope). "
-                          f"Si hay un tercero real, reclasifíquelo; si la cuenta no se reporta, márquela así en el "
-                          f"Asistente"))
+                          f"empresa van a cuantías menores ({nit_cm}) en su concepto y columna: la empresa no puede "
+                          f"reportarse a sí misma. Si hay un tercero real, reclasifíquelo en el software"))
 
 
 def _cuentas_asumida(cfg: Config) -> tuple[str, ...]:
@@ -164,7 +167,8 @@ def _retencion_asumida(recs: list, cfg: Config, hallazgos: list) -> None:
     if not cuentas:
         return
     tol = float((cfg.parametros.get("retencion_asumida") or {}).get("tolerancia", 1))
-    no_cruzan = {cfg.nit_empresa, str((cfg.parametros.get("pagos_dian_no_deducibles") or {}).get("nit", NIT_DIAN))}
+    no_cruzan = {cfg.nit_empresa, str(cfg.parametros["cuantias_menores"]["nit"]),
+                 str((cfg.parametros.get("pagos_dian_no_deducibles") or {}).get("nit", NIT_DIAN))}
     base = lambda r: r["formato"] == "1001" and r["descartado"] == "" and r["nit"] != ""  # noqa: E731
     # el GMF puede estar dentro de la 5315 (p. ej. 53152001): nunca es retención asumida
     es_gasto = lambda r: (base(r) and r["cuenta"].startswith(cuentas) and r["columna"] != "ret_renta"  # noqa: E731
@@ -490,10 +494,11 @@ def _cuantias_menores(fmt: str, tabla: pd.DataFrame, valores: list[str], cfg: Co
     if cfg.parametros.get("no_agrupar_si_retencion", True) and rets:
         menores_nit -= set(tabla.loc[tabla[rets].abs().sum(axis=1) > 0.5, "nit"])
     menores_nit.discard(cfg.nit_empresa)
+    nit_cm = cfg.parametros["cuantias_menores"]["nit"]
+    menores_nit.add(nit_cm)   # lo que ya llega como cuantías menores (gastos a nombre de la empresa) se fusiona
     menores = tabla["nit"].isin(menores_nit)
     if not menores.any():
         return tabla
-    nit_cm = cfg.parametros["cuantias_menores"]["nit"]
     agrupado = tabla[menores].groupby("concepto")[valores].sum().reset_index()
     agrupado["nit"] = nit_cm
     return pd.concat([tabla[~menores], agrupado], ignore_index=True)

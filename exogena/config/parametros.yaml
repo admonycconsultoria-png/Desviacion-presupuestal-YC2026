@@ -36,8 +36,8 @@ nits_excluidos:
 
 # NIT que NO se excluyen en un formato aunque estén en la lista global. En el 1001 los gastos a nombre de la
 # propia empresa o de la DIAN se reportan según la regla de su cuenta (las cuentas "No se reporta", como el
-# costo de ventas 61 o las depreciaciones, siguen fuera); a nombre de la empresa van con el NIT del informante
-# o en cuantías menores si no llegan al tope.
+# costo de ventas 61 o las depreciaciones, siguen fuera). Lo que queda a nombre de la empresa va SIEMPRE a
+# cuantías menores (222222222) en su concepto y columna: la empresa no puede reportarse a sí misma.
 nits_excluidos_excepto:
   "1001": ["{empresa}"]
 

@@ -70,8 +70,8 @@ def test_1001_decide_por_cuenta_y_prorratea_iva(resultado):
     f = resultado["generados"]["1001"]
     # la DIAN aparece solo por gastos a su nombre (5315 -> 5016, intereses de mora -> 5006), no por retenciones
     assert set(f.loc[f["numero_identificacion"] == "800197268", "concepto"]) <= {"5016", "5006"}
-    # la propia empresa solo aparece por el gasto a su nombre (519595 -> 5016), nunca por costo de ventas o depreciación
-    assert set(f.loc[f["numero_identificacion"] == "900123456", "concepto"]) <= {"5016"}
+    # la empresa nunca se reporta a sí misma: su gasto (519595) va a cuantías menores
+    assert "900123456" not in set(f["numero_identificacion"])
     serv = f[(f["numero_identificacion"] == "901234567") & (f["concepto"] == "5004")].iloc[0]
     assert serv["ret_iva_comun"] == 570000 and serv["ret_renta"] == 800000
     # arrendamiento de $60.000 < tope -> cuantías menores con tipo 43
@@ -272,8 +272,11 @@ def test_gmf_mitad_deducible_y_gasto_a_nombre_de_la_empresa(resultado):
     f = resultado["generados"]["1001"]
     b = f[(f["numero_identificacion"] == "860034313") & (f["concepto"] == "5015")].iloc[0]
     assert b["pago_deducible"] == 600_000 and b["pago_no_deducible"] == 600_000       # GMF 50/50 con el banco
-    e = f[f["numero_identificacion"] == "900123456"].iloc[0]
-    assert e["concepto"] == "5016" and e["pago_deducible"] == 500_000 and e["tipo_documento"] == "31"
+    # gasto a nombre de la empresa (500.000, sobre el tope): a cuantías menores, una sola fila por concepto
+    cm = f[(f["numero_identificacion"] == "222222222") & (f["concepto"] == "5016")]
+    assert len(cm) == 1 and cm.iloc[0]["pago_deducible"] >= 500_000 and cm.iloc[0]["tipo_documento"] == "43"
+    assert "900123456" not in set(f["numero_identificacion"])
+    assert f.groupby(["concepto", "numero_identificacion"]).size().max() == 1
     h = {(x[0], x[1], x[2]) for x in resultado["hallazgos"]}
     assert ("INFO", "GMF 50% deducible", "530595") in h
     assert ("INFO", "Pago a la DIAN no deducible", "530520") in h

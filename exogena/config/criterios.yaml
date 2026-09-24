@@ -13,7 +13,7 @@ criterios:
     fuente: "Res. 227/2025 art. 1.3.5.2.1 par. 1"
   - formato: "1001"
     prefijos: []
-    texto: "En el 1001 decide la CUENTA, no el NIT: los gastos a nombre de la DIAN o de la propia empresa se reportan según la regla de su cuenta (las cuentas 'No se reporta', como el costo de ventas 61, siguen fuera). A nombre de la empresa van con el NIT del informante o en cuantías menores y dejan ALERTA para buscar el tercero real. A nombre de la DIAN (intereses de mora, sanciones) van a no deducible, salvo en las cuentas de impuestos."
+    texto: "En el 1001 decide la CUENTA, no el NIT: los gastos a nombre de la DIAN o de la propia empresa se reportan según la regla de su cuenta (las cuentas 'No se reporta', como el costo de ventas 61, siguen fuera). A nombre de la empresa van SIEMPRE a cuantías menores (222222222) en su concepto y columna, porque la empresa no puede reportarse a sí misma; dejan ALERTA para buscar el tercero real. A nombre de la DIAN (intereses de mora, sanciones) van a no deducible, salvo en las cuentas de impuestos."
     fuente: "Res. 227/2025 art. 1.3.5.2.1 (pagos no solicitados como deducción); Práctica"
   - formato: "1001"
     prefijos: []
